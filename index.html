@@ -299,12 +299,32 @@ window.onload = () => {
 };
 
 function showTab(name) {
+  // Pages deaktivieren
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
-  event.target.classList.add('active');
-  if(name === 'dashboard' || name === 'rechnungen') { if(accessToken) loadFromSheets(); }
+
+  // Tabs deaktivieren
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+
+  // Passenden Tab aktivieren
+  const tabMap = {
+    dashboard: 0,
+    erfassen: 1,
+    rechnungen: 2,
+    abgleich: 3,
+    einstellungen: 4
+  };
+
+  const tabIndex = tabMap[name];
+  if (tabIndex !== undefined) {
+    document.querySelectorAll('.tab')[tabIndex].classList.add('active');
+  }
+
+  if ((name === 'dashboard' || name === 'rechnungen') && accessToken) {
+    loadFromSheets();
+  }
 }
+``
 
 function showToast(msg, type='success') {
   const t = document.getElementById('toast');
