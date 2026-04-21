@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TC Rechnungen</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#153048">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<!-- Google APIs -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://apis.google.com/js/api.js" async defer></script>
+<style>
+  :root {
+    --navy: rgb(21, 48, 72); --navy-mid: rgb(32, 68, 102); --navy-light: rgb(45, 95, 140);
+    --gold: #c9a84c; --gold-light: #e8c97a;
+    --cream: #f8f5f0; --white: #ffffff;
+    --gray-100: #f3f4f6; --gray-200: #e5e7eb; --gray-400: #9ca3af; --gray-600: #4b5563; --gray-800: #1f2937;
+    --success: #2d7a4f; --warning: #b45309; --danger: #991b1b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'DM Sans', sans-serif; }
+  body { background: var(--cream); color: var(--gray-800); min-height: 100vh; padding-bottom: 30px; }
+  
+  /* HEADER & NAV */
+  header { background: var(--navy); color: white; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
+  .header-brand { display: flex; align-items: center; gap: 10px; font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; }
+  nav { background: var(--navy-mid); display: flex; gap: 2px; padding: 0 10px; overflow-x: auto; scrollbar-width: none; }
+  nav::-webkit-scrollbar { display: none; }
+  .tab { padding: 12px 16px; color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; }
+  .tab.active { color: var(--gold-light); border-bottom-color: var(--gold); }
+  
+  main { max-width: 1000px; margin: 0 auto; padding: 20px 16px; }
+  .page { display: none; } .page.active { display: block; }
+  
+  /* CARDS & UI */
+  .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); margin-bottom: 20px; }
+  .card-title { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--navy); margin-bottom: 16px; font-weight: 600; }
+  
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .stat-card { background: white; border-radius: 10px; padding: 16px; border: 1px solid var(--gray-200); }
+  .stat-label { font-size: 10px; text-transform: uppercase; color: var(--gray-400); margin-bottom: 4px; }
+  .stat-value { font-size: 22px; font-weight: 600; color: var(--navy); }
+  
+  /* FORM */
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 11px; font-weight: 600; color: var(--navy); text-transform: uppercase; }
+  input, select, textarea { padding: 10px; border: 1px solid var(--gray-200); border-radius: 8px; font-size: 14px; background: #fff; }
+  
+  /* UPLOAD */
+  .upload-zone { border: 2px dashed var(--gray-200); border-radius: 10px; padding: 24px 10px; text-align: center; cursor: pointer; background: var(--gray-100); position: relative; margin-bottom:16px;}
+  .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  #preview-container { display: flex; gap: 10px; overflow-x: auto; margin-top: 10px; padding-bottom: 5px; }
+  .preview-item { width: 60px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; background: #fff; }
+  .pdf-preview { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 60px; height: 80px; background: #ffebee; color: #c62828; border-radius: 6px; font-size: 10px; border: 1px solid #ef9a9a; }
+  
+  /* BUTTONS */
+  .btn { padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+  .btn-primary { background: var(--navy); color: white; }
+  .btn-gold { background: var(--gold); color: white; }
+  .btn-outline { background: transparent; color: var(--navy); border: 1px solid var(--navy); }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-sm { padding: 6px 10px; font-size: 12px; }
+  
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { text-align: left; padding: 10px; background: rgba(21,48,72,0.03); color: var(--navy); font-size: 11px; text-transform: uppercase; border-bottom: 2px solid var(--gray-200); }
+  td { padding: 10px; border-bottom: 1px solid var(--gray-100); vertical-align: middle; }
+  
+  /* BADGES */
+  .badge { padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; text-transform: uppercase; }
+  .badge-bezahlt { background: #d1fae5; color: #065f46; }
+  .badge-offen { background: #fee2e2; color: #991b1b; }
+  
+  /* BANK ABGLEICH SECTIONS */
+  .match-section { margin-top: 20px; border: 1px solid var(--gray-200); border-radius: 10px; overflow: hidden; }
+  .match-header { padding: 12px 16px; font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; }
+  .bg-green { background: #ecfdf5; color: #065f46; }
+  .bg-yellow { background: #fffbeb; color: #b45309; }
+  .bg-red { background: #fef2f2; color: #991b1b; }
+  .match-row { padding: 12px 16px; border-top: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; background: white;}
+  .match-info { flex: 1; min-width: 200px; }
+
+  /* TOAST & LOADER */
+  #toast { position: fixed; bottom: 20px; right: 20px; background: var(--navy); color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px; transform: translateY(100px); opacity: 0; transition: all 0.3s; z-index: 1000; }
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #global-loader { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 2000; align-items: center; justify-content: center; flex-direction: column; font-weight: 600; color: var(--navy); }
+  .spinner { width: 30px; height: 30px; border: 3px solid var(--gray-200); border-top-color: var(--navy); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 10px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div id="global-loader"><div class="spinner"></div><span id="loader-text">Lade Daten...</span></div>
+
+<header>
+  <div class="header-brand">🎾 TC Rechnungen</div>
+  <div id="auth-status" style="font-size:11px; opacity:0.8;">Nicht angemeldet</div>
+</header>
+
+<nav>
+  <div class="tab active" onclick="showTab('dashboard')">📊 Dashboard</div>
+  <div class="tab" onclick="showTab('erfassen')">➕ Erfassen</div>
+  <div class="tab" onclick="showTab('rechnungen')">📋 Rechnungen</div>
+  <div class="tab" onclick="showTab('abgleich')">🔁 Bankabgleich</div>
+  <div class="tab" onclick="showTab('einstellungen')">⚙️ Setup</div>
+</nav>
+
+<main>
+
+  <!-- ═══════════════════════════════════════════════════════ DASHBOARD -->
+  <div id="page-dashboard" class="page active">
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Gesamt Offen</div><div class="stat-value" id="d-offen-betrag">€ 0.00</div><div id="d-offen-anzahl" style="font-size:11px;color:#666">0 Belege</div></div>
+      <div class="stat-card"><div class="stat-label">Bezahlt (Gesamt)</div><div class="stat-value" id="d-bezahlt-betrag" style="color:var(--success)">€ 0.00</div><div id="d-bezahlt-anzahl" style="font-size:11px;color:#666">0 Belege</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Letzte offene Rechnungen</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Datum</th><th>Firma</th><th>Betrag</th><th>Fällig</th></tr></thead>
+          <tbody id="dash-tbody"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:10px;text-align:right;">
+        <button class="btn btn-sm btn-outline" onclick="loadFromSheets()">🔄 Aktualisieren</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ ERFASSEN -->
+  <div id="page-erfassen" class="page">
+    <div class="card">
+      <div class="card-title">Neuer Beleg</div>
+      
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" id="file-input" accept="image/*,application/pdf" multiple onchange="handleFiles(this)" />
+        <div style="font-size:30px; margin-bottom:5px;">📸</div>
+        <div style="font-size:13px; font-weight:600;">Rechnung hochladen</div>
+        <div style="font-size:11px; color:var(--gray-400);">Kamera, Fotos oder PDF (auch mehrseitig)</div>
+        <div id="preview-container"></div>
+      </div>
+      
+      <div style="text-align:center; margin-bottom:20px;">
+        <button class="btn btn-gold" id="ai-btn" onclick="extractAI()" style="display:none; width:100%;">✨ KI Auslesen</button>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group"><label>Firma / Lieferant *</label><input type="text" id="f-firma"></div>
+        <div class="form-group"><label>Rechnungsdatum *</label><input type="date" id="f-datum"></div>
+        <div class="form-group"><label>Betrag (€) *</label><input type="number" id="f-betrag" step="0.01"></div>
+        <div class="form-group"><label>MwSt (%)</label><input type="number" id="f-mwst"></div>
+        <div class="form-group"><label>Rechnungs-Nr.</label><input type="text" id="f-rechnr"></div>
+        <div class="form-group"><label>Fällig am</label><input type="date" id="f-faellig"></div>
+        <div class="form-group full"><label>Kategorie *</label>
+          <select id="f-kategorie">
+            <option value="">-- Bitte wählen --</option>
+            <option>Getränke</option><option>Kantine</option><option>Mitglieder</option>
+            <option>Instandhaltung - Betriebskosten</option><option>Versicherungen</option>
+            <option>Material (Tennisbälle etc.)</option><option>Gebühren (Lizenzen)</option>
+            <option>Tennislehrer</option><option>Reinigung</option>
+            <option>Öffentlichkeitsarbeit</option><option>Miete</option>
+            <option>Bankgebühren, Bankzinsen und Geldspesen</option>
+          </select>
+        </div>
+        <div class="form-group full"><label>Notiz</label><input type="text" id="f-notiz"></div>
+      </div>
+      
+      <button class="btn btn-primary" onclick="saveRechnung()" style="width:100%; margin-top:20px; padding:14px;">💾 In Cloud speichern</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ RECHNUNGEN -->
+  <div id="page-rechnungen" class="page">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <div class="card-title" style="margin:0;">Alle Rechnungen</div>
+        <button class="btn btn-sm btn-outline" onclick="loadFromSheets()">🔄</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ID</th><th>Firma</th><th>Betrag</th><th>Kat.</th><th>Status</th><th>Foto</th></tr></thead>
+          <tbody id="rech-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ BANKABGLEICH -->
+  <div id="page-abgleich" class="page">
+    <div class="card">
+      <div class="card-title">Bankabgleich-Assistent</div>
+      <div style="font-size:12px; color:var(--gray-600); margin-bottom:15px;">Lade deinen Raiffeisen-Kontoauszug als CSV hoch. Die App vergleicht Transaktionen mit offenen Rechnungen aus der Cloud.</div>
+      
+      <div class="upload-zone" style="padding:15px;">
+        <input type="file" accept=".csv" onchange="handleBankCSV(this)">
+        <div style="font-size:24px;">🏦</div>
+        <div style="font-size:13px; font-weight:600;">CSV hochladen</div>
+      </div>
+
+      <div id="abgleich-results" style="display:none;">
+        
+        <!-- Sektion 1: Perfekte Matches -->
+        <div class="match-section">
+          <div class="match-header bg-green">🟢 Perfekte Zuordnung (<span id="count-perfect">0</span>)</div>
+          <div style="padding:10px 16px; font-size:11px; background:#fff;">Betrag exakt, Datum passend. Überprüfe sie und setze alle mit einem Klick auf Bezahlt.</div>
+          <div id="list-perfect"></div>
+          <div style="background:#fff; padding:10px; border-top:1px solid #eee; text-align:right;">
+             <button class="btn btn-sm btn-primary" onclick="processPerfectMatches()">Alle als 'Bezahlt' in Cloud markieren</button>
+          </div>
+        </div>
+
+        <!-- Sektion 2: Unsicher -->
+        <div class="match-section">
+          <div class="match-header bg-yellow">🟡 Unsicher - Manuell prüfen (<span id="count-unsure">0</span>)</div>
+          <div style="padding:10px 16px; font-size:11px; background:#fff;">Betrag ähnlich oder Datum abweichend. Bitte Rechnung aus Dropdown wählen.</div>
+          <div id="list-unsure"></div>
+        </div>
+
+        <!-- Sektion 3: Kein Match -->
+        <div class="match-section">
+          <div class="match-header bg-red">🔴 Keine Rechnung gefunden (<span id="count-none">0</span>)</div>
+          <div style="padding:10px 16px; font-size:11px; background:#fff;">Diese Abbuchungen haben noch keinen Beleg im System.</div>
+          <div id="list-none"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ EINSTELLUNGEN -->
+  <div id="page-einstellungen" class="page">
+    <div class="card">
+      <div class="card-title">Cloud Setup (Einmalig)</div>
+      <div style="font-size:12px; margin-bottom:15px; color:var(--gray-600);">Kopiere hier die 4 IDs hinein, die du vom Admin erhalten hast.</div>
+      
+      <div class="form-group" style="margin-bottom:10px;">
+        <label>OAuth Client ID</label>
+        <input type="text" id="s-client" placeholder="xxxxx.apps.googleusercontent.com">
+      </div>
+      <div class="form-group" style="margin-bottom:10px;">
+        <label>Google Sheet ID</label>
+        <input type="text" id="s-sheet" placeholder="Aus der Tabellen-URL">
+      </div>
+      <div class="form-group" style="margin-bottom:10px;">
+        <label>Drive Ordner ID</label>
+        <input type="text" id="s-folder" placeholder="Aus der Drive-URL">
+      </div>
+      <div class="form-group" style="margin-bottom:15px;">
+        <label>Gemini API Key</label>
+        <input type="password" id="s-gemini" placeholder="AIzaSy...">
+      </div>
+      
+      <button class="btn btn-outline" onclick="saveSettings()" style="width:100%; margin-bottom:15px;">💾 IDs lokal Speichern</button>
+      <button class="btn btn-primary" onclick="loginGoogle()" style="width:100%; padding:14px;">🔐 Mit Google Anmelden</button>
+    </div>
+  </div>
+
+</main>
+
+<div id="toast"></div>
+
+<script>
+// ==========================================
+// SERVICE WORKER REGISTRIERUNG (PWA)
+// ==========================================
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(err => console.error('SW Error:', err));
+}
+
+// ==========================================
+// STATE & VARIABLEN
+// ==========================================
+let settings = JSON.parse(localStorage.getItem('tc_settings') || '{}');
+let rechnungen = []; // Wird immer live aus Sheets geladen
+let tokenClient;
+let accessToken = null;
+let currentFilesBase64 = []; // Speichert alle aktuellen Dateien (Bilder/PDFs)
+
+const KATEGORIEN = [
+  "Getränke", "Kantine", "Mitglieder", "Instandhaltung - Betriebskosten", 
+  "Versicherungen", "Material (Tennisbälle etc.)", "Gebühren (Lizenzen)", 
+  "Tennislehrer", "Reinigung", "Öffentlichkeitsarbeit", "Miete", 
+  "Bankgebühren, Bankzinsen und Geldspesen"
+];
+
+// ==========================================
+// INITIALISIERUNG
+// ==========================================
+window.onload = () => {
+  document.getElementById('s-client').value = settings.clientId || '';
+  document.getElementById('s-sheet').value = settings.sheetId || '';
+  document.getElementById('s-folder').value = settings.folderId || '';
+  document.getElementById('s-gemini').value = settings.geminiKey || '';
+  
+  if (settings.clientId) initGoogleAuth();
+};
+
+function showTab(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if(name === 'dashboard' || name === 'rechnungen') { if(accessToken) loadFromSheets(); }
+}
+
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.background = type === 'error' ? 'var(--danger)' : 'var(--navy)';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function showLoader(text) {
+  document.getElementById('loader-text').innerText = text;
+  document.getElementById('global-loader').style.display = 'flex';
+}
+function hideLoader() { document.getElementById('global-loader').style.display = 'none'; }
+
+function saveSettings() {
+  settings = {
+    clientId: document.getElementById('s-client').value.trim(),
+    sheetId: document.getElementById('s-sheet').value.trim(),
+    folderId: document.getElementById('s-folder').value.trim(),
+    geminiKey: document.getElementById('s-gemini').value.trim()
+  };
+  localStorage.setItem('tc_settings', JSON.stringify(settings));
+  showToast('Einstellungen gespeichert');
+  initGoogleAuth();
+}
+
+// ==========================================
+// GOOGLE OAUTH & SHEETS SYNC
+// ==========================================
+function initGoogleAuth() {
+  if(!settings.clientId) return;
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: settings.clientId,
+    scope: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file',
+    callback: (response) => {
+      if (response.error) { showToast('Login fehlgeschlagen', 'error'); return; }
+      accessToken = response.access_token;
+      document.getElementById('auth-status').innerHTML = '✅ Cloud Verbunden';
+      showToast('Erfolgreich angemeldet!');
+      showTab('dashboard'); // Löst automatisches loadFromSheets aus
+    },
+  });
+}
+
+function loginGoogle() {
+  if(!tokenClient) { showToast('Bitte zuerst Client-ID speichern!', 'error'); return; }
+  tokenClient.requestAccessToken({prompt: 'consent'});
+}
+
+async function loadFromSheets() {
+  if(!accessToken || !settings.sheetId) return;
+  showLoader('Lade Datenbank...');
+  try {
+    const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/A:K`, {
+      headers: { 'Authorization': `Bearer ${accessToken}` }
+    });
+    const data = await res.json();
+    if(data.error) throw new Error(data.error.message);
+    
+    rechnungen = [];
+    const rows = data.values || [];
+    // Zeile 0 ist Header. Ab Zeile 1 sind Daten. rowIndex für spätere Updates merken!
+    for(let i = 1; i < rows.length; i++) {
+      const r = rows[i];
+      if(r[0]) {
+        rechnungen.push({
+          rowIndex: i + 1, // Sheets zählt ab 1
+          id: r[0], datum: r[1], lieferant: r[2],
+          betrag: parseFloat(r[3]?.replace(',','.')) || 0,
+          kategorie: r[6], status: r[8], fotolink: r[10]
+        });
+      }
+    }
+    renderDashboard();
+    renderRechnungen();
+  } catch(e) {
+    showToast('Fehler beim Laden: ' + e.message, 'error');
+  }
+  hideLoader();
+}
+
+function renderDashboard() {
+  rechnungen.sort((a,b) => new Date(b.datum) - new Date(a.datum));
+  const offen = rechnungen.filter(r => r.status !== 'Bezahlt');
+  const bezahlt = rechnungen.filter(r => r.status === 'Bezahlt');
+  
+  document.getElementById('d-offen-betrag').innerText = '€ ' + offen.reduce((sum,r)=>sum+r.betrag, 0).toFixed(2);
+  document.getElementById('d-offen-anzahl').innerText = offen.length + ' Belege';
+  document.getElementById('d-bezahlt-betrag').innerText = '€ ' + bezahlt.reduce((sum,r)=>sum+r.betrag, 0).toFixed(2);
+  document.getElementById('d-bezahlt-anzahl').innerText = bezahlt.length + ' Belege';
+  
+  const tbody = document.getElementById('dash-tbody');
+  tbody.innerHTML = offen.slice(0,5).map(r => `
+    <tr><td>${r.datum}</td><td><strong>${r.lieferant}</strong><br><span style="font-size:10px;color:#888">${r.kategorie}</span></td>
+    <td>€ ${r.betrag.toFixed(2)}</td><td><span class="badge badge-offen">Offen</span></td></tr>
+  `).join('') || '<tr><td colspan="4" style="text-align:center;">Keine offenen Rechnungen 🎉</td></tr>';
+}
+
+function renderRechnungen() {
+  const tbody = document.getElementById('rech-tbody');
+  tbody.innerHTML = rechnungen.map(r => `
+    <tr>
+      <td style="font-size:10px;">${r.id}</td>
+      <td><strong>${r.lieferant}</strong><br><span style="font-size:10px;color:#888">${r.datum}</span></td>
+      <td>€ ${r.betrag.toFixed(2)}</td>
+      <td>${r.kategorie}</td>
+      <td><span class="badge ${r.status==='Bezahlt'?'badge-bezahlt':'badge-offen'}">${r.status}</span></td>
+      <td>${r.fotolink ? `<a href="${r.fotolink.split(',')[0]}" target="_blank">🔗</a>` : '-'}</td>
+    </tr>
+  `).join('');
+}
+
+// ==========================================
+// FILE UPLOAD & KI (MULTIPLE & PDF)
+// ==========================================
+function handleFiles(input) {
+  const files = input.files;
+  if(!files.length) return;
+  
+  currentFilesBase64 = [];
+  const container = document.getElementById('preview-container');
+  container.innerHTML = '';
+  document.getElementById('ai-btn').style.display = 'block';
+
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64 = e.target.result;
+      
+      if(file.type === 'application/pdf') {
+        currentFilesBase64.push({ type: 'application/pdf', data: base64.split(',')[1], name: file.name });
+        container.innerHTML += `<div class="pdf-preview">📄<br>PDF</div>`;
+      } else {
+        // Bild komprimieren
+        const img = new Image();
+        img.onload = () => {
+          const cvs = document.createElement('canvas');
+          const maxW = 1000;
+          let w = img.width, h = img.height;
+          if(w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+          cvs.width = w; cvs.height = h;
+          cvs.getContext('2d').drawImage(img, 0, 0, w, h);
+          const compressed = cvs.toDataURL('image/jpeg', 0.7);
+          
+          currentFilesBase64.push({ type: 'image/jpeg', data: compressed.split(',')[1], name: file.name });
+          container.innerHTML += `<img src="${compressed}" class="preview-item">`;
+        };
+        img.src = base64;
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function extractAI() {
+  if(!settings.geminiKey) { showToast('Gemini API Key fehlt in Einstellungen', 'error'); return; }
+  if(!currentFilesBase64.length) return;
+  
+  showLoader('KI analysiert Beleg(e)...');
+  
+  try {
+    const prompt = `Analysiere diese Rechnung(en). Du MUSST eine valide JSON zurückgeben. 
+Felder: lieferant (String), datum (YYYY-MM-DD), betrag (Zahl, Punkt als Dezimal), mwst (Zahl), rechnr (String), faellig (YYYY-MM-DD), notiz (String kurz).
+WICHTIG: Wähle für "kategorie" exakt einen Wert aus dieser Liste, der am besten passt: [${KATEGORIEN.join(', ')}].`;
+
+    // Baue Payload für Multi-File
+    const parts = [{ text: prompt }];
+    currentFilesBase64.forEach(f => {
+      parts.push({ inline_data: { mime_type: f.type, data: f.data } });
+    });
+
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${settings.geminiKey}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts }] })
+    });
+    
+    const data = await res.json();
+    if(data.error) throw new Error(data.error.message);
+    
+    let text = data.candidates[0].content.parts[0].text;
+    text = text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(text);
+
+    if(parsed.lieferant) document.getElementById('f-firma').value = parsed.lieferant;
+    if(parsed.datum) document.getElementById('f-datum').value = parsed.datum.substring(0,10);
+    if(parsed.betrag) document.getElementById('f-betrag').value = parsed.betrag;
+    if(parsed.mwst) document.getElementById('f-mwst').value = parsed.mwst;
+    if(parsed.rechnr) document.getElementById('f-rechnr').value = parsed.rechnr;
+    if(parsed.faellig) document.getElementById('f-faellig').value = parsed.faellig.substring(0,10);
+    if(parsed.notiz) document.getElementById('f-notiz').value = parsed.notiz;
+    if(parsed.kategorie && KATEGORIEN.includes(parsed.kategorie)) {
+      document.getElementById('f-kategorie').value = parsed.kategorie;
+    }
+    showToast('✨ Felder automatisch ausgefüllt!');
+  } catch (e) {
+    showToast('KI Fehler: ' + e.message, 'error');
+  }
+  hideLoader();
+}
+
+// ==========================================
+// SPEICHERN (DRIVE & SHEETS)
+// ==========================================
+async function uploadToDrive(base64obj, idPrefix) {
+  const metadata = { name: `${idPrefix}_${base64obj.name}`, parents: [settings.folderId] };
+  const boundary = '-------314159265358979323846';
+  const delimiter = "\r\n--" + boundary + "\r\n";
+  const close_delim = "\r\n--" + boundary + "--";
+
+  const body = delimiter +
+    'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+    JSON.stringify(metadata) +
+    delimiter +
+    'Content-Type: ' + base64obj.type + '\r\n' +
+    'Content-Transfer-Encoding: base64\r\n\r\n' +
+    base64obj.data +
+    close_delim;
+
+  const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': `multipart/related; boundary=${boundary}` },
+    body: body
+  });
+  const data = await res.json();
+  return data.webViewLink;
+}
+
+async function saveRechnung() {
+  if(!accessToken) { showToast('Nicht an Google angemeldet!', 'error'); return; }
+  
+  const firma = document.getElementById('f-firma').value.trim();
+  const datum = document.getElementById('f-datum').value;
+  const betrag = parseFloat(document.getElementById('f-betrag').value);
+  const kategorie = document.getElementById('f-kategorie').value;
+
+  if(!firma || !datum || isNaN(betrag) || !kategorie) {
+    showToast('Bitte Firma, Datum, Betrag & Kategorie füllen!', 'error'); return;
+  }
+
+  showLoader('Speichere Belege in Cloud...');
+  try {
+    const id = 'R-' + Date.now().toString().slice(-6);
+    let links = [];
+    
+    // 1. Fotos in Drive laden
+    if(currentFilesBase64.length > 0 && settings.folderId) {
+      for(let f of currentFilesBase64) {
+        const link = await uploadToDrive(f, id);
+        if(link) links.push(link);
+      }
+    }
+
+    // 2. Zeile in Sheets anhängen
+    const rowData = [
+      id, datum, firma, 
+      betrag.toString().replace('.', ','), // Excel Format
+      document.getElementById('f-mwst').value,
+      document.getElementById('f-faellig').value,
+      kategorie,
+      document.getElementById('f-rechnr').value,
+      'Erfasst', // Status
+      document.getElementById('f-notiz').value,
+      links.join(', ') // Mehrere Links kommagetrennt
+    ];
+
+    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/A1:append?valueInputOption=USER_ENTERED`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values: [rowData] })
+    });
+
+    showToast('✅ In Cloud gespeichert!');
+    
+    // Formular leeren
+    document.querySelectorAll('.form-grid input').forEach(i => i.value='');
+    document.getElementById('f-kategorie').value = '';
+    document.getElementById('preview-container').innerHTML = '';
+    document.getElementById('ai-btn').style.display = 'none';
+    currentFilesBase64 = [];
+    
+    // Daten neu laden & wechseln
+    await loadFromSheets();
+    showTab('rechnungen');
+    
+  } catch (e) {
+    showToast('Fehler beim Speichern: ' + e.message, 'error');
+  }
+  hideLoader();
+}
+
+// ==========================================
+// BANKABGLEICH ASSISTENT
+// ==========================================
+let perfectMatches = []; // Merkt sich die Sheet-Row-Indexe zum updaten
+
+function handleBankCSV(input) {
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => processBankCSV(e.target.result);
+  reader.readAsText(file, 'windows-1252');
+}
+
+function processBankCSV(text) {
+  const lines = text.split('\n').filter(l => l.trim());
+  const transactions = [];
+
+  for (const line of lines) {
+    const parts = line.split(';').map(p => p.replace(/"/g, '').trim());
+    if (parts.length < 3) continue;
+
+    let date = '', amount = 0, desc = '';
+    for (const p of parts) {
+      if (/^\d{2}\.\d{2}\.\d{4}$/.test(p)) { date = p; continue; }
+      const num = parseFloat(p.replace(',', '.').replace(/\./g, '').replace(',', '.'));
+      if (!isNaN(num) && Math.abs(num) > 0 && num < 0) { amount = Math.abs(num); continue; }
+      if (p.length > 5 && isNaN(parseFloat(p))) { desc = desc || p; }
+    }
+    if (date && amount > 0) {
+      const [d, m, y] = date.split('.');
+      transactions.push({ date: `${y}-${m}-${d}`, amount, desc });
+    }
+  }
+
+  // Abgleich Logik
+  const openRechnungen = rechnungen.filter(r => r.status !== 'Bezahlt');
+  perfectMatches = [];
+  let htmlPerfect = '', htmlUnsure = '', htmlNone = '';
+  let countP = 0, countU = 0, countN = 0;
+
+  // Erzeuge Options für Dropdown (Unsicher)
+  const optionsHtml = openRechnungen.map(r => `<option value="${r.rowIndex}">€${r.betrag.toFixed(2)} - ${r.lieferant}</option>`).join('');
+
+  transactions.forEach(t => {
+    const tDate = new Date(t.date);
+    
+    // Perfekter Match: Gleicher Betrag (+- 0.01) und Datum max 14 Tage abweichend
+    const match = openRechnungen.find(r => Math.abs(r.betrag - t.amount) < 0.02 && Math.abs(new Date(r.datum) - tDate) / 86400000 <= 14);
+    
+    // Unsicherer Match: Gleicher Betrag (egal wann)
+    const unsure = !match && openRechnungen.find(r => Math.abs(r.betrag - t.amount) < 0.02);
+
+    if (match) {
+      countP++;
+      perfectMatches.push(match.rowIndex);
+      htmlPerfect += `<div class="match-row">
+        <div class="match-info"><strong>€ ${t.amount.toFixed(2)}</strong> am ${t.date}<br><span style="font-size:11px;color:#666">${t.desc.substring(0,40)}</span></div>
+        <div style="font-size:12px; color:var(--success); font-weight:600;">✅ ${match.lieferant}</div>
+      </div>`;
+      // Verhindert, dass eine Rechnung 2x gematcht wird
+      openRechnungen.splice(openRechnungen.indexOf(match), 1);
+    } 
+    else if (unsure) {
+      countU++;
+      htmlUnsure += `<div class="match-row">
+        <div class="match-info"><strong>€ ${t.amount.toFixed(2)}</strong> am ${t.date}<br><span style="font-size:11px;color:#666">${t.desc.substring(0,40)}</span></div>
+        <div style="display:flex;gap:5px;">
+          <select id="sel-${countU}" style="padding:6px;font-size:11px;max-width:150px;">
+            <option value="">-- Beleg wählen --</option>${optionsHtml}
+          </select>
+          <button class="btn btn-sm btn-outline" onclick="setSingleBezahlt('sel-${countU}')">OK</button>
+        </div>
+      </div>`;
+    } 
+    else {
+      countN++;
+      htmlNone += `<div class="match-row">
+        <div class="match-info"><strong>€ ${t.amount.toFixed(2)}</strong> am ${t.date}<br><span style="font-size:11px;color:#666">${t.desc.substring(0,60)}</span></div>
+      </div>`;
+    }
+  });
+
+  document.getElementById('count-perfect').innerText = countP;
+  document.getElementById('list-perfect').innerHTML = htmlPerfect || '<div style="padding:15px;text-align:center;font-size:12px;">Keine perfekten Matches</div>';
+  
+  document.getElementById('count-unsure').innerText = countU;
+  document.getElementById('list-unsure').innerHTML = htmlUnsure || '<div style="padding:15px;text-align:center;font-size:12px;">Keine unklaren Fälle</div>';
+  
+  document.getElementById('count-none').innerText = countN;
+  document.getElementById('list-none').innerHTML = htmlNone || '<div style="padding:15px;text-align:center;font-size:12px;">Alle Transaktionen zugeordnet!</div>';
+
+  document.getElementById('abgleich-results').style.display = 'block';
+  showToast('Abgleich abgeschlossen!');
+}
+
+async function setSingleBezahlt(selectId) {
+  const rowIndex = document.getElementById(selectId).value;
+  if(!rowIndex) return;
+  await updateSheetStatus([rowIndex]);
+  document.getElementById(selectId).parentElement.parentElement.style.opacity = '0.3'; // Optisch deaktivieren
+}
+
+async function processPerfectMatches() {
+  if(perfectMatches.length === 0) return;
+  await updateSheetStatus(perfectMatches);
+  document.getElementById('list-perfect').innerHTML = '<div style="padding:15px;text-align:center;color:green;font-weight:bold;">Alle als Bezahlt markiert! ✅</div>';
+  perfectMatches = [];
+}
+
+async function updateSheetStatus(rowIndexes) {
+  if(!accessToken) return;
+  showLoader('Schreibe in Tabelle...');
+  try {
+    // Status steht in Spalte I (Index 8). Wir updaten Zelle I{row}
+    for(let row of rowIndexes) {
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/I${row}?valueInputOption=USER_ENTERED`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ values: [['Bezahlt']] })
+      });
+    }
+    showToast('Erfolgreich verbucht!');
+    await loadFromSheets(); // Daten direkt aktualisieren
+  } catch(e) {
+    showToast('Fehler beim Updaten: ' + e.message, 'error');
+  }
+  hideLoader();
+}
+</script>
+</body>
+</html>
