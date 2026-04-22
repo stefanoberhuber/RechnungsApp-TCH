@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="de">
 <head>
 <meta charset="UTF-8">
@@ -11,409 +12,441 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://apis.google.com/js/api.js" async defer></script>
 <style>
-  :root {
-    --navy: rgb(21, 48, 72); --navy-mid: rgb(32, 68, 102); --navy-light: rgb(45, 95, 140);
-    --gold: #c9a84c; --gold-light: #e8c97a;
-    --cream: #f8f5f0; --white: #ffffff;
-    --gray-100: #f3f4f6; --gray-200: #e5e7eb; --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280; --gray-600: #4b5563; --gray-800: #1f2937;
-    --success: #2d7a4f; --warning: #b45309; --danger: #991b1b;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'DM Sans', sans-serif; }
-  body { background: var(--cream); color: var(--gray-800); min-height: 100vh; padding-bottom: 40px; }
-  
-  /* HEADER & NAV */
-  header { background: var(--navy); color: white; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
-  .header-brand { display: flex; align-items: center; gap: 10px; font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; }
-  nav { background: var(--navy-mid); display: flex; gap: 2px; padding: 0 10px; overflow-x: auto; scrollbar-width: none; }
-  nav::-webkit-scrollbar { display: none; }
-  .tab { padding: 12px 16px; color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; transition: 0.2s; }
-  .tab.active { color: var(--gold-light); border-bottom-color: var(--gold); }
-  
-  main { max-width: 1100px; margin: 0 auto; padding: 20px 16px; }
-  .page { display: none; animation: fadeIn 0.3s; } .page.active { display: block; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-  
-  /* CARDS & UI */
-  .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); margin-bottom: 20px; }
-  .card-title { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--navy); margin-bottom: 16px; font-weight: 600; }
-  
-  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
-  .stat-card { background: white; border-radius: 10px; padding: 16px; border: 1px solid var(--gray-200); position: relative; transition: all 0.2s; }
-  .stat-label { font-size: 10.5px; text-transform: uppercase; color: var(--gray-500); font-weight: 600; margin-bottom: 4px; }
-  .stat-value { font-size: 22px; font-weight: 700; color: var(--navy); }
-  
-  .hover-card.cursor-pointer { cursor: pointer; }
-  .hover-card:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.06); border-color: var(--gold-light); }
-  .hover-hint { display: none; position: absolute; bottom: 10px; right: 12px; font-size: 10px; color: var(--gold); font-weight: 600; }
-  .hover-card:hover .hover-hint { display: block; }
+:root {
+--navy: rgb(21, 48, 72); --navy-mid: rgb(32, 68, 102); --navy-light: rgb(45, 95, 140);
+--gold: #c9a84c; --gold-light: #e8c97a;
+--cream: #f8f5f0; --white: #ffffff;
+--gray-100: #f3f4f6; --gray-200: #e5e7eb; --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280; --gray-600: #4b5563; --gray-800: #1f2937;
+--success: #2d7a4f; --warning: #b45309; --danger: #991b1b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'DM Sans', sans-serif; }
+body { background: var(--cream); color: var(--gray-800); min-height: 100vh; padding-bottom: 40px; }
 
-  /* FORM */
-  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
-  .form-group { display: flex; flex-direction: column; gap: 4px; }
-  .form-group.full { grid-column: 1 / -1; }
-  label { font-size: 11px; font-weight: 600; color: var(--navy); text-transform: uppercase; }
-  input, select, textarea { padding: 10px; border: 1px solid var(--gray-200); border-radius: 8px; font-size: 14px; background: #fff; transition: border-color 0.2s; }
-  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--navy-light); }
-  
-  /* UPLOAD */
-  .upload-zone { border: 2px dashed var(--gray-300); border-radius: 10px; padding: 24px 10px; text-align: center; cursor: pointer; background: var(--gray-100); position: relative; margin-bottom:16px; transition: 0.2s; }
-  .upload-zone:hover { border-color: var(--navy-light); background: #f0f4f8; }
-  .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-  #preview-container { display: flex; gap: 10px; overflow-x: auto; margin-top: 10px; padding-bottom: 5px; }
-  .preview-item { width: 60px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; background: #fff; }
-  
-  /* BUTTONS */
-  .btn { padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; }
-  .btn-primary { background: var(--navy); color: white; }
-  .btn-primary:hover { background: var(--navy-light); }
-  .btn-gold { background: var(--gold); color: white; }
-  .btn-gold:hover { background: #b8973d; }
-  .btn-outline { background: transparent; color: var(--navy); border: 1px solid var(--navy); }
-  .btn-outline:hover { background: rgba(21, 48, 72, 0.05); }
-  .btn-danger { background: var(--danger); color: white; }
-  .btn-danger:hover { background: #7f1d1d; }
-  .btn-warning { background: var(--warning); color: white; }
-  .btn-sm { padding: 6px 10px; font-size: 11px; }
-  
-  /* TABLE & UTILITIES */
-  .table-wrap { overflow-x: auto; margin-top: 10px; }
-  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-  th { text-align: left; padding: 12px 10px; background: rgba(21,48,72,0.03); color: var(--navy); font-size: 11px; text-transform: uppercase; border-bottom: 2px solid var(--gray-200); white-space: nowrap; }
-  td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-align: middle; }
-  .cursor-pointer { cursor: pointer; user-select: none; }
-  .text-right { text-align: right; }
-  .font-bold { font-weight: 700; }
-  .text-xs { font-size: 11px; }
-  .italic { font-style: italic; }
-  .text-gray-500 { color: var(--gray-500); }
-  .text-center { text-align: center; }
-  .bg-white { background: #fff; }
-  .border-b { border-bottom: 1px solid var(--gray-100); }
-  
-  /* BADGES */
-  .badge { padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
-  .badge-bezahlt { background: #d1fae5; color: #065f46; }
-  .badge-erfasst { background: #e5e7eb; color: #374151; }
-  .badge-geprüft { background: #fef3c7; color: #b45309; }
-  .badge-freigegeben { background: #dbeafe; color: #1e40af; }
-  .badge-offen { background: #fee2e2; color: #991b1b; }
-  
-  /* FILTER BAR */
-  .filter-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; padding: 15px; background: var(--gray-100); border-radius: 8px; align-items: center; }
-  .filter-bar input, .filter-bar select { padding: 8px; font-size: 12px; }
-  
-  /* KASSAPRÜFUNG TABS */
-  .kassa-tabs { display: flex; gap: 10px; border-bottom: 2px solid var(--gray-200); margin-bottom: 20px; }
-  .k-tab { padding: 10px 15px; font-weight: 600; font-size: 13px; color: var(--gray-500); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
-  .k-tab.active { color: var(--navy); border-bottom-color: var(--navy); }
 
-  /* TOAST & LOADER & MODAL */
-  #toast { position: fixed; bottom: 20px; right: 20px; background: var(--navy); color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px; transform: translateY(100px); opacity: 0; transition: all 0.3s; z-index: 4000; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-  #toast.show { transform: translateY(0); opacity: 1; }
-  #global-loader { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.85); z-index: 5000; align-items: center; justify-content: center; flex-direction: column; font-weight: 600; color: var(--navy); backdrop-filter: blur(2px); }
-  .spinner { width: 34px; height: 34px; border: 4px solid var(--gray-200); border-top-color: var(--navy); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 12px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+/* HEADER & NAV */
+header { background: var(--navy); color: white; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
+.header-brand { display: flex; align-items: center; gap: 10px; font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; }
+nav { background: var(--navy-mid); display: flex; gap: 2px; padding: 0 10px; overflow-x: auto; scrollbar-width: none; }
+nav::-webkit-scrollbar { display: none; }
+.tab { padding: 12px 16px; color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; transition: 0.2s; }
+.tab.active { color: var(--gold-light); border-bottom-color: var(--gold); }
+
+main { max-width: 1100px; margin: 0 auto; padding: 20px 16px; }
+.page { display: none; animation: fadeIn 0.3s; } .page.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+/* CARDS & UI */
+.card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); margin-bottom: 20px; }
+.card-title { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--navy); margin-bottom: 16px; font-weight: 600; }
+
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.stat-card { background: white; border-radius: 10px; padding: 16px; border: 1px solid var(--gray-200); position: relative; transition: all 0.2s; }
+.stat-label { font-size: 10.5px; text-transform: uppercase; color: var(--gray-500); font-weight: 600; margin-bottom: 4px; }
+.stat-value { font-size: 22px; font-weight: 700; color: var(--navy); }
+
+.hover-card.cursor-pointer { cursor: pointer; }
+.hover-card:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.06); border-color: var(--gold-light); }
+.hover-hint { display: none; position: absolute; bottom: 10px; right: 12px; font-size: 10px; color: var(--gold); font-weight: 600; }
+.hover-card:hover .hover-hint { display: block; }
+
+/* FORM */
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-group.full { grid-column: 1 / -1; }
+label { font-size: 11px; font-weight: 600; color: var(--navy); text-transform: uppercase; }
+input, select, textarea { padding: 10px; border: 1px solid var(--gray-200); border-radius: 8px; font-size: 14px; background: #fff; transition: border-color 0.2s; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--navy-light); }
+
+/* UPLOAD */
+.upload-zone { border: 2px dashed var(--gray-300); border-radius: 10px; padding: 24px 10px; text-align: center; cursor: pointer; background: var(--gray-100); position: relative; margin-bottom:16px; transition: 0.2s; }
+.upload-zone:hover { border-color: var(--navy-light); background: #f0f4f8; }
+.upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+#preview-container { display: flex; gap: 10px; overflow-x: auto; margin-top: 10px; padding-bottom: 5px; align-items:flex-end; }
+.preview-item { width: 100px; height: 140px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
+/* BUTTONS */
+.btn { padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; }
+.btn-primary { background: var(--navy); color: white; }
+.btn-primary:hover { background: var(--navy-light); }
+.btn-gold { background: var(--gold); color: white; }
+.btn-gold:hover { background: #b8973d; }
+.btn-outline { background: transparent; color: var(--navy); border: 1px solid var(--navy); }
+.btn-outline:hover { background: rgba(21, 48, 72, 0.05); }
+.btn-danger { background: var(--danger); color: white; }
+.btn-danger:hover { background: #7f1d1d; }
+.btn-warning { background: var(--warning); color: white; }
+.btn-sm { padding: 6px 10px; font-size: 11px; }
+
+/* TABLE & UTILITIES */
+.table-wrap { overflow-x: auto; margin-top: 10px; }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+th { text-align: left; padding: 12px 10px; background: rgba(21,48,72,0.03); color: var(--navy); font-size: 11px; text-transform: uppercase; border-bottom: 2px solid var(--gray-200); white-space: nowrap; }
+td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-align: middle; }
+.cursor-pointer { cursor: pointer; user-select: none; }
+.text-right { text-align: right; }
+.font-bold { font-weight: 700; }
+.text-xs { font-size: 11px; }
+.italic { font-style: italic; }
+.text-gray-500 { color: var(--gray-500); }
+.text-center { text-align: center; }
+.bg-white { background: #fff; }
+.border-b { border-bottom: 1px solid var(--gray-100); }
+
+/* BADGES */
+.badge { padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
+.badge-bezahlt { background: #d1fae5; color: #065f46; }
+.badge-erfasst { background: #e5e7eb; color: #374151; }
+.badge-geprüft { background: #fef3c7; color: #b45309; }
+.badge-freigegeben { background: #dbeafe; color: #1e40af; }
+.badge-offen { background: #fee2e2; color: #991b1b; }
+
+/* FILTER BAR */
+.filter-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; padding: 15px; background: var(--gray-100); border-radius: 8px; align-items: center; }
+.filter-bar input, .filter-bar select { padding: 8px; font-size: 12px; }
+
+/* KASSAPRÜFUNG TABS */
+.kassa-tabs { display: flex; gap: 10px; border-bottom: 2px solid var(--gray-200); margin-bottom: 20px; }
+.k-tab { padding: 10px 15px; font-weight: 600; font-size: 13px; color: var(--gray-500); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+.k-tab.active { color: var(--navy); border-bottom-color: var(--navy); }
+
+/* TOAST & LOADER & MODAL */
+#toast { position: fixed; bottom: 20px; right: 20px; background: var(--navy); color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px; transform: translateY(100px); opacity: 0; transition: all 0.3s; z-index: 4000; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+#toast.show { transform: translateY(0); opacity: 1; }
+#global-loader { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.85); z-index: 5000; align-items: center; justify-content: center; flex-direction: column; font-weight: 600; color: var(--navy); backdrop-filter: blur(2px); }
+.spinner { width: 34px; height: 34px; border: 4px solid var(--gray-200); border-top-color: var(--navy); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
+
 </head>
 <body>
 
 <div id="global-loader"><div class="spinner"></div><span id="loader-text">Lade Daten...</span></div>
 
 <header>
-  <div class="header-brand">🎾 TC Rechnungen</div>
-  <div id="auth-status" style="font-size:11px; opacity:0.8;">Nicht angemeldet</div>
+<div class="header-brand">🎾 TC Rechnungen</div>
+<div id="auth-status" style="font-size:11px; opacity:0.8;">Nicht angemeldet</div>
 </header>
 
 <nav>
-  <div class="tab active" onclick="showTab('dashboard')">📊 Dashboard</div>
-  <div class="tab" onclick="showTab('erfassen')">➕ Erfassen</div>
-  <div class="tab" onclick="showTab('rechnungen')">📋 Rechnungen</div>
-  <div class="tab" onclick="showTab('kassapruefung')">🏦 Kassaprüfung</div>
-  <div class="tab" onclick="showTab('einstellungen')">⚙️ Setup</div>
+<div class="tab active" onclick="showTab('dashboard')">📊 Dashboard</div>
+<div class="tab" onclick="showTab('erfassen')">➕ Erfassen</div>
+<div class="tab" onclick="showTab('rechnungen')">📋 Rechnungen</div>
+<div class="tab" onclick="showTab('kassapruefung')">🏦 Kassaprüfung</div>
+<div class="tab" onclick="showTab('einstellungen')">⚙️ Setup</div>
 </nav>
 
 <main>
 
-  <!-- ═══════════════════════════════════════════════════════ DASHBOARD -->
-  <div id="page-dashboard" class="page active">
-    <div class="stats-row">
-      <div class="stat-card hover-card cursor-pointer" onclick="jumpTo('offen')">
-        <div class="stat-label">Gesamt Offen</div><div class="stat-value" id="d-offen-betrag">€ 0,00</div><div id="d-offen-anzahl" style="font-size:11px;color:#666">0 Belege</div>
-        <div class="hover-hint">→ anzeigen</div>
-      </div>
-      <div class="stat-card hover-card cursor-pointer" onclick="jumpTo('monat')">
-        <div class="stat-label">Diesen Monat</div><div class="stat-value" id="d-monat-betrag">€ 0,00</div><div id="d-monat-anzahl" style="font-size:11px;color:#666">0 Belege</div>
-        <div class="hover-hint">→ anzeigen</div>
-      </div>
-      <div class="stat-card hover-card cursor-pointer" onclick="jumpTo('bezahlt')">
-        <div class="stat-label">Bezahlt (Gesamt)</div><div class="stat-value" id="d-bezahlt-betrag" style="color:var(--success)">€ 0,00</div><div id="d-bezahlt-anzahl" style="font-size:11px;color:#666">0 Belege</div>
-        <div class="hover-hint">→ anzeigen</div>
-      </div>
-      <div class="stat-card hover-card cursor-pointer" onclick="jumpTo('pruefung')">
-        <div class="stat-label">Zur Prüfung</div><div class="stat-value" id="d-pruef-betrag" style="color:var(--warning)">€ 0,00</div><div id="d-pruef-anzahl" style="font-size:11px;color:#666">0 Belege</div>
-        <div class="hover-hint">→ anzeigen</div>
-      </div>
+<!-- ═══════════════════════════════════════════════════════ DASHBOARD -->
+
+<div id="page-dashboard" class="page active">
+<div class="stats-row">
+<div class="stat-card hover-card cursor-pointer" onclick="jumpTo('offen')">
+<div class="stat-label">Gesamt Offen</div><div class="stat-value" id="d-offen-betrag">€ 0,00</div><div id="d-offen-anzahl" style="font-size:11px;color:#666">0 Belege</div>
+<div class="hover-hint">→ anzeigen</div>
+</div>
+<div class="stat-card hover-card cursor-pointer" onclick="jumpTo('monat')">
+<div class="stat-label">Diesen Monat</div><div class="stat-value" id="d-monat-betrag">€ 0,00</div><div id="d-monat-anzahl" style="font-size:11px;color:#666">0 Belege</div>
+<div class="hover-hint">→ anzeigen</div>
+</div>
+<div class="stat-card hover-card cursor-pointer" onclick="jumpTo('bezahlt')">
+<div class="stat-label">Bezahlt (Gesamt)</div><div class="stat-value" id="d-bezahlt-betrag" style="color:var(--success)">€ 0,00</div><div id="d-bezahlt-anzahl" style="font-size:11px;color:#666">0 Belege</div>
+<div class="hover-hint">→ anzeigen</div>
+</div>
+<div class="stat-card hover-card cursor-pointer" onclick="jumpTo('pruefung')">
+<div class="stat-label">Zur Prüfung</div><div class="stat-value" id="d-pruef-betrag" style="color:var(--warning)">€ 0,00</div><div id="d-pruef-anzahl" style="font-size:11px;color:#666">0 Belege</div>
+<div class="hover-hint">→ anzeigen</div>
+</div>
+</div>
+
+code
+Code
+download
+content_copy
+expand_less
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <div class="card-title" style="margin:0;">Letzte offene Rechnungen</div>
+    <button class="btn btn-sm btn-outline" onclick="loadFromSheets()">🔄 Aktualisieren</button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Datum</th><th>Rechnungsnr.</th><th>Lieferant</th><th class="text-right">Betrag</th><th>Notiz</th><th>Status</th><th>Aktion</th></tr></thead>
+      <tbody id="dash-tbody"></tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ ERFASSEN -->
+
+<div id="page-erfassen" class="page">
+<div class="card">
+<div class="card-title">Neuer Beleg</div>
+
+code
+Code
+download
+content_copy
+expand_less
+<div class="upload-zone" id="upload-zone">
+    <input type="file" id="file-input" accept="image/*,application/pdf" multiple onchange="handleFiles(this)" />
+    <div style="font-size:32px; margin-bottom:5px;">📸</div>
+    <div style="font-size:14px; font-weight:700;">Rechnung hochladen</div>
+    <div style="font-size:12px; color:var(--gray-500);">Kamera, Fotos oder PDF (auch mehrseitig)</div>
+    <div id="preview-container"></div>
+  </div>
+  
+  <div style="text-align:center; margin-bottom:20px;">
+    <button class="btn btn-gold" id="ai-btn" onclick="extractAI()" style="display:none; width:100%; padding:14px; font-size:14px;">✨ KI Auslesen</button>
+    <label style="display:flex; align-items:center; justify-content:center; gap:8px; font-size:12px; font-weight:600; cursor:pointer; margin-top:12px;">
+      <input type="checkbox" id="f-autoupload" onchange="toggleAutoUpload(this)">
+      ⚡ Auto-Upload – Foto automatisch in Drive speichern
+    </label>
+    <p id="f-autoupload-hint" style="font-size:11px;color:var(--gray-500);margin-top:4px;display:none;">
+      ⚡ Foto wird nach KI-Analyse direkt in Drive gespeichert – keine manuelle Kontrolle.
+    </p>
+  </div>
+
+  <div class="form-grid">
+    <div class="form-group"><label>Lieferant / Firma *</label><input type="text" id="f-firma"></div>
+    <div class="form-group"><label>Rechnungsdatum *</label><input type="date" id="f-datum"></div>
+    <div class="form-group"><label>Betrag (€) *</label><input type="number" id="f-betrag" step="0.01"></div>
+    <div class="form-group"><label>Rechnungs-Nr. *</label><input type="text" id="f-rechnr"></div>
+    <div class="form-group"><label>Kategorie *</label>
+      <select id="f-kategorie">
+        <option value="">-- Bitte wählen --</option>
+        <option>Platzbetrieb</option><option>Verwaltung</option>
+        <option>Veranstaltungen</option><option>Mitglieder & Bewerb</option>
+        <option>Investitionen</option><option>Sonstiges</option>
+      </select>
     </div>
-    
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div class="card-title" style="margin:0;">Letzte offene Rechnungen</div>
-        <button class="btn btn-sm btn-outline" onclick="loadFromSheets()">🔄 Aktualisieren</button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Datum</th><th>Rechnungsnr.</th><th>Lieferant</th><th class="text-right">Betrag</th><th>Notiz</th><th>Status</th><th>Aktion</th></tr></thead>
-          <tbody id="dash-tbody"></tbody>
-        </table>
-      </div>
+    <div class="form-group full"><label>Notiz</label><textarea id="f-notiz" rows="2" style="resize:vertical;"></textarea></div>
+  </div>
+  
+  <div style="display:flex; gap:10px; margin-top:20px;">
+    <button class="btn btn-outline" onclick="resetForm()" style="flex:1;">Abbrechen</button>
+    <button class="btn btn-primary" id="btn-save" onclick="saveRechnung()" style="flex:2; padding:14px;">💾 In Cloud speichern</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ RECHNUNGEN -->
+
+<div id="page-rechnungen" class="page">
+<div class="card">
+<div class="card-title">Rechnungen verwalten</div>
+
+code
+Code
+download
+content_copy
+expand_less
+<div class="filter-bar">
+    <input type="text" id="filt-text" placeholder="Suche (Firma, Nr, Notiz)..." style="flex:1; min-width:150px;" oninput="renderRechnungen()">
+    <select id="filt-status" onchange="renderRechnungen()">
+      <option value="Alle">Alle Stati</option>
+      <option value="Offen">Nur Offen</option>
+      <option value="Erfasst">Erfasst</option>
+      <option value="Geprüft">Geprüft</option>
+      <option value="Freigegeben">Freigegeben</option>
+      <option value="Bezahlt">Bezahlt</option>
+    </select>
+    <select id="filt-kat" onchange="renderRechnungen()">
+      <option value="Alle">Alle Kategorien</option>
+      <option>Platzbetrieb</option><option>Verwaltung</option>
+      <option>Veranstaltungen</option><option>Mitglieder & Bewerb</option>
+      <option>Investitionen</option><option>Sonstiges</option>
+    </select>
+    <select id="filt-jahr" onchange="renderRechnungen()">
+      <option value="Alle">Alle Jahre</option>
+    </select>
+    <div id="rech-count" style="font-size:12px; font-weight:600; color:var(--gray-500); margin-left:auto;">0 von 0 Rechnungen</div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th onclick="setSort('datum')" class="cursor-pointer" id="th-datum">Datum ↓</th>
+          <th>Rechnungsnr.</th>
+          <th onclick="setSort('lieferant')" class="cursor-pointer" id="th-lieferant">Lieferant</th>
+          <th onclick="setSort('betrag')" class="cursor-pointer text-right" id="th-betrag">Betrag</th>
+          <th>Kategorie</th>
+          <th>Notiz</th>
+          <th>Status</th>
+          <th>Erfasst von</th>
+          <th>Foto</th>
+          <th>Aktionen</th>
+        </tr>
+      </thead>
+      <tbody id="rech-tbody"></tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ KASSAPRÜFUNG -->
+
+<div id="page-kassapruefung" class="page">
+<div class="card">
+<div class="card-title" style="margin-bottom:5px;">Kassaprüfung & Bankabgleich</div>
+<div style="font-size:12px; color:var(--gray-500); margin-bottom:20px;">Lade den CSV-Kontoauszug (Raiffeisen) hoch. Einzahlungen werden ignoriert, Datenschutz ist aktiv. KI Abgleich startet automatisch.</div>
+
+code
+Code
+download
+content_copy
+expand_less
+<div class="filter-bar" style="background:var(--white); border:1px solid var(--gray-200); justify-content:space-between;">
+    <div style="display:flex; gap:10px; align-items:center;">
+      <label style="margin:0;">Von:</label><input type="date" id="kassa-von" onchange="updateKassapruefungUI()">
+      <label style="margin:0;">Bis:</label><input type="date" id="kassa-bis" onchange="updateKassapruefungUI()">
+    </div>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <label class="btn btn-outline btn-sm" style="margin:0; cursor:pointer;">
+        <input type="file" accept=".csv" onchange="handleBankCSV(this)" style="display:none;">
+        📥 Raiffeisen CSV Upload
+      </label>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════ ERFASSEN -->
-  <div id="page-erfassen" class="page">
-    <div class="card">
-      <div class="card-title">Neuer Beleg</div>
-      
-      <div class="upload-zone" id="upload-zone">
-        <input type="file" id="file-input" accept="image/*,application/pdf" multiple onchange="handleFiles(this)" />
-        <div style="font-size:32px; margin-bottom:5px;">📸</div>
-        <div style="font-size:14px; font-weight:700;">Rechnung hochladen</div>
-        <div style="font-size:12px; color:var(--gray-500);">Kamera, Fotos oder PDF (auch mehrseitig)</div>
-        <div id="preview-container"></div>
-      </div>
-      
-      <div style="text-align:center; margin-bottom:20px;">
-        <button class="btn btn-gold" id="ai-btn" onclick="extractAI()" style="display:none; width:100%; padding:14px; font-size:14px;">✨ KI Auslesen</button>
-        <label style="display:flex; align-items:center; justify-content:center; gap:8px; font-size:12px; font-weight:600; cursor:pointer; margin-top:12px;">
-          <input type="checkbox" id="f-autoupload" onchange="toggleAutoUpload(this)">
-          ⚡ Auto-Upload – Foto automatisch in Drive speichern
-        </label>
-        <p id="f-autoupload-hint" style="font-size:11px;color:var(--gray-500);margin-top:4px;display:none;">
-          ⚡ Foto wird nach KI-Analyse direkt in Drive gespeichert – keine manuelle Kontrolle.
-        </p>
-      </div>
+  <div id="kassa-checksum"></div>
 
-      <div class="form-grid">
-        <div class="form-group"><label>Lieferant / Firma *</label><input type="text" id="f-firma"></div>
-        <div class="form-group"><label>Rechnungsdatum *</label><input type="date" id="f-datum"></div>
-        <div class="form-group"><label>Betrag (€) *</label><input type="number" id="f-betrag" step="0.01"></div>
-        <div class="form-group"><label>Rechnungs-Nr. *</label><input type="text" id="f-rechnr"></div>
-        <div class="form-group"><label>Kategorie *</label>
-          <select id="f-kategorie">
-            <option value="">-- Bitte wählen --</option>
-            <option>Platzbetrieb</option><option>Verwaltung</option>
-            <option>Veranstaltungen</option><option>Mitglieder & Bewerb</option>
-            <option>Investitionen</option><option>Sonstiges</option>
-          </select>
-        </div>
-        <div class="form-group"><label>IBAN / Zahlungsinfo</label><input type="text" id="f-iban"></div>
-        <div class="form-group full"><label>Notiz</label><textarea id="f-notiz" rows="2" style="resize:vertical;"></textarea></div>
-      </div>
-      
-      <div style="display:flex; gap:10px; margin-top:20px;">
-        <button class="btn btn-outline" onclick="resetForm()" style="flex:1;">Abbrechen</button>
-        <button class="btn btn-primary" id="btn-save" onclick="saveRechnung()" style="flex:2; padding:14px;">💾 In Cloud speichern</button>
-      </div>
+  <div class="stats-row" style="margin-bottom:25px;">
+    <div class="stat-card" style="border-left:4px solid var(--success)">
+      <div class="stat-label">✅ Gedeckt</div><div class="stat-value" id="tile-gedeck-sum">€ 0,00</div><div id="tile-gedeck-count" style="font-size:11px;color:#666">0 Rechnungen</div>
+    </div>
+    <div class="stat-card" style="border-left:4px solid var(--warning)">
+      <div class="stat-label">⚠️ Ohne Buchung</div><div class="stat-value" id="tile-ohnebuchung-sum">€ 0,00</div><div id="tile-ohnebuchung-count" style="font-size:11px;color:#666">0 Rechnungen</div>
+    </div>
+    <div class="stat-card" style="border-left:4px solid var(--danger)">
+      <div class="stat-label">❌ Ohne Rechnung</div><div class="stat-value" id="tile-ohnerech-sum">€ 0,00</div><div id="tile-ohnerech-count" style="font-size:11px;color:#666">0 Ausgaben</div>
+    </div>
+    <div class="stat-card" style="border-left:4px solid var(--gray-400)">
+      <div class="stat-label">ℹ️ Einzahlungen</div><div class="stat-value" id="tile-einzahl-count" style="color:var(--gray-500)">0</div><div style="font-size:11px;color:#666">Ignoriert gem. Datenschutz</div>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════ RECHNUNGEN -->
-  <div id="page-rechnungen" class="page">
-    <div class="card">
-      <div class="card-title">Rechnungen verwalten</div>
-      
-      <div class="filter-bar">
-        <input type="text" id="filt-text" placeholder="Suche (Firma, Nr, Notiz)..." style="flex:1; min-width:150px;" oninput="renderRechnungen()">
-        <select id="filt-status" onchange="renderRechnungen()">
-          <option value="Alle">Alle Stati</option>
-          <option value="Offen">Nur Offen</option>
-          <option value="Erfasst">Erfasst</option>
-          <option value="Geprüft">Geprüft</option>
-          <option value="Freigegeben">Freigegeben</option>
-          <option value="Bezahlt">Bezahlt</option>
-        </select>
-        <select id="filt-kat" onchange="renderRechnungen()">
-          <option value="Alle">Alle Kategorien</option>
-          <option>Platzbetrieb</option><option>Verwaltung</option>
-          <option>Veranstaltungen</option><option>Mitglieder & Bewerb</option>
-          <option>Investitionen</option><option>Sonstiges</option>
-        </select>
-        <select id="filt-jahr" onchange="renderRechnungen()">
-          <option value="Alle">Alle Jahre</option>
-        </select>
-        <div id="rech-count" style="font-size:12px; font-weight:600; color:var(--gray-500); margin-left:auto;">0 von 0 Rechnungen</div>
-      </div>
+  <div class="kassa-tabs">
+    <div class="k-tab active" id="ktab-0" onclick="switchKassaTab(0)">1. KI Abgleich</div>
+    <div class="k-tab" id="ktab-1" onclick="switchKassaTab(1)">2. Alle Zahlungen</div>
+  </div>
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th onclick="setSort('datum')" class="cursor-pointer" id="th-datum">Datum ↓</th>
-              <th>Rechnungsnr.</th>
-              <th onclick="setSort('lieferant')" class="cursor-pointer" id="th-lieferant">Lieferant</th>
-              <th onclick="setSort('betrag')" class="cursor-pointer text-right" id="th-betrag">Betrag</th>
-              <th>Kategorie</th>
-              <th>Notiz</th>
-              <th>Status</th>
-              <th>Erfasst von</th>
-              <th>Foto</th>
-              <th>Aktionen</th>
-            </tr>
-          </thead>
-          <tbody id="rech-tbody"></tbody>
-        </table>
-      </div>
+  <!-- SUBTAB 0: ABGLEICH -->
+  <div id="ksub-0">
+    <div style="text-align:right; margin-bottom:15px;">
+      <button class="btn btn-gold" onclick="startGeminiAbgleich(false)">✨ KI Abgleich manuell starten</button>
+    </div>
+
+    <h4 style="color:var(--success); margin-bottom:10px; font-size:14px;">✅ Gedeckte Rechnungen</h4>
+    <div class="table-wrap" style="margin-bottom:25px;">
+      <table>
+        <thead><tr><th>Rech. Datum</th><th>Rechnr.</th><th>Lieferant</th><th class="text-right">Betrag</th><th>Buchungstext Bank</th><th>Bank Datum</th><th>KI Konfidenz</th><th>Foto</th></tr></thead>
+        <tbody id="abg-gedeckt-tbody"></tbody>
+      </table>
+    </div>
+
+    <h4 style="color:var(--warning); margin-bottom:10px; font-size:14px;">⚠️ Rechnungen ohne Bankbuchung</h4>
+    <div style="font-size:11px; color:var(--gray-500); margin-bottom:10px;">Noch nicht bezahlt oder Buchung fehlt im Auszug.</div>
+    <div class="table-wrap" style="margin-bottom:25px;">
+      <table>
+        <thead><tr><th>Datum</th><th>Rechnr.</th><th>Lieferant</th><th class="text-right">Betrag</th><th>Status</th><th>Notiz</th><th>Foto</th></tr></thead>
+        <tbody id="abg-ohnebuch-tbody"></tbody>
+      </table>
+    </div>
+
+    <h4 style="color:var(--danger); margin-bottom:10px; font-size:14px;">❌ Bankausgaben ohne Rechnung</h4>
+    <div style="font-size:11px; color:var(--gray-500); margin-bottom:10px;">Ausgaben ohne Rechnung – kritisch für die Kassaprüfung!</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Datum</th><th>Buchungstext</th><th>Empfänger</th><th class="text-right">Betrag</th><th>Aktion</th></tr></thead>
+        <tbody id="abg-ohnerech-tbody"></tbody>
+      </table>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════ KASSAPRÜFUNG -->
-  <div id="page-kassapruefung" class="page">
-    <div class="card">
-      <div class="card-title" style="margin-bottom:5px;">Kassaprüfung & Bankabgleich</div>
-      <div style="font-size:12px; color:var(--gray-500); margin-bottom:20px;">Lade den CSV-Kontoauszug (Raiffeisen) hoch. Einzahlungen werden datenschutzkonform ignoriert, IBANs anonymisiert.</div>
-      
-      <div class="filter-bar" style="background:var(--white); border:1px solid var(--gray-200); justify-content:space-between;">
-        <div style="display:flex; gap:10px; align-items:center;">
-          <label style="margin:0;">Von:</label><input type="date" id="kassa-von" onchange="updateKassapruefungUI()">
-          <label style="margin:0;">Bis:</label><input type="date" id="kassa-bis" onchange="updateKassapruefungUI()">
-        </div>
-        <div style="display:flex; gap:10px; align-items:center;">
-          <label class="btn btn-outline btn-sm" style="margin:0; cursor:pointer;">
-            <input type="file" accept=".csv" onchange="handleBankCSV(this)" style="display:none;">
-            📥 Raiffeisen CSV Upload
-          </label>
-        </div>
-      </div>
-
-      <div id="kassa-checksum"></div>
-
-      <div class="stats-row" style="margin-bottom:25px;">
-        <div class="stat-card" style="border-left:4px solid var(--success)">
-          <div class="stat-label">✅ Gedeckt</div><div class="stat-value" id="tile-gedeck-sum">€ 0,00</div><div id="tile-gedeck-count" style="font-size:11px;color:#666">0 Rechnungen</div>
-        </div>
-        <div class="stat-card" style="border-left:4px solid var(--warning)">
-          <div class="stat-label">⚠️ Ohne Buchung</div><div class="stat-value" id="tile-ohnebuchung-sum">€ 0,00</div><div id="tile-ohnebuchung-count" style="font-size:11px;color:#666">0 Rechnungen</div>
-        </div>
-        <div class="stat-card" style="border-left:4px solid var(--danger)">
-          <div class="stat-label">❌ Ohne Rechnung</div><div class="stat-value" id="tile-ohnerech-sum">€ 0,00</div><div id="tile-ohnerech-count" style="font-size:11px;color:#666">0 Ausgaben</div>
-        </div>
-        <div class="stat-card" style="border-left:4px solid var(--gray-400)">
-          <div class="stat-label">ℹ️ Einzahlungen</div><div class="stat-value" id="tile-einzahl-count" style="color:var(--gray-500)">0</div><div style="font-size:11px;color:#666">Ignoriert gem. Datenschutz</div>
-        </div>
-      </div>
-
-      <div class="kassa-tabs">
-        <div class="k-tab active" id="ktab-0" onclick="switchKassaTab(0)">1. KI Abgleich</div>
-        <div class="k-tab" id="ktab-1" onclick="switchKassaTab(1)">2. Alle Zahlungen</div>
-      </div>
-
-      <!-- SUBTAB 0: ABGLEICH -->
-      <div id="ksub-0">
-        <div style="text-align:right; margin-bottom:15px;">
-          <button class="btn btn-gold" onclick="startGeminiAbgleich()">✨ KI Abgleich starten</button>
-        </div>
-
-        <h4 style="color:var(--success); margin-bottom:10px; font-size:14px;">✅ Gedeckte Rechnungen</h4>
-        <div class="table-wrap" style="margin-bottom:25px;">
-          <table>
-            <thead><tr><th>Rech. Datum</th><th>Rechnr.</th><th>Lieferant</th><th class="text-right">Betrag</th><th>Buchungstext Bank</th><th>Bank Datum</th><th>KI Konfidenz</th><th>Foto</th></tr></thead>
-            <tbody id="abg-gedeckt-tbody"></tbody>
-          </table>
-        </div>
-
-        <h4 style="color:var(--warning); margin-bottom:10px; font-size:14px;">⚠️ Rechnungen ohne Bankbuchung</h4>
-        <div style="font-size:11px; color:var(--gray-500); margin-bottom:10px;">Noch nicht bezahlt oder Buchung fehlt im Auszug.</div>
-        <div class="table-wrap" style="margin-bottom:25px;">
-          <table>
-            <thead><tr><th>Datum</th><th>Rechnr.</th><th>Lieferant</th><th class="text-right">Betrag</th><th>Status</th><th>Notiz</th><th>Foto</th></tr></thead>
-            <tbody id="abg-ohnebuch-tbody"></tbody>
-          </table>
-        </div>
-
-        <h4 style="color:var(--danger); margin-bottom:10px; font-size:14px;">❌ Bankausgaben ohne Rechnung</h4>
-        <div style="font-size:11px; color:var(--gray-500); margin-bottom:10px;">Ausgaben ohne Rechnung – kritisch für die Kassaprüfung!</div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Datum</th><th>Buchungstext</th><th>Empfänger</th><th class="text-right">Betrag</th><th>Aktion</th></tr></thead>
-            <tbody id="abg-ohnerech-tbody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- SUBTAB 1: ALLE ZAHLUNGEN -->
-      <div id="ksub-1" style="display:none;">
-        <div class="filter-bar" style="margin-top:0;">
-          <input type="text" id="kz-text" placeholder="Suche in Text/Empfänger..." style="flex:1;" oninput="updateKassapruefungUI()">
-          <select id="kz-filter" onchange="updateKassapruefungUI()">
-            <option value="Alle">Alle Ausgaben</option>
-            <option value="Mit">Mit Rechnung</option>
-            <option value="Ohne">Ohne Rechnung</option>
-          </select>
-          <div id="kz-count" style="font-size:12px; font-weight:600; color:var(--gray-500);">0 Zahlungen</div>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Datum</th><th>Buchungstext</th><th>Empfänger</th><th class="text-right">Betrag</th><th>Zugeordnete Rech.</th><th>Rechnr.</th><th>Foto</th></tr></thead>
-            <tbody id="kz-tbody"></tbody>
-          </table>
-        </div>
-      </div>
-
+  <!-- SUBTAB 1: ALLE ZAHLUNGEN -->
+  <div id="ksub-1" style="display:none;">
+    <div class="filter-bar" style="margin-top:0;">
+      <input type="text" id="kz-text" placeholder="Suche in Text/Empfänger..." style="flex:1;" oninput="updateKassapruefungUI()">
+      <select id="kz-filter" onchange="updateKassapruefungUI()">
+        <option value="Alle">Alle Ausgaben</option>
+        <option value="Mit">Mit Rechnung</option>
+        <option value="Ohne">Ohne Rechnung</option>
+      </select>
+      <div id="kz-count" style="font-size:12px; font-weight:600; color:var(--gray-500);">0 Zahlungen</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Datum</th><th>Buchungstext</th><th>Empfänger</th><th class="text-right">Betrag</th><th>Zugeordnete Rech.</th><th>Rechnr.</th><th>Foto</th></tr></thead>
+        <tbody id="kz-tbody"></tbody>
+      </table>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════ EINSTELLUNGEN -->
-  <div id="page-einstellungen" class="page">
-    <div class="card">
-      <div class="card-title">Cloud Setup (Einmalig)</div>
-      
-      <div class="form-group" style="margin-bottom:10px;">
-        <label>Dein Name (Erfasser)</label>
-        <input type="text" id="s-username" placeholder="Max Mustermann">
-      </div>
-      <div class="form-group" style="margin-bottom:10px;">
-        <label>OAuth Client ID</label>
-        <input type="text" id="s-client" placeholder="xxxxx.apps.googleusercontent.com">
-      </div>
-      <div class="form-group" style="margin-bottom:10px;">
-        <label>Google Sheet ID</label>
-        <input type="text" id="s-sheet" placeholder="Aus der Tabellen-URL">
-      </div>
-      <div class="form-group" style="margin-bottom:10px;">
-        <label>Drive Ordner ID</label>
-        <input type="text" id="s-folder" placeholder="Aus der Drive-URL">
-      </div>
-      <div class="form-group" style="margin-bottom:15px;">
-        <label>Gemini API Key</label>
-        <input type="password" id="s-gemini" placeholder="AIzaSy...">
-      </div>
-      
-      <button class="btn btn-outline" onclick="saveSettings()" style="width:100%; margin-bottom:15px;">💾 Einstellungen lokal speichern</button>
-      <button class="btn btn-primary" onclick="loginGoogle()" style="width:100%; padding:14px; margin-bottom:30px;">🔐 Mit Google Anmelden</button>
+</div>
+</div>
 
-      <div style="border-top:1px solid var(--gray-200); padding-top:20px;">
-        <div class="card-title" style="color:var(--danger); font-size:15px;">Gefahrenzone</div>
-        <button class="btn btn-outline" style="color:var(--danger); border-color:var(--danger); width:100%;" onclick="deleteBankbuchungen()">🗑️ Alle Bankbuchungen (Sheet) löschen</button>
-        <div style="font-size:11px; color:var(--gray-500); margin-top:5px; text-align:center;">Löscht den Reiter "Bankbuchungen" ab Zeile 2.</div>
-      </div>
-    </div>
+<!-- ═══════════════════════════════════════════════════════ EINSTELLUNGEN -->
+
+<div id="page-einstellungen" class="page">
+<div class="card">
+<div class="card-title">Cloud Setup (Einmalig)</div>
+
+code
+Code
+download
+content_copy
+expand_less
+<div class="form-group" style="margin-bottom:10px;">
+    <label>Dein Name (Erfasser)</label>
+    <input type="text" id="s-username" placeholder="Max Mustermann">
   </div>
+  <div class="form-group" style="margin-bottom:10px;">
+    <label>OAuth Client ID</label>
+    <input type="text" id="s-client" placeholder="xxxxx.apps.googleusercontent.com">
+  </div>
+  <div class="form-group" style="margin-bottom:10px;">
+    <label>Google Sheet ID</label>
+    <input type="text" id="s-sheet" placeholder="Aus der Tabellen-URL">
+  </div>
+  <div class="form-group" style="margin-bottom:10px;">
+    <label>Drive Ordner ID</label>
+    <input type="text" id="s-folder" placeholder="Aus der Drive-URL">
+  </div>
+  <div class="form-group" style="margin-bottom:15px;">
+    <label>Gemini API Key</label>
+    <input type="password" id="s-gemini" placeholder="AIzaSy...">
+  </div>
+  
+  <button class="btn btn-outline" onclick="saveSettings()" style="width:100%; margin-bottom:15px;">💾 Einstellungen lokal speichern</button>
+  <button class="btn btn-primary" onclick="loginGoogle()" style="width:100%; padding:14px; margin-bottom:30px;">🔐 Mit Google Anmelden</button>
+
+  <div style="border-top:1px solid var(--gray-200); padding-top:20px;">
+    <div class="card-title" style="color:var(--danger); font-size:15px;">Gefahrenzone</div>
+    <button class="btn btn-outline" style="color:var(--danger); border-color:var(--danger); width:100%;" onclick="deleteBankbuchungen()">🗑️ Alle Bankbuchungen (Sheet) löschen</button>
+    <div style="font-size:11px; color:var(--gray-500); margin-top:5px; text-align:center;">Löscht den Reiter "Bankbuchungen" ab Zeile 2.</div>
+  </div>
+</div>
+</div>
 
 </main>
 
 <div id="toast"></div>
 
 <!-- MODAL RECHNUNG ZUORDNEN -->
+
 <div id="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(21,48,72,0.6); z-index:6000; align-items:center; justify-content:center; backdrop-filter:blur(2px);">
-  <div style="background:#fff; padding:24px; border-radius:12px; width:90%; max-width:450px; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
-    <h3 style="font-family:'Playfair Display',serif; color:var(--navy); margin-bottom:15px; font-size:18px;">Rechnung zuordnen</h3>
-    <div style="font-size:12px; color:var(--gray-500); margin-bottom:10px;">Wähle eine offene Rechnung für diese Bankausgabe:</div>
-    <select id="modal-select" style="width:100%; padding:12px; margin-bottom:20px; border-radius:8px; border:1px solid var(--gray-300); font-size:13px;"></select>
-    <div style="display:flex; gap:10px; justify-content:flex-end;">
-      <button class="btn btn-outline" onclick="document.getElementById('modal-overlay').style.display='none'">Abbrechen</button>
-      <button class="btn btn-primary" onclick="confirmZuordnung()">Speichern</button>
-    </div>
-  </div>
+<div style="background:#fff; padding:24px; border-radius:12px; width:90%; max-width:450px; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+<h3 style="font-family:'Playfair Display',serif; color:var(--navy); margin-bottom:15px; font-size:18px;">Rechnung zuordnen</h3>
+<div style="font-size:12px; color:var(--gray-500); margin-bottom:10px;">Wähle eine offene Rechnung für diese Bankausgabe:</div>
+<select id="modal-select" style="width:100%; padding:12px; margin-bottom:20px; border-radius:8px; border:1px solid var(--gray-300); font-size:13px;"></select>
+<div style="display:flex; gap:10px; justify-content:flex-end;">
+<button class="btn btn-outline" onclick="document.getElementById('modal-overlay').style.display='none'">Abbrechen</button>
+<button class="btn btn-primary" onclick="confirmZuordnung()">Speichern</button>
+</div>
+</div>
 </div>
 
 <script>
@@ -428,17 +461,17 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').
 let settings = JSON.parse(localStorage.getItem('tc_settings') || '{}');
 let tc_autoupload = localStorage.getItem('tc_autoupload') === 'true';
 
-let rechnungen = [];
-let bankbuchungen = [];
+let rechnungen =[];
+let bankbuchungen =[];
 let einzahlungenCount = 0;
 
 let tokenClient;
 let accessToken = null;
-let currentFilesBase64 = []; 
-let preUploadedLinks = [];
+let currentFilesBase64 = [];
+let preUploadedLinks =[];
 let editingRechnungId = null;
 
-const KATEGORIEN = ["Platzbetrieb", "Verwaltung", "Veranstaltungen", "Mitglieder & Bewerb", "Investitionen", "Sonstiges"];
+const KATEGORIEN =["Platzbetrieb", "Verwaltung", "Veranstaltungen", "Mitglieder & Bewerb", "Investitionen", "Sonstiges"];
 
 // Sort State
 let sortCol = 'datum';
@@ -447,515 +480,522 @@ let sortDir = -1;
 // Format Utils
 const formatEur = num => new Intl.NumberFormat('de-AT', { style: 'currency', currency: 'EUR' }).format(num);
 const formatDate = iso => {
-  if(!iso) return '-';
-  const parts = iso.split('-');
-  return parts.length === 3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : iso;
+if(!iso) return '-';
+const parts = iso.split('-');
+return parts.length === 3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : iso;
 };
 
 // ==========================================
 // INITIALISIERUNG
 // ==========================================
 window.onload = () => {
-  document.getElementById('s-username').value = settings.userName || '';
-  document.getElementById('s-client').value = settings.clientId || '';
-  document.getElementById('s-sheet').value = settings.sheetId || '';
-  document.getElementById('s-folder').value = settings.folderId || '';
-  document.getElementById('s-gemini').value = settings.geminiKey || '';
-  
-  if(tc_autoupload) {
-    document.getElementById('f-autoupload').checked = true;
-    document.getElementById('f-autoupload-hint').style.display = 'block';
-  }
+document.getElementById('s-username').value = settings.userName || '';
+document.getElementById('s-client').value = settings.clientId || '';
+document.getElementById('s-sheet').value = settings.sheetId || '';
+document.getElementById('s-folder').value = settings.folderId || '';
+document.getElementById('s-gemini').value = settings.geminiKey || '';
 
-  initDates();
+if(tc_autoupload) {
+document.getElementById('f-autoupload').checked = true;
+document.getElementById('f-autoupload-hint').style.display = 'block';
+}
 
-  if (settings.clientId) initGoogleAuth();
+initDates();
+
+if (settings.clientId) initGoogleAuth();
 };
 
 function initDates() {
-  const y = new Date().getFullYear();
-  document.getElementById('kassa-von').value = `${y}-01-01`;
-  document.getElementById('kassa-bis').value = `${y}-12-31`;
+const y = new Date().getFullYear();
+document.getElementById('kassa-von').value = `${y}-01-01`;
+document.getElementById('kassa-bis').value = `${y}-12-31`;
 }
 
 function showTab(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  const tabMap = { dashboard: 0, erfassen: 1, rechnungen: 2, kassapruefung: 3, einstellungen: 4 };
-  if (tabMap[name] !== undefined) document.querySelectorAll('.tab')[tabMap[name]].classList.add('active');
-  
-  if ((name === 'dashboard' || name === 'rechnungen' || name === 'kassapruefung') && accessToken) {
-    loadFromSheets();
-  }
+document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+document.getElementById('page-' + name).classList.add('active');
+document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+const tabMap = { dashboard: 0, erfassen: 1, rechnungen: 2, kassapruefung: 3, einstellungen: 4 };
+if (tabMap[name] !== undefined) document.querySelectorAll('.tab')[tabMap[name]].classList.add('active');
+
+if ((name === 'dashboard' || name === 'rechnungen' || name === 'kassapruefung') && accessToken) {
+loadFromSheets();
+}
 }
 
 function showToast(msg, type='success') {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.style.background = type === 'error' ? 'var(--danger)' : 'var(--navy)';
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3500);
+const t = document.getElementById('toast');
+t.textContent = msg; t.style.background = type === 'error' ? 'var(--danger)' : 'var(--navy)';
+t.classList.add('show');
+setTimeout(() => t.classList.remove('show'), 3500);
 }
 function showLoader(text) { document.getElementById('loader-text').innerText = text; document.getElementById('global-loader').style.display = 'flex'; }
 function hideLoader() { document.getElementById('global-loader').style.display = 'none'; }
 
 function saveSettings() {
-  settings = {
-    userName: document.getElementById('s-username').value.trim(),
-    clientId: document.getElementById('s-client').value.trim(),
-    sheetId: document.getElementById('s-sheet').value.trim(),
-    folderId: document.getElementById('s-folder').value.trim(),
-    geminiKey: document.getElementById('s-gemini').value.trim()
-  };
-  localStorage.setItem('tc_settings', JSON.stringify(settings));
-  showToast('Einstellungen gespeichert');
-  initGoogleAuth();
+settings = {
+userName: document.getElementById('s-username').value.trim(),
+clientId: document.getElementById('s-client').value.trim(),
+sheetId: document.getElementById('s-sheet').value.trim(),
+folderId: document.getElementById('s-folder').value.trim(),
+geminiKey: document.getElementById('s-gemini').value.trim()
+};
+localStorage.setItem('tc_settings', JSON.stringify(settings));
+showToast('Einstellungen gespeichert');
+initGoogleAuth();
 }
 
 function toggleAutoUpload(cb) {
-  tc_autoupload = cb.checked;
-  localStorage.setItem('tc_autoupload', tc_autoupload);
-  document.getElementById('f-autoupload-hint').style.display = tc_autoupload ? 'block' : 'none';
+tc_autoupload = cb.checked;
+localStorage.setItem('tc_autoupload', tc_autoupload);
+document.getElementById('f-autoupload-hint').style.display = tc_autoupload ? 'block' : 'none';
+}
+
+function extractJSON(text) {
+let t = text.replace(/```json/g, '').replace(/```/g, '').trim();
+const s = t.indexOf('{'), e = t.lastIndexOf('}');
+const sa = t.indexOf('['), ea = t.lastIndexOf(']');
+if (sa !== -1 && ea !== -1 && (s === -1 || sa < s)) return JSON.parse(t.substring(sa, ea + 1));
+if (s !== -1 && e !== -1) return JSON.parse(t.substring(s, e + 1));
+return JSON.parse(t);
 }
 
 // ==========================================
 // GOOGLE OAUTH & SHEETS SYNC
 // ==========================================
 function initGoogleAuth() {
-  if(!settings.clientId) return;
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: settings.clientId,
-    scope: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file',
-    callback: async (response) => {
-      if (response.error) { showToast('Login fehlgeschlagen', 'error'); return; }
-      accessToken = response.access_token;
-      document.getElementById('auth-status').innerHTML = '✅ Cloud Verbunden';
-      showToast('Erfolgreich angemeldet!');
-      await ensureBankbuchungenHeader();
-      showTab('dashboard');
-    },
-  });
+if(!settings.clientId) return;
+tokenClient = google.accounts.oauth2.initTokenClient({
+client_id: settings.clientId,
+scope: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file',
+callback: async (response) => {
+if (response.error) { showToast('Login fehlgeschlagen', 'error'); return; }
+accessToken = response.access_token;
+document.getElementById('auth-status').innerHTML = '✅ Cloud Verbunden';
+showToast('Erfolgreich angemeldet!');
+await ensureBankbuchungenHeader();
+showTab('dashboard');
+},
+});
 }
 
 function loginGoogle() {
-  if(!tokenClient) { showToast('Bitte zuerst Client-ID speichern!', 'error'); return; }
-  tokenClient.requestAccessToken({prompt: 'consent'});
+if(!tokenClient) { showToast('Bitte zuerst Client-ID speichern!', 'error'); return; }
+tokenClient.requestAccessToken({prompt: 'consent'});
 }
 
 async function ensureBankbuchungenHeader() {
-  try {
-    const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Bankbuchungen!A1:G1`, { headers: { 'Authorization': `Bearer ${accessToken}` } });
-    const data = await res.json();
-    if (!data.values || data.values.length === 0) {
-      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Bankbuchungen!A1:G1?valueInputOption=USER_ENTERED`, {
-        method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ values: [['Fingerprint', 'Datum', 'Betrag', 'Buchungstext', 'Empfaenger', 'Abgeglichen', 'RechnungID']] })
-      });
-    }
-  } catch(e) {}
+try {
+const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Bankbuchungen!A1:H1`, { headers: { 'Authorization': `Bearer ${accessToken}` } });
+const data = await res.json();
+if (!data.values || data.values.length === 0 || data.values[0].length < 8) {
+await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Bankbuchungen!A1:H1?valueInputOption=USER_ENTERED`, {
+method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+body: JSON.stringify({ values: [['Fingerprint', 'Datum', 'Betrag', 'Buchungstext', 'Empfaenger', 'Abgeglichen', 'RechnungID', 'FotoLink']] })
+});
+}
+} catch(e) {}
 }
 
 async function loadFromSheets() {
-  if(!accessToken || !settings.sheetId) return;
-  showLoader('Lade Datenbank...');
-  try {
-    // 1. RECHNUNGEN
-    const resR = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A:K`, { headers: { 'Authorization': `Bearer ${accessToken}` } });
-    const dataR = await resR.json();
-    rechnungen = [];
-    const rowsR = dataR.values || [];
-    for(let i = 1; i < rowsR.length; i++) {
-      const r = rowsR[i];
-      if(r[0]) {
-        rechnungen.push({
-          rowIndex: i + 1, id: r[0], datum: r[1], lieferant: r[2],
-          betrag: parseFloat((r[3]||'0').replace(',','.')) || 0,
-          kategorie: r[4], rechnr: r[5], iban: r[6], status: r[7]||'Erfasst', notiz: r[8],
-          erfasstVon: r[9], fotolink: r[10]
-        });
-      }
-    }
+if(!accessToken || !settings.sheetId) return;
+showLoader('Lade Datenbank...');
+try {
+// 1. RECHNUNGEN
+const resR = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A:K`, { headers: { 'Authorization': `Bearer ${accessToken}` } });
+const dataR = await resR.json();
+rechnungen =[];
+const rowsR = dataR.values ||[];
+for(let i = 1; i < rowsR.length; i++) {
+const r = rowsR[i];
+if(r[0] && r[0] !== 'ID') {
+rechnungen.push({
+rowIndex: i + 1, id: r[0], datum: r[1], lieferant: r[2],
+betrag: parseFloat((r[3]||'0').replace(',','.')) || 0,
+kategorie: r[4], rechnr: r[5], iban: r[6], status: r[7]||'Erfasst', notiz: r[8],
+erfasstVon: r[9], fotolink: r[10]
+});
+}
+}
 
-    // 2. BANKBUCHUNGEN
-    const resB = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Bankbuchungen!A:G`, { headers: { 'Authorization': `Bearer ${accessToken}` } });
-    const dataB = await resB.json();
-    bankbuchungen = [];
-    const rowsB = dataB.values || [];
-    for(let i = 1; i < rowsB.length; i++) {
-      const b = rowsB[i];
-      if(b[0] && b[0] !== 'Fingerprint') {
-        bankbuchungen.push({
-          rowIndex: i + 1, fingerprint: b[0], datum: b[1], betrag: parseFloat((b[2]||'0').replace(',','.')),
-          buchungstext: b[3], empfaenger: b[4], abgeglichen: b[5], rechnungID: b[6]
-        });
-      }
-    }
+// 2. BANKBUCHUNGEN
+const resB = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Bankbuchungen!A:H`, { headers: { 'Authorization': `Bearer ${accessToken}` } });
+const dataB = await resB.json();
+bankbuchungen =[];
+const rowsB = dataB.values ||[];
+for(let i = 1; i < rowsB.length; i++) {
+const b = rowsB[i];
+if(b[0] && b[0] !== 'Fingerprint') {
+bankbuchungen.push({
+rowIndex: i + 1, fingerprint: b[0], datum: b[1], betrag: parseFloat((b[2]||'0').replace(',','.')),
+buchungstext: b[3], empfaenger: b[4], abgeglichen: b[5], rechnungID: b[6], fotolink: b[7]
+});
+}
+}
 
-    updateYearDropdown();
-    renderDashboard();
-    renderRechnungen();
-    updateKassapruefungUI();
-  } catch(e) {
-    showToast('Fehler beim Laden: ' + e.message, 'error');
-  }
-  hideLoader();
+updateYearDropdown();
+renderDashboard();
+renderRechnungen();
+updateKassapruefungUI();
+} catch(e) {
+showToast('Fehler beim Laden: ' + e.message, 'error');
+}
+hideLoader();
 }
 
 // ==========================================
 // DASHBOARD
 // ==========================================
 function renderDashboard() {
-  const offen = rechnungen.filter(r => r.status !== 'Bezahlt');
-  const bezahlt = rechnungen.filter(r => r.status === 'Bezahlt');
-  const zurPruefung = rechnungen.filter(r => r.status === 'Erfasst');
-  
-  const now = new Date();
-  const currentMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-  const diesenMonat = rechnungen.filter(r => (r.datum||'').startsWith(currentMonth));
-  
-  document.getElementById('d-offen-betrag').innerText = formatEur(offen.reduce((s,r)=>s+r.betrag, 0));
-  document.getElementById('d-offen-anzahl').innerText = offen.length + ' Belege';
-  document.getElementById('d-bezahlt-betrag').innerText = formatEur(bezahlt.reduce((s,r)=>s+r.betrag, 0));
-  document.getElementById('d-bezahlt-anzahl').innerText = bezahlt.length + ' Belege';
-  document.getElementById('d-monat-betrag').innerText = formatEur(diesenMonat.reduce((s,r)=>s+r.betrag, 0));
-  document.getElementById('d-monat-anzahl').innerText = diesenMonat.length + ' Belege';
-  document.getElementById('d-pruef-betrag').innerText = formatEur(zurPruefung.reduce((s,r)=>s+r.betrag, 0));
-  document.getElementById('d-pruef-anzahl').innerText = zurPruefung.length + ' Belege';
+const offen = rechnungen.filter(r => r.status !== 'Bezahlt');
+const bezahlt = rechnungen.filter(r => r.status === 'Bezahlt');
+const zurPruefung = rechnungen.filter(r => r.status === 'Erfasst');
 
-  const sortedOffen = [...offen].sort((a,b) => new Date(b.datum) - new Date(a.datum));
-  const tbody = document.getElementById('dash-tbody');
-  tbody.innerHTML = sortedOffen.slice(0,6).map(r => `
-    <tr>
-      <td>${formatDate(r.datum)}</td>
-      <td>${r.rechnr||'-'}</td>
-      <td><strong>${r.lieferant}</strong><br><span style="font-size:10px;color:var(--gray-500)">${r.kategorie}</span></td>
-      <td class="text-right font-bold">${formatEur(r.betrag)}</td>
-      <td class="text-xs text-gray-500 italic">${(r.notiz||'').substring(0,40)}</td>
-      <td><span class="badge badge-${r.status.toLowerCase().replace('ü','u')}">${r.status}</span></td>
-      <td>
-        <select onchange="changeStatus('${r.rowIndex}', this.value)" style="padding:4px;font-size:11px;border-radius:4px;">
-          <option value="Erfasst" ${r.status==='Erfasst'?'selected':''}>Erfasst</option>
-          <option value="Geprüft" ${r.status==='Geprüft'?'selected':''}>Geprüft</option>
-          <option value="Freigegeben" ${r.status==='Freigegeben'?'selected':''}>Freigegeben</option>
-          <option value="Bezahlt" ${r.status==='Bezahlt'?'selected':''}>Bezahlt</option>
-        </select>
-      </td>
-    </tr>
-  `).join('') || '<tr><td colspan="7" class="text-center p-4">Keine offenen Rechnungen 🎉</td></tr>';
+const now = new Date();
+const currentMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+const diesenMonat = rechnungen.filter(r => (r.datum||'').startsWith(currentMonth));
+
+document.getElementById('d-offen-betrag').innerText = formatEur(offen.reduce((s,r)=>s+r.betrag, 0));
+document.getElementById('d-offen-anzahl').innerText = offen.length + ' Belege';
+document.getElementById('d-bezahlt-betrag').innerText = formatEur(bezahlt.reduce((s,r)=>s+r.betrag, 0));
+document.getElementById('d-bezahlt-anzahl').innerText = bezahlt.length + ' Belege';
+document.getElementById('d-monat-betrag').innerText = formatEur(diesenMonat.reduce((s,r)=>s+r.betrag, 0));
+document.getElementById('d-monat-anzahl').innerText = diesenMonat.length + ' Belege';
+document.getElementById('d-pruef-betrag').innerText = formatEur(zurPruefung.reduce((s,r)=>s+r.betrag, 0));
+document.getElementById('d-pruef-anzahl').innerText = zurPruefung.length + ' Belege';
+
+const sortedOffen = [...offen].sort((a,b) => new Date(b.datum) - new Date(a.datum));
+const tbody = document.getElementById('dash-tbody');
+tbody.innerHTML = sortedOffen.slice(0,6).map(r => `
+<tr>
+<td>${formatDate(r.datum)}</td>
+<td>${r.rechnr||'-'}</td>
+<td><strong>${r.lieferant}</strong><br><span style="font-size:10px;color:var(--gray-500)">${r.kategorie}</span></td>
+<td class="text-right font-bold">${formatEur(r.betrag)}</td>
+<td class="text-xs text-gray-500 italic">${(r.notiz||'').substring(0,40)}</td>
+<td><span class="badge badge-${r.status.toLowerCase().replace('ü','u')}">${r.status}</span></td>
+<td>
+<select onchange="changeStatus('${r.rowIndex}', this.value)" style="padding:4px;font-size:11px;border-radius:4px;">
+<option value="Erfasst" ${r.status==='Erfasst'?'selected':''}>Erfasst</option>
+<option value="Geprüft" ${r.status==='Geprüft'?'selected':''}>Geprüft</option>
+<option value="Freigegeben" ${r.status==='Freigegeben'?'selected':''}>Freigegeben</option>
+<option value="Bezahlt" ${r.status==='Bezahlt'?'selected':''}>Bezahlt</option>
+</select>
+</td>
+</tr>
+`).join('') || '<tr><td colspan="7" class="text-center p-4">Keine offenen Rechnungen 🎉</td></tr>';
 }
 
 function jumpTo(filterType) {
-  showTab('rechnungen');
-  document.getElementById('filt-text').value = '';
-  document.getElementById('filt-status').value = 'Alle';
-  document.getElementById('filt-kat').value = 'Alle';
-  document.getElementById('filt-jahr').value = 'Alle';
+showTab('rechnungen');
+document.getElementById('filt-text').value = '';
+document.getElementById('filt-status').value = 'Alle';
+document.getElementById('filt-kat').value = 'Alle';
+document.getElementById('filt-jahr').value = 'Alle';
 
-  if (filterType === 'offen') document.getElementById('filt-status').value = 'Offen';
-  else if (filterType === 'bezahlt') document.getElementById('filt-status').value = 'Bezahlt';
-  else if (filterType === 'pruefung') document.getElementById('filt-status').value = 'Erfasst';
-  else if (filterType === 'monat') {
-    const ym = `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`;
-    document.getElementById('filt-text').value = ym;
-  }
-  renderRechnungen();
+if (filterType === 'offen') document.getElementById('filt-status').value = 'Offen';
+else if (filterType === 'bezahlt') document.getElementById('filt-status').value = 'Bezahlt';
+else if (filterType === 'pruefung') document.getElementById('filt-status').value = 'Erfasst';
+else if (filterType === 'monat') {
+const ym = `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`;
+document.getElementById('filt-text').value = ym;
+}
+renderRechnungen();
 }
 
 async function changeStatus(rowIndex, newStatus) {
-  showLoader('Aktualisiere Status...');
-  try {
-    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!H${rowIndex}?valueInputOption=USER_ENTERED`, {
-      method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ values: [[newStatus]] })
-    });
-    showToast('Status aktualisiert!');
-    await loadFromSheets();
-  } catch(e) { showToast('Fehler: '+e.message, 'error'); }
-  hideLoader();
+showLoader('Aktualisiere Status...');
+try {
+await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!H${rowIndex}?valueInputOption=USER_ENTERED`, {
+method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+body: JSON.stringify({ values: [[newStatus]] })
+});
+showToast('Status aktualisiert!');
+await loadFromSheets();
+} catch(e) { showToast('Fehler: '+e.message, 'error'); }
+hideLoader();
 }
 
 // ==========================================
 // RECHNUNGEN
 // ==========================================
 function updateYearDropdown() {
-  const years = new Set();
-  rechnungen.forEach(r => { if(r.datum) years.add(r.datum.substring(0,4)); });
-  const sorted = Array.from(years).sort().reverse();
-  document.getElementById('filt-jahr').innerHTML = '<option value="Alle">Alle Jahre</option>' + sorted.map(y => `<option value="${y}">${y}</option>`).join('');
+const years = new Set();
+rechnungen.forEach(r => { if(r.datum) years.add(r.datum.substring(0,4)); });
+const sorted = Array.from(years).sort().reverse();
+document.getElementById('filt-jahr').innerHTML = '<option value="Alle">Alle Jahre</option>' + sorted.map(y => `<option value="${y}">${y}</option>`).join('');
 }
 
 function setSort(col) {
-  if (sortCol === col) sortDir *= -1;
-  else { sortCol = col; sortDir = 1; if(col==='datum') sortDir = -1; }
-  renderRechnungen();
+if (sortCol === col) sortDir *= -1;
+else { sortCol = col; sortDir = 1; if(col==='datum') sortDir = -1; }
+renderRechnungen();
 }
 
 function updateSortHeaders() {
-  document.getElementById('th-datum').innerText = 'Datum' + (sortCol==='datum' ? (sortDir===1?' ↑':' ↓') : '');
-  document.getElementById('th-lieferant').innerText = 'Lieferant' + (sortCol==='lieferant' ? (sortDir===1?' ↑':' ↓') : '');
-  document.getElementById('th-betrag').innerText = 'Betrag' + (sortCol==='betrag' ? (sortDir===1?' ↑':' ↓') : '');
+document.getElementById('th-datum').innerText = 'Datum' + (sortCol==='datum' ? (sortDir===1?' ↑':' ↓') : '');
+document.getElementById('th-lieferant').innerText = 'Lieferant' + (sortCol==='lieferant' ? (sortDir===1?' ↑':' ↓') : '');
+document.getElementById('th-betrag').innerText = 'Betrag' + (sortCol==='betrag' ? (sortDir===1?' ↑':' ↓') : '');
 }
 
 function renderRechnungen() {
-  updateSortHeaders();
-  const text = document.getElementById('filt-text').value.toLowerCase();
-  const status = document.getElementById('filt-status').value;
-  const kat = document.getElementById('filt-kat').value;
-  const jahr = document.getElementById('filt-jahr').value;
+updateSortHeaders();
+const text = document.getElementById('filt-text').value.toLowerCase();
+const status = document.getElementById('filt-status').value;
+const kat = document.getElementById('filt-kat').value;
+const jahr = document.getElementById('filt-jahr').value;
 
-  let filtered = rechnungen.filter(r => {
-    let matchText = (r.lieferant||'').toLowerCase().includes(text) || (r.rechnr||'').toLowerCase().includes(text) || (r.notiz||'').toLowerCase().includes(text) || (r.datum||'').includes(text);
-    let matchStatus = status === 'Alle' ? true : (status === 'Offen' ? r.status !== 'Bezahlt' : r.status === status);
-    let matchKat = kat === 'Alle' ? true : r.kategorie === kat;
-    let matchJahr = jahr === 'Alle' ? true : (r.datum||'').startsWith(jahr);
-    return matchText && matchStatus && matchKat && matchJahr;
-  });
+let filtered = rechnungen.filter(r => {
+let matchText = (r.lieferant||'').toLowerCase().includes(text) || (r.rechnr||'').toLowerCase().includes(text) || (r.notiz||'').toLowerCase().includes(text) || (r.datum||'').includes(text);
+let matchStatus = status === 'Alle' ? true : (status === 'Offen' ? r.status !== 'Bezahlt' : r.status === status);
+let matchKat = kat === 'Alle' ? true : r.kategorie === kat;
+let matchJahr = jahr === 'Alle' ? true : (r.datum||'').startsWith(jahr);
+return matchText && matchStatus && matchKat && matchJahr;
+});
 
-  filtered.sort((a, b) => {
-    let valA = a[sortCol], valB = b[sortCol];
-    if (sortCol === 'datum') { valA = new Date(valA||0).getTime(); valB = new Date(valB||0).getTime(); }
-    if (sortCol === 'betrag') { valA = a.betrag; valB = b.betrag; }
-    if (valA < valB) return -1 * sortDir;
-    if (valA > valB) return 1 * sortDir;
-    return 0;
-  });
+filtered.sort((a, b) => {
+let valA = a[sortCol], valB = b[sortCol];
+if (sortCol === 'datum') { valA = new Date(valA||0).getTime(); valB = new Date(valB||0).getTime(); }
+if (sortCol === 'betrag') { valA = a.betrag; valB = b.betrag; }
+if (valA < valB) return -1 * sortDir;
+if (valA > valB) return 1 * sortDir;
+return 0;
+});
 
-  document.getElementById('rech-count').innerText = `${filtered.length} von ${rechnungen.length} Rechnungen`;
+document.getElementById('rech-count').innerText = `${filtered.length} von ${rechnungen.length} Rechnungen`;
 
-  document.getElementById('rech-tbody').innerHTML = filtered.map(r => `
-    <tr class="bg-white hover-card">
-      <td>${formatDate(r.datum)}</td>
-      <td>${r.rechnr||'-'}</td>
-      <td class="font-bold">${r.lieferant}</td>
-      <td class="text-right font-bold">${formatEur(r.betrag)}</td>
-      <td class="text-xs text-gray-500">${r.kategorie}</td>
-      <td class="text-xs text-gray-500 italic">${(r.notiz||'').substring(0,40)}</td>
-      <td><span class="badge badge-${(r.status||'').toLowerCase().replace('ü','u')}">${r.status}</span></td>
-      <td class="text-xs">${r.erfasstVon||'-'}</td>
-      <td>${getFotoBtn(r.fotolink)}</td>
-      <td>
-        <button class="btn btn-sm btn-outline" title="Bearbeiten" onclick="editRechnung('${r.id}')">✏️</button>
-        <button class="btn btn-sm btn-danger" title="Löschen" onclick="deleteRechnung('${r.rowIndex}')">🗑️</button>
-      </td>
-    </tr>
-  `).join('') || '<tr><td colspan="10" class="text-center p-4">Keine Treffer zur Suche.</td></tr>';
+document.getElementById('rech-tbody').innerHTML = filtered.map(r => `
+<tr class="bg-white hover-card">
+<td>${formatDate(r.datum)}</td>
+<td>${r.rechnr||'-'}</td>
+<td class="font-bold">${r.lieferant}</td>
+<td class="text-right font-bold">${formatEur(r.betrag)}</td>
+<td class="text-xs text-gray-500">${r.kategorie}</td>
+<td class="text-xs text-gray-500 italic">${(r.notiz||'').substring(0,40)}</td>
+<td><span class="badge badge-${(r.status||'').toLowerCase().replace('ü','u')}">${r.status}</span></td>
+<td class="text-xs">${r.erfasstVon||'-'}</td>
+<td>${getFotoBtn(r.fotolink)}</td>
+<td>
+<button class="btn btn-sm btn-outline" title="Bearbeiten" onclick="editRechnung('${r.id}')">✏️</button>
+<button class="btn btn-sm btn-danger" title="Löschen" onclick="deleteRechnung('${r.rowIndex}')">🗑️</button>
+</td>
+</tr>
+`).join('') || '<tr><td colspan="10" class="text-center p-4">Keine Treffer zur Suche.</td></tr>';
 }
 
 function getFotoBtn(link) {
-  if(!link || link.trim()==='') return '<span style="color:#ccc;font-size:16px;">🖼️</span>';
-  return `<button class="btn btn-sm btn-outline" onclick="window.open('${link.split(',')[0].trim()}','_blank')" style="padding:2px 6px;">🖼️</button>`;
+if(!link || link.trim()==='') return '<span style="color:#ccc;font-size:16px;">🖼️</span>';
+return `<button class="btn btn-sm btn-outline" onclick="window.open('${link.split(',')[0].trim()}','_blank')" style="padding:2px 6px;">🖼️</button>`;
 }
 
 async function deleteRechnung(rowIndex) {
-  if(!confirm("Rechnung wirklich löschen?")) return;
-  showLoader('Lösche...');
-  try {
-    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A${rowIndex}:K${rowIndex}:clear`, { method: 'POST', headers: { 'Authorization': `Bearer ${accessToken}` } });
-    showToast('Gelöscht!');
-    await loadFromSheets();
-  } catch(e) { showToast('Fehler: '+e.message, 'error'); }
-  hideLoader();
+if(!confirm("Rechnung wirklich löschen?")) return;
+showLoader('Lösche...');
+try {
+await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A${rowIndex}:K${rowIndex}:clear`, { method: 'POST', headers: { 'Authorization': `Bearer ${accessToken}` } });
+showToast('Gelöscht!');
+await loadFromSheets();
+} catch(e) { showToast('Fehler: '+e.message, 'error'); }
+hideLoader();
 }
 
 // ==========================================
 // ERFASSEN & KI & FILE HANDLING
 // ==========================================
 function validateForm() {
-  const req = ['f-firma', 'f-datum', 'f-betrag', 'f-rechnr', 'f-kategorie'];
-  let valid = true;
-  req.forEach(id => {
-    const el = document.getElementById(id);
-    if (!el.value.trim()) { el.style.borderColor = 'var(--danger)'; valid = false; }
-    else { el.style.borderColor = ''; }
-  });
-  if (!valid) showToast('Bitte alle rot markierten Pflichtfelder ausfüllen', 'error');
-  return valid;
+const req =['f-firma', 'f-datum', 'f-betrag', 'f-rechnr', 'f-kategorie'];
+let valid = true;
+req.forEach(id => {
+const el = document.getElementById(id);
+if (!el.value.trim()) { el.style.borderColor = 'var(--danger)'; valid = false; }
+else { el.style.borderColor = ''; }
+});
+if (!valid) showToast('Bitte alle rot markierten Pflichtfelder ausfüllen', 'error');
+return valid;
 }
 
 function resetForm() {
-  editingRechnungId = null;
-  document.querySelectorAll('.form-grid input, .form-grid textarea, .form-grid select').forEach(i => { i.value=''; i.style.borderColor=''; });
-  document.getElementById('preview-container').innerHTML = '';
-  document.getElementById('ai-btn').style.display = 'none';
-  const btn = document.getElementById('btn-save');
-  btn.innerHTML = '💾 In Cloud speichern'; btn.classList.remove('btn-warning');
-  currentFilesBase64 = []; preUploadedLinks = [];
+editingRechnungId = null;
+document.querySelectorAll('.form-grid input, .form-grid textarea, .form-grid select').forEach(i => { i.value=''; i.style.borderColor=''; });
+document.getElementById('preview-container').innerHTML = '';
+document.getElementById('ai-btn').style.display = 'none';
+const btn = document.getElementById('btn-save');
+btn.innerHTML = '💾 In Cloud speichern'; btn.classList.remove('btn-warning');
+currentFilesBase64 = []; preUploadedLinks =[];
 }
 
 function handleFiles(input) {
-  const files = input.files;
-  if(!files.length) return;
-  currentFilesBase64 = [];
-  const container = document.getElementById('preview-container'); container.innerHTML = '';
-  document.getElementById('ai-btn').style.display = 'block';
+const files = input.files;
+if(!files.length) return;
+currentFilesBase64 =[];
+const container = document.getElementById('preview-container'); container.innerHTML = '';
+document.getElementById('ai-btn').style.display = 'block';
 
-  Array.from(files).forEach(file => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const b64 = e.target.result;
-      if(file.type === 'application/pdf') {
-        currentFilesBase64.push({ type: 'application/pdf', data: b64.split(',')[1], name: file.name });
-        container.innerHTML += `<div class="preview-item flex-center text-xs" style="display:flex;align-items:center;justify-content:center;background:#ffebee;color:#c62828;">PDF</div>`;
-      } else {
-        const img = new Image();
-        img.onload = () => {
-          const cvs = document.createElement('canvas');
-          let w = img.width, h = img.height; const maxW = 1200;
-          if(w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
-          cvs.width = w; cvs.height = h;
-          cvs.getContext('2d').drawImage(img, 0, 0, w, h);
-          const comp = cvs.toDataURL('image/jpeg', 0.8);
-          currentFilesBase64.push({ type: 'image/jpeg', data: comp.split(',')[1], name: file.name });
-          container.innerHTML += `<img src="${comp}" class="preview-item">`;
-        };
-        img.src = b64;
-      }
-    };
-    reader.readAsDataURL(file);
-  });
+Array.from(files).forEach(file => {
+const reader = new FileReader();
+reader.onload = (e) => {
+const b64 = e.target.result;
+if(file.type === 'application/pdf') {
+currentFilesBase64.push({ type: 'application/pdf', data: b64.split(',')[1], name: file.name });
+container.innerHTML += `<embed src="${b64}" type="application/pdf" class="preview-item">`;
+} else {
+const img = new Image();
+img.onload = () => {
+const cvs = document.createElement('canvas');
+let w = img.width, h = img.height; const maxW = 1200;
+if(w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+cvs.width = w; cvs.height = h;
+cvs.getContext('2d').drawImage(img, 0, 0, w, h);
+const comp = cvs.toDataURL('image/jpeg', 0.8);
+currentFilesBase64.push({ type: 'image/jpeg', data: comp.split(',')[1], name: file.name });
+container.innerHTML += `<img src="${comp}" class="preview-item">`;
+};
+img.src = b64;
+}
+};
+reader.readAsDataURL(file);
+});
 }
 
 async function uploadToDrive(base64obj, idPrefix) {
-  const metadata = { name: `${idPrefix}_${base64obj.name}`, parents: [settings.folderId] };
-  const boundary = '-------314159265358979323846';
-  const body = "\r\n--" + boundary + "\r\n" +
-    'Content-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) +
-    "\r\n--" + boundary + "\r\n" +
-    'Content-Type: ' + base64obj.type + '\r\nContent-Transfer-Encoding: base64\r\n\r\n' + base64obj.data +
-    "\r\n--" + boundary + "--";
+const metadata = { name: `${idPrefix}_${base64obj.name}`, parents: [settings.folderId] };
+const boundary = '-------314159265358979323846';
+const body = "\r\n--" + boundary + "\r\n" +
+'Content-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) +
+"\r\n--" + boundary + "\r\n" +
+'Content-Type: ' + base64obj.type + '\r\nContent-Transfer-Encoding: base64\r\n\r\n' + base64obj.data +
+"\r\n--" + boundary + "--";
 
-  const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
-    method: 'POST', headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': `multipart/related; boundary=${boundary}` }, body: body
-  });
-  return (await res.json()).webViewLink;
+const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
+method: 'POST', headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': `multipart/related; boundary=${boundary}` }, body: body
+});
+return (await res.json()).webViewLink;
 }
 
 async function extractAI() {
-  if(!settings.geminiKey) { showToast('Gemini API Key fehlt', 'error'); return; }
-  if(!currentFilesBase64.length) return;
-  showLoader('KI analysiert Beleg(e)...');
-  
-  try {
-    const prompt = `Analysiere diese Rechnung(en). Du MUSST eine valide JSON zurückgeben. 
-Felder: lieferant (String), datum (YYYY-MM-DD), betrag (Zahl, Punkt als Dezimal), rechnr (String), iban (String), notiz (String kurz).
-WICHTIG: Wähle für "kategorie" exakt einen Wert aus dieser Liste: [${KATEGORIEN.join(', ')}].`;
+if(!settings.geminiKey) { showToast('Gemini API Key fehlt', 'error'); return; }
+if(!currentFilesBase64.length) return;
+showLoader('KI analysiert Beleg(e)...');
 
-    const parts = [{ text: prompt }];
-    currentFilesBase64.forEach(f => parts.push({ inline_data: { mime_type: f.type, data: f.data } }));
+try {
+const prompt = `Analysiere diese Rechnung(en). Du MUSST eine valide JSON zurückgeben, die genau diese Keys enthält. Keine anderen Texte!
+Felder: lieferant (String), datum (YYYY-MM-DD), betrag (Zahl, mit Punkt), rechnr (String), notiz (String kurz), kategorie (Wähle exakt aus:[${KATEGORIEN.join(', ')}]).`;
 
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${settings.geminiKey}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [{ parts }], generationConfig: { responseMimeType: "application/json" } })
-    });
-    
-    const data = await res.json();
-    if(data.error) throw new Error(data.error.message);
-    const parsed = JSON.parse(data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim());
+const parts = [{ text: prompt }];
+currentFilesBase64.forEach(f => parts.push({ inline_data: { mime_type: f.type, data: f.data } }));
 
-    if(parsed.lieferant) document.getElementById('f-firma').value = parsed.lieferant;
-    if(parsed.datum) document.getElementById('f-datum').value = parsed.datum.substring(0,10);
-    if(parsed.betrag) document.getElementById('f-betrag').value = parsed.betrag;
-    if(parsed.rechnr) document.getElementById('f-rechnr').value = parsed.rechnr;
-    if(parsed.iban) document.getElementById('f-iban').value = parsed.iban;
-    if(parsed.notiz) document.getElementById('f-notiz').value = parsed.notiz;
-    if(parsed.kategorie && KATEGORIEN.includes(parsed.kategorie)) document.getElementById('f-kategorie').value = parsed.kategorie;
-    
-    showToast('✨ Felder ausgefüllt!'); validateForm();
+const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${settings.geminiKey}`, {
+method: 'POST', headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ contents: [{ parts }], generationConfig: { temperature: 0.1, responseMimeType: "application/json" } })
+});
 
-    if (tc_autoupload) {
-      showLoader('Lade Foto in Drive (Auto-Upload)...');
-      const idPrefix = 'R-' + Date.now().toString().slice(-6);
-      for(let f of currentFilesBase64) {
-        const link = await uploadToDrive(f, idPrefix);
-        if(link) preUploadedLinks.push(link);
-      }
-      currentFilesBase64 = [];
-      document.getElementById('preview-container').innerHTML = '<div style="font-size:12px;color:var(--success);font-weight:bold;">✅ Fotos in Drive gespeichert</div>';
-      document.getElementById('ai-btn').style.display = 'none';
-      showToast('⚡ Auto-Upload erfolgreich');
-    }
-  } catch (e) { showToast('KI Fehler: ' + e.message, 'error'); }
-  hideLoader();
+const data = await res.json();
+if(data.error) throw new Error(data.error.message);
+
+const parsed = extractJSON(data.candidates[0].content.parts[0].text);
+
+if(parsed.lieferant) document.getElementById('f-firma').value = parsed.lieferant;
+if(parsed.datum) document.getElementById('f-datum').value = parsed.datum.substring(0,10);
+if(parsed.betrag) document.getElementById('f-betrag').value = parsed.betrag;
+if(parsed.rechnr) document.getElementById('f-rechnr').value = parsed.rechnr;
+if(parsed.notiz) document.getElementById('f-notiz').value = parsed.notiz;
+if(parsed.kategorie && KATEGORIEN.includes(parsed.kategorie)) document.getElementById('f-kategorie').value = parsed.kategorie;
+
+showToast('✨ Felder ausgefüllt!'); validateForm();
+
+if (tc_autoupload) {
+showLoader('Lade Foto in Drive (Auto-Upload)...');
+const idPrefix = 'R-' + Date.now().toString().slice(-6);
+for(let f of currentFilesBase64) {
+const link = await uploadToDrive(f, idPrefix);
+if(link) preUploadedLinks.push(link);
+}
+currentFilesBase64 =[];
+document.getElementById('preview-container').innerHTML = '<div style="font-size:12px;color:var(--success);font-weight:bold;margin-bottom:10px;">✅ Fotos in Drive gespeichert</div>';
+document.getElementById('ai-btn').style.display = 'none';
+showToast('⚡ Auto-Upload erfolgreich');
+}
+} catch (e) { showToast('KI Fehler beim Auslesen. Bitte manuell ergänzen.', 'error'); console.error(e); }
+hideLoader();
 }
 
 async function saveRechnung() {
-  if(!accessToken) { showToast('Nicht angemeldet!', 'error'); return; }
-  if(!validateForm()) return;
-  
-  showLoader('Speichere Beleg...');
-  try {
-    let isEdit = editingRechnungId != null;
-    const id = isEdit ? editingRechnungId : 'R-' + Date.now().toString().slice(-6);
-    let links = [...preUploadedLinks];
-    
-    if(currentFilesBase64.length > 0 && settings.folderId) {
-      for(let f of currentFilesBase64) {
-        const link = await uploadToDrive(f, id);
-        if(link) links.push(link);
-      }
-    }
+if(!accessToken) { showToast('Nicht angemeldet!', 'error'); return; }
+if(!validateForm()) return;
 
-    const rowData = [
-      id, document.getElementById('f-datum').value, document.getElementById('f-firma').value.trim(), 
-      document.getElementById('f-betrag').value.replace('.', ','), document.getElementById('f-kategorie').value,
-      document.getElementById('f-rechnr').value, document.getElementById('f-iban').value,
-      'Erfasst', document.getElementById('f-notiz').value, settings.userName || 'Admin', links.join(', ')
-    ];
+showLoader('Speichere Beleg...');
+try {
+let isEdit = editingRechnungId != null;
+const id = isEdit ? editingRechnungId : 'R-' + Date.now().toString().slice(-6);
+let links = [...preUploadedLinks];
 
-    if (isEdit) {
-       const r = rechnungen.find(x => x.id === id);
-       if(links.length === 0) rowData[10] = r.fotolink || ''; 
-       rowData[7] = r.status;
-       await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A${r.rowIndex}:K${r.rowIndex}?valueInputOption=USER_ENTERED`, {
-          method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ values: [rowData] })
-       });
-    } else {
-       await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A1:append?valueInputOption=USER_ENTERED`, {
-         method: 'POST', headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ values: [rowData] })
-       });
-    }
+if(currentFilesBase64.length > 0 && settings.folderId) {
+for(let f of currentFilesBase64) {
+const link = await uploadToDrive(f, id);
+if(link) links.push(link);
+}
+}
 
-    showToast('✅ Gespeichert!'); resetForm(); await loadFromSheets(); showTab('rechnungen');
-  } catch (e) { showToast('Fehler: ' + e.message, 'error'); }
-  hideLoader();
+const rowData =[
+id, document.getElementById('f-datum').value, document.getElementById('f-firma').value.trim(),
+document.getElementById('f-betrag').value.replace('.', ','), document.getElementById('f-kategorie').value,
+document.getElementById('f-rechnr').value, '', // Index 6 IBAN is empty string per requirements
+'Erfasst', document.getElementById('f-notiz').value, settings.userName || 'Admin', links.join(', ')
+];
+
+if (isEdit) {
+const r = rechnungen.find(x => x.id === id);
+if(links.length === 0) rowData[10] = r.fotolink || '';
+rowData[7] = r.status;
+await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A${r.rowIndex}:K${r.rowIndex}?valueInputOption=USER_ENTERED`, {
+method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ values: [rowData] })
+});
+} else {
+await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A1:append?valueInputOption=USER_ENTERED`, {
+method: 'POST', headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ values: [rowData] })
+});
+}
+
+showToast('✅ Gespeichert!'); resetForm(); await loadFromSheets(); showTab('rechnungen');
+} catch (e) { showToast('Fehler: ' + e.message, 'error'); }
+hideLoader();
 }
 
 function editRechnung(id) {
-  const r = rechnungen.find(x => x.id === id);
-  if(!r) return;
-  editingRechnungId = id;
-  document.getElementById('f-firma').value = r.lieferant || '';
-  document.getElementById('f-datum').value = r.datum || '';
-  document.getElementById('f-betrag').value = r.betrag || '';
-  document.getElementById('f-rechnr').value = r.rechnr || '';
-  document.getElementById('f-kategorie').value = r.kategorie || '';
-  document.getElementById('f-iban').value = r.iban || '';
-  document.getElementById('f-notiz').value = r.notiz || '';
-  
-  document.getElementById('ai-btn').style.display = 'none';
-  document.getElementById('preview-container').innerHTML = r.fotolink ? `<div style="font-size:12px;color:var(--navy);">Bestehendes Foto verknüpft.</div>` : '';
-  
-  const btn = document.getElementById('btn-save');
-  btn.innerHTML = '💾 Änderungen speichern'; btn.classList.add('btn-warning');
-  showTab('erfassen'); window.scrollTo(0,0);
+const r = rechnungen.find(x => x.id === id);
+if(!r) return;
+editingRechnungId = id;
+document.getElementById('f-firma').value = r.lieferant || '';
+document.getElementById('f-datum').value = r.datum || '';
+document.getElementById('f-betrag').value = r.betrag || '';
+document.getElementById('f-rechnr').value = r.rechnr || '';
+document.getElementById('f-kategorie').value = r.kategorie || '';
+document.getElementById('f-notiz').value = r.notiz || '';
+
+document.getElementById('ai-btn').style.display = 'none';
+document.getElementById('preview-container').innerHTML = r.fotolink ? `<div style="font-size:12px;color:var(--navy);font-weight:bold;margin-bottom:10px;">Bestehendes Foto in Cloud verknüpft.</div>` : '';
+
+const btn = document.getElementById('btn-save');
+btn.innerHTML = '💾 Änderungen speichern'; btn.classList.add('btn-warning');
+showTab('erfassen'); window.scrollTo(0,0);
 }
 
 // ==========================================
 // KASSAPRÜFUNG & BANKABGLEICH
 // ==========================================
 function switchKassaTab(idx) {
-  document.getElementById('ktab-0').classList.remove('active');
-  document.getElementById('ktab-1').classList.remove('active');
-  document.getElementById('ktab-'+idx).classList.add('active');
-  document.getElementById('ksub-0').style.display = idx===0 ? 'block' : 'none';
-  document.getElementById('ksub-1').style.display = idx===1 ? 'block' : 'none';
+document.getElementById('ktab-0').classList.remove('active');
+document.getElementById('ktab-1').classList.remove('active');
+document.getElementById('ktab-'+idx).classList.add('active');
+document.getElementById('ksub-0').style.display = idx===0 ? 'block' : 'none';
+document.getElementById('ksub-1').style.display = idx===1 ? 'block' : 'none';
 }
 
 function handleBankCSV(input) {
-  const file = input.files[0]; if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e => processBankCSV(e.target.result);
-  reader.readAsText(file, 'windows-1252');
+const file = input.files[0]; if(!file) return;
+const reader = new FileReader();
+reader.onload = e => processBankCSV(e.target.result);
+reader.readAsText(file, 'windows-1252');
 }
 
 // DATENSCHUTZ FILTER
@@ -963,209 +1003,222 @@ const anonymisiereIBAN = t => t.replace(/[A-Z]{2}\d{2}[\d\s]{10,30}/g, m => { co
 const entferneBIC = t => t.replace(/BIC\s+Empfänger:\s*[A-Z0-9]+/gi, '').trim();
 const extrahiereEmpfaenger = t => { const m = t.match(/Empfänger:\s*([^I]+?)(?=IBAN|BIC|Zahlungsreferenz|$)/i); return m ? m[1].trim().substring(0,50) : ''; };
 
-function processBankCSV(text) {
-  const lines = text.split('\n').filter(l => l.trim());
-  let newAusgaben = [];
-  let existingFingerprints = new Set(bankbuchungen.map(b => b.fingerprint));
-  let skipped = 0; einzahlungenCount = 0;
+async function processBankCSV(text) {
+showLoader('Verarbeite CSV...');
+const lines = text.split('\n').filter(l => l.trim());
+let newAusgaben =[];
+let existingFingerprints = new Set(bankbuchungen.map(b => b.fingerprint));
+let skipped = 0; einzahlungenCount = 0;
 
-  for (const line of lines) {
-    const parts = line.split(';').map(p => p.replace(/"/g, '').trim());
-    if (parts.length < 5) continue;
-    let betrag = parseFloat(parts[3].replace(/\./g, '').replace(',', '.'));
-    if(isNaN(betrag)) continue;
+for (const line of lines) {
+const parts = line.split(';').map(p => p.replace(/"/g, '').trim());
+if (parts.length < 5) continue;
+let betrag = parseFloat(parts[3].replace(/\./g, '').replace(',', '.'));
+if(isNaN(betrag)) continue;
 
-    // ✅ DATENSCHUTZ: Keine Einzahlungen
-    if (betrag >= 0) { einzahlungenCount++; continue; }
+// ✅ DATENSCHUTZ: Keine Einzahlungen
+if (betrag >= 0) { einzahlungenCount++; continue; }
 
-    let rawText = parts[1];
-    let txtClean = entferneBIC(anonymisiereIBAN(rawText)).substring(0,60);
-    const empf = extrahiereEmpfaenger(rawText);
-    
-    const [d, m, y] = parts[0].split('.'); const datumIso = `${y}-${m}-${d}`;
-    const fingerprint = `${datumIso}|${Math.abs(betrag)}|${txtClean.substring(0,20)}`;
-    
-    if (existingFingerprints.has(fingerprint)) { skipped++; continue; }
+let rawText = parts[1];
+let txtClean = entferneBIC(anonymisiereIBAN(rawText)).substring(0,60);
+const empf = extrahiereEmpfaenger(rawText);
 
-    newAusgaben.push({ fingerprint, datum: datumIso, betrag: betrag, buchungstext: txtClean, empfaenger: empf, abgeglichen: '', rechnungID: '' });
-  }
+const [d, m, y] = parts[0].split('.'); const datumIso = `${y}-${m}-${d}`;
+const fingerprint = `${datumIso}|${Math.abs(betrag)}|${txtClean.substring(0,20)}`;
 
-  showToast(`${newAusgaben.length} neu, ${skipped} Duplikate, ${einzahlungenCount} Einzahlungen ignoriert.`);
-  if(newAusgaben.length > 0) appendBankbuchungen(newAusgaben); else updateKassapruefungUI();
+if (existingFingerprints.has(fingerprint)) { skipped++; continue; }
+
+newAusgaben.push({ fingerprint, datum: datumIso, betrag: betrag, buchungstext: txtClean, empfaenger: empf, abgeglichen: '', rechnungID: '', fotolink: '' });
+}
+
+if(newAusgaben.length > 0) {
+await appendBankbuchungen(newAusgaben);
+showToast(`${newAusgaben.length} neu, ${skipped} Dupl. Starte KI-Abgleich...`);
+await startGeminiAbgleich(true);
+} else {
+showToast(`Keine neuen Bankbuchungen. ${skipped} Duplikate.`, 'warning');
+updateKassapruefungUI();
+hideLoader();
+}
 }
 
 async function appendBankbuchungen(newAusgaben) {
-  showLoader('Speichere Bankbuchungen...');
-  try {
-    const values = newAusgaben.map(b => [b.fingerprint, b.datum, b.betrag.toString().replace('.', ','), b.buchungstext, b.empfaenger, b.abgeglichen, b.rechnungID]);
-    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Bankbuchungen!A1:append?valueInputOption=USER_ENTERED`, {
-      method: 'POST', headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ values })
-    });
-    await loadFromSheets();
-  } catch(e) { showToast('Fehler: ' + e.message, 'error'); }
-  hideLoader();
+try {
+const values = newAusgaben.map(b =>[b.fingerprint, b.datum, b.betrag.toString().replace('.', ','), b.buchungstext, b.empfaenger, b.abgeglichen, b.rechnungID, b.fotolink]);
+await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Bankbuchungen!A1:append?valueInputOption=USER_ENTERED`, {
+method: 'POST', headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ values })
+});
+await loadFromSheets();
+} catch(e) { showToast('Fehler: ' + e.message, 'error'); }
 }
 
 function updateKassapruefungUI() {
-  const von = document.getElementById('kassa-von').value;
-  const bis = document.getElementById('kassa-bis').value;
-  
-  const ausgaben = bankbuchungen.filter(b => b.datum >= von && b.datum <= bis);
-  const rechnungenZeit = rechnungen.filter(r => r.datum >= von && r.datum <= bis);
-  const summe = ausgaben.reduce((s, b) => s + Math.abs(b.betrag), 0);
-  
-  document.getElementById('kassa-checksum').innerHTML = `
-    <div style="background:#fff; border-left:4px solid var(--navy); padding:15px; margin-bottom:20px; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-      <div style="font-weight:700; color:var(--navy); margin-bottom:10px;">PRÜFSUMME AUSGABEN</div>
-      <div style="display:grid; grid-template-columns: 140px 1fr; gap:5px; font-size:13px;">
-        <div class="text-gray-500">Zeitraum:</div><div class="font-bold">${formatDate(von)} – ${formatDate(bis)}</div>
-        <div class="text-gray-500">Anzahl Buchungen:</div><div class="font-bold">${ausgaben.length}</div>
-        <div class="text-gray-500">Summe Ausgaben:</div><div style="font-weight:800; font-size:15px; color:var(--danger);">${formatEur(summe)}</div>
-      </div>
-      <div style="margin-top:10px; font-size:11px; color:var(--gray-500);">→ Bitte mit Kontoauszug der Raiffeisen abgleichen</div>
-    </div>
-  `;
+const von = document.getElementById('kassa-von').value;
+const bis = document.getElementById('kassa-bis').value;
 
-  const matchedAusgaben = ausgaben.filter(b => b.rechnungID);
-  const unmatchedAusgaben = ausgaben.filter(b => !b.rechnungID);
-  const matchedIds = new Set(matchedAusgaben.map(b => b.rechnungID));
-  const matchedRech = rechnungenZeit.filter(r => matchedIds.has(r.id));
-  const unmatchedRech = rechnungenZeit.filter(r => !matchedIds.has(r.id));
+const ausgaben = bankbuchungen.filter(b => b.datum >= von && b.datum <= bis);
+const rechnungenZeit = rechnungen.filter(r => r.datum >= von && r.datum <= bis);
+const summe = ausgaben.reduce((s, b) => s + Math.abs(b.betrag), 0);
 
-  document.getElementById('tile-gedeck-count').innerText = matchedRech.length + ' Rechnungen';
-  document.getElementById('tile-gedeck-sum').innerText = formatEur(matchedRech.reduce((s,r)=>s+r.betrag, 0));
-  document.getElementById('tile-ohnebuchung-count').innerText = unmatchedRech.length + ' Rechnungen';
-  document.getElementById('tile-ohnebuchung-sum').innerText = formatEur(unmatchedRech.reduce((s,r)=>s+r.betrag, 0));
-  document.getElementById('tile-ohnerech-count').innerText = unmatchedAusgaben.length + ' Ausgaben';
-  document.getElementById('tile-ohnerech-sum').innerText = formatEur(unmatchedAusgaben.reduce((s,b)=>s+Math.abs(b.betrag), 0));
-  document.getElementById('tile-einzahl-count').innerText = einzahlungenCount;
+document.getElementById('kassa-checksum').innerHTML = `
+<div style="background:#fff; border-left:4px solid var(--navy); padding:15px; margin-bottom:20px; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+<div style="font-weight:700; color:var(--navy); margin-bottom:10px;">PRÜFSUMME AUSGABEN</div>
+<div style="display:grid; grid-template-columns: 140px 1fr; gap:5px; font-size:13px;">
+<div class="text-gray-500">Zeitraum:</div><div class="font-bold">${formatDate(von)} – ${formatDate(bis)}</div>
+<div class="text-gray-500">Anzahl Buchungen:</div><div class="font-bold">${ausgaben.length}</div>
+<div class="text-gray-500">Summe Ausgaben:</div><div style="font-weight:800; font-size:15px; color:var(--danger);">${formatEur(summe)}</div>
+</div>
+<div style="margin-top:10px; font-size:11px; color:var(--gray-500);">→ Bitte mit Kontoauszug der Raiffeisen abgleichen</div>
+</div>
+`;
 
-  // Render Subtab 0
-  document.getElementById('abg-gedeckt-tbody').innerHTML = matchedAusgaben.map(b => {
-    const r = rechnungen.find(x => x.id === b.rechnungID); if(!r) return '';
-    return `<tr class="bg-white border-b">
-      <td>${formatDate(r.datum)}</td><td>${r.rechnr||'-'}</td><td>${r.lieferant}</td>
-      <td class="font-bold text-right">${formatEur(r.betrag)}</td><td class="text-xs text-gray-500">${b.buchungstext}</td>
-      <td>${formatDate(b.datum)}</td><td>${getKonfBadge(b.konfidenz)}</td><td>${getFotoBtn(r.fotolink)}</td>
-    </tr>`;
-  }).join('') || '<tr><td colspan="8" class="text-center p-4">Keine gedeckten Rechnungen.</td></tr>';
+const matchedAusgaben = ausgaben.filter(b => b.rechnungID);
+const unmatchedAusgaben = ausgaben.filter(b => !b.rechnungID);
+const matchedIds = new Set(matchedAusgaben.map(b => b.rechnungID));
+const matchedRech = rechnungenZeit.filter(r => matchedIds.has(r.id));
+const unmatchedRech = rechnungenZeit.filter(r => !matchedIds.has(r.id));
 
-  document.getElementById('abg-ohnebuch-tbody').innerHTML = unmatchedRech.map(r => `
-    <tr class="bg-white border-b">
-      <td>${formatDate(r.datum)}</td><td>${r.rechnr||'-'}</td><td>${r.lieferant}</td>
-      <td class="font-bold text-right">${formatEur(r.betrag)}</td><td><span class="badge badge-${(r.status||'').toLowerCase().replace('ü','u')}">${r.status}</span></td>
-      <td class="text-xs text-gray-500 italic">${(r.notiz||'').substring(0,40)}</td><td>${getFotoBtn(r.fotolink)}</td>
-    </tr>
-  `).join('') || '<tr><td colspan="7" class="text-center p-4 text-gray-500">Alles super! Keine offene Rechnung ohne Buchung.</td></tr>';
+document.getElementById('tile-gedeck-count').innerText = matchedRech.length + ' Rechnungen';
+document.getElementById('tile-gedeck-sum').innerText = formatEur(matchedRech.reduce((s,r)=>s+r.betrag, 0));
+document.getElementById('tile-ohnebuchung-count').innerText = unmatchedRech.length + ' Rechnungen';
+document.getElementById('tile-ohnebuchung-sum').innerText = formatEur(unmatchedRech.reduce((s,r)=>s+r.betrag, 0));
+document.getElementById('tile-ohnerech-count').innerText = unmatchedAusgaben.length + ' Ausgaben';
+document.getElementById('tile-ohnerech-sum').innerText = formatEur(unmatchedAusgaben.reduce((s,b)=>s+Math.abs(b.betrag), 0));
+document.getElementById('tile-einzahl-count').innerText = einzahlungenCount;
 
-  document.getElementById('abg-ohnerech-tbody').innerHTML = unmatchedAusgaben.map(b => `
-    <tr class="bg-white border-b">
-      <td>${formatDate(b.datum)}</td><td class="text-xs text-gray-500">${b.buchungstext}</td>
-      <td>${b.empfaenger}</td><td class="font-bold text-right">${formatEur(Math.abs(b.betrag))}</td>
-      <td><button class="btn btn-sm btn-outline" onclick="openZuordnenModal('${b.fingerprint}')">Zuordnen</button></td>
-    </tr>
-  `).join('') || '<tr><td colspan="5" class="text-center p-4 text-gray-500">Alle Bankausgaben haben eine Rechnung!</td></tr>';
+// Render Subtab 0
+document.getElementById('abg-gedeckt-tbody').innerHTML = matchedAusgaben.map(b => {
+const r = rechnungen.find(x => x.id === b.rechnungID); if(!r) return '';
+return `<tr class="bg-white border-b">
+<td>${formatDate(r.datum)}</td><td>${r.rechnr||'-'}</td><td>${r.lieferant}</td>
+<td class="font-bold text-right">${formatEur(r.betrag)}</td><td class="text-xs text-gray-500">${b.buchungstext}</td>
+<td>${formatDate(b.datum)}</td><td>${getKonfBadge(b.konfidenz)}</td><td>${getFotoBtn(b.fotolink || r.fotolink)}</td>
+</tr>`;
+}).join('') || '<tr><td colspan="8" class="text-center p-4">Keine gedeckten Rechnungen.</td></tr>';
 
-  // Render Subtab 1
-  const txt = document.getElementById('kz-text')?.value.toLowerCase() || '';
-  const flt = document.getElementById('kz-filter')?.value || 'Alle';
-  const filteredKZ = ausgaben.filter(b => {
-    let mt = b.buchungstext.toLowerCase().includes(txt) || b.empfaenger.toLowerCase().includes(txt);
-    let mf = true; if(flt==='Mit') mf = !!b.rechnungID; if(flt==='Ohne') mf = !b.rechnungID;
-    return mt && mf;
-  });
-  document.getElementById('kz-count').innerText = `${filteredKZ.length} von ${ausgaben.length} Zahlungen`;
-  document.getElementById('kz-tbody').innerHTML = filteredKZ.map(b => {
-    const r = b.rechnungID ? rechnungen.find(x => x.id === b.rechnungID) : null;
-    return `<tr class="bg-white border-b">
-      <td>${formatDate(b.datum)}</td><td class="text-xs text-gray-500">${b.buchungstext}</td>
-      <td>${b.empfaenger}</td><td class="font-bold text-right">${formatEur(Math.abs(b.betrag))}</td>
-      <td>${r?r.lieferant:'-'}</td><td>${r?(r.rechnr||'-'):'-'}</td><td>${getFotoBtn(r?r.fotolink:null)}</td>
-    </tr>`;
-  }).join('') || '<tr><td colspan="7" class="text-center p-4">Keine Zahlungen gefunden.</td></tr>';
+document.getElementById('abg-ohnebuch-tbody').innerHTML = unmatchedRech.map(r => `
+<tr class="bg-white border-b">
+<td>${formatDate(r.datum)}</td><td>${r.rechnr||'-'}</td><td>${r.lieferant}</td>
+<td class="font-bold text-right">${formatEur(r.betrag)}</td><td><span class="badge badge-${(r.status||'').toLowerCase().replace('ü','u')}">${r.status}</span></td>
+<td class="text-xs text-gray-500 italic">${(r.notiz||'').substring(0,40)}</td><td>${getFotoBtn(r.fotolink)}</td>
+</tr>
+`).join('') || '<tr><td colspan="7" class="text-center p-4 text-gray-500">Alles super! Keine offene Rechnung ohne Buchung.</td></tr>';
+
+document.getElementById('abg-ohnerech-tbody').innerHTML = unmatchedAusgaben.map(b => `
+<tr class="bg-white border-b">
+<td>${formatDate(b.datum)}</td><td class="text-xs text-gray-500">${b.buchungstext}</td>
+<td>${b.empfaenger}</td><td class="font-bold text-right">${formatEur(Math.abs(b.betrag))}</td>
+<td><button class="btn btn-sm btn-outline" onclick="openZuordnenModal('${b.fingerprint}')">Zuordnen</button></td>
+</tr>
+`).join('') || '<tr><td colspan="5" class="text-center p-4 text-gray-500">Alle Bankausgaben haben eine Rechnung!</td></tr>';
+
+// Render Subtab 1
+const txt = document.getElementById('kz-text')?.value.toLowerCase() || '';
+const flt = document.getElementById('kz-filter')?.value || 'Alle';
+const filteredKZ = ausgaben.filter(b => {
+let mt = b.buchungstext.toLowerCase().includes(txt) || b.empfaenger.toLowerCase().includes(txt);
+let mf = true; if(flt==='Mit') mf = !!b.rechnungID; if(flt==='Ohne') mf = !b.rechnungID;
+return mt && mf;
+});
+document.getElementById('kz-count').innerText = `${filteredKZ.length} von ${ausgaben.length} Zahlungen`;
+document.getElementById('kz-tbody').innerHTML = filteredKZ.map(b => {
+const r = b.rechnungID ? rechnungen.find(x => x.id === b.rechnungID) : null;
+return `<tr class="bg-white border-b">
+<td>${formatDate(b.datum)}</td><td class="text-xs text-gray-500">${b.buchungstext}</td>
+<td>${b.empfaenger}</td><td class="font-bold text-right">${formatEur(Math.abs(b.betrag))}</td>
+<td>${r?r.lieferant:'-'}</td><td>${r?(r.rechnr||'-'):'-'}</td><td>${getFotoBtn(b.fotolink || (r?r.fotolink:null))}</td>
+</tr>`;
+}).join('') || '<tr><td colspan="7" class="text-center p-4">Keine Zahlungen gefunden.</td></tr>';
 }
 
 function getKonfBadge(k) {
-  if(k==='hoch') return '<span class="badge" style="background:#d1fae5;color:#065f46;">Hoch</span>';
-  if(k==='mittel') return '<span class="badge" style="background:#fef3c7;color:#b45309;">Mittel</span>';
-  if(k==='niedrig') return '<span class="badge" style="background:#ffedd5;color:#c2410c;">Niedrig</span>';
-  return '<span class="badge" style="background:#e5e7eb;color:#374151;">Manuell</span>';
+if(k==='hoch') return '<span class="badge" style="background:#d1fae5;color:#065f46;">Hoch</span>';
+if(k==='mittel') return '<span class="badge" style="background:#fef3c7;color:#b45309;">Mittel</span>';
+if(k==='niedrig') return '<span class="badge" style="background:#ffedd5;color:#c2410c;">Niedrig</span>';
+return '<span class="badge" style="background:#e5e7eb;color:#374151;">Manuell</span>';
 }
 
-async function startGeminiAbgleich() {
-  const von = document.getElementById('kassa-von').value; const bis = document.getElementById('kassa-bis').value;
-  const ausgaben = bankbuchungen.filter(b => b.datum >= von && b.datum <= bis && !b.rechnungID);
-  const offene = rechnungen.filter(r => r.datum >= von && r.datum <= bis); // Let Gemini see all in timeframe to catch already-paid false states
+async function startGeminiAbgleich(isAuto = false) {
+const von = document.getElementById('kassa-von').value; const bis = document.getElementById('kassa-bis').value;
+const ausgaben = bankbuchungen.filter(b => b.datum >= von && b.datum <= bis && !b.rechnungID);
+const offene = rechnungen.filter(r => r.status !== 'Bezahlt');
 
-  if(ausgaben.length === 0) { showToast('Keine offenen Ausgaben zum Abgleichen.'); return; }
-  
-  showLoader('Gemini analysiert Zuordnungen...');
-  try {
-    const prompt = `Du bist Buchhaltungsassistent für einen österreichischen Tennisverein. Ordne jede Bankausgabe einer Rechnung zu.
+if(ausgaben.length === 0) {
+if(!isAuto) showToast('Keine offenen Ausgaben zum Abgleichen.');
+hideLoader(); return;
+}
+
+showLoader('Gemini analysiert Zuordnungen...');
+try {
+const prompt = `Du bist Buchhaltungsassistent für einen österreichischen Tennisverein. Ordne jede Bankausgabe einer Rechnung zu.
 Regeln: Ähnliche Firmennamen matchen, Betragsabweichung bis 2% ok, Datum max 14 Tage Diff. "niedrig" Konfidenz wenn nur Betrag stimmt.
 Bankausgaben: ${JSON.stringify(ausgaben.map(a => ({fingerprint: a.fingerprint, datum: a.datum, betrag: Math.abs(a.betrag), text: a.buchungstext, empf: a.empfaenger})))}
 Rechnungen: ${JSON.stringify(offene.map(r => ({id: r.id, datum: r.datum, lieferant: r.lieferant, betrag: r.betrag, rechnr: r.rechnr})))}
-Antworte AUSSCHLIESSLICH mit JSON-Array: [{"bank_fingerprint":"...", "rechnung_id":"...", "konfidenz":"hoch|mittel|niedrig", "begruendung":"..."}]`;
+Antworte AUSSCHLIESSLICH mit JSON-Array:[{"bank_fingerprint":"...", "rechnung_id":"...", "konfidenz":"hoch|mittel|niedrig", "begruendung":"..."}]`;
 
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${settings.geminiKey}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.1, responseMimeType: "application/json" } })
-    });
-    
-    const data = await res.json();
-    if(data.error) throw new Error(data.error.message);
-    const matches = JSON.parse(data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim());
+const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${settings.geminiKey}`, {
+method: 'POST', headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ contents: [{ parts:[{ text: prompt }] }], generationConfig: { temperature: 0.1, responseMimeType: "application/json" } })
+});
 
-    let updates = 0;
-    for(let m of matches) {
-      if(m.rechnung_id && m.rechnung_id !== "null") {
-        const b = bankbuchungen.find(x => x.fingerprint === m.bank_fingerprint);
-        if(b) {
-          b.rechnungID = m.rechnung_id; b.abgeglichen = 'ja'; b.konfidenz = m.konfidenz;
-          await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Bankbuchungen!F${b.rowIndex}:G${b.rowIndex}?valueInputOption=USER_ENTERED`, {
-            method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ values: [['ja', m.rechnung_id]] })
-          });
-          updates++;
-        }
-      }
-    }
-    showToast(`Abgleich fertig. ${updates} Zuordnungen gefunden!`); await loadFromSheets();
-  } catch (e) { showToast('KI Fehler: ' + e.message, 'error'); }
-  hideLoader();
+const data = await res.json();
+if(data.error) throw new Error(data.error.message);
+const matches = extractJSON(data.candidates[0].content.parts[0].text);
+
+let updates = 0;
+for(let m of matches) {
+if(m.rechnung_id && m.rechnung_id !== "null") {
+const b = bankbuchungen.find(x => x.fingerprint === m.bank_fingerprint);
+const r = rechnungen.find(x => x.id === m.rechnung_id);
+if(b && r) {
+b.rechnungID = m.rechnung_id; b.abgeglichen = 'ja'; b.konfidenz = m.konfidenz; b.fotolink = r.fotolink || '';
+await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Bankbuchungen!F${b.rowIndex}:H${b.rowIndex}?valueInputOption=USER_ENTERED`, {
+method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ values: [['ja', r.id, b.fotolink]] })
+});
+updates++;
+}
+}
+}
+showToast(`Abgleich fertig. ${updates} Zuordnungen gefunden!`); await loadFromSheets();
+} catch (e) { showToast('KI Fehler: ' + e.message, 'error'); }
+hideLoader();
 }
 
 let currentAssignFingerprint = null;
 function openZuordnenModal(fp) {
-  currentAssignFingerprint = fp;
-  const von = document.getElementById('kassa-von').value; const bis = document.getElementById('kassa-bis').value;
-  const offene = rechnungen.filter(r => r.datum >= von && r.datum <= bis);
-  document.getElementById('modal-select').innerHTML = '<option value="">-- Rechnung wählen --</option>' + 
-    offene.map(r => `<option value="${r.id}">${formatDate(r.datum)} | ${formatEur(r.betrag)} | ${r.lieferant}</option>`).join('');
-  document.getElementById('modal-overlay').style.display = 'flex';
+currentAssignFingerprint = fp;
+const von = document.getElementById('kassa-von').value; const bis = document.getElementById('kassa-bis').value;
+const offene = rechnungen.filter(r => r.datum >= von && r.datum <= bis);
+document.getElementById('modal-select').innerHTML = '<option value="">-- Rechnung wählen --</option>' +
+offene.map(r => `<option value="${r.id}">${formatDate(r.datum)} | ${formatEur(r.betrag)} | ${r.lieferant}</option>`).join('');
+document.getElementById('modal-overlay').style.display = 'flex';
 }
 
 async function confirmZuordnung() {
-  const rid = document.getElementById('modal-select').value; if(!rid) return;
-  const b = bankbuchungen.find(x => x.fingerprint === currentAssignFingerprint); if(!b) return;
-  showLoader('Speichere Zuordnung...');
-  try {
-    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Bankbuchungen!F${b.rowIndex}:G${b.rowIndex}?valueInputOption=USER_ENTERED`, {
-      method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ values: [['ja', rid]] })
-    });
-    document.getElementById('modal-overlay').style.display = 'none'; showToast('Manuell zugeordnet!'); await loadFromSheets();
-  } catch(e) { showToast('Fehler: '+e.message, 'error'); }
-  hideLoader();
+const rid = document.getElementById('modal-select').value; if(!rid) return;
+const b = bankbuchungen.find(x => x.fingerprint === currentAssignFingerprint); if(!b) return;
+const r = rechnungen.find(x => x.id === rid); if(!r) return;
+
+showLoader('Speichere Zuordnung...');
+try {
+await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Bankbuchungen!F${b.rowIndex}:H${b.rowIndex}?valueInputOption=USER_ENTERED`, {
+method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ values: [['ja', rid, r.fotolink || '']] })
+});
+document.getElementById('modal-overlay').style.display = 'none'; showToast('Manuell zugeordnet!'); await loadFromSheets();
+} catch(e) { showToast('Fehler: '+e.message, 'error'); }
+hideLoader();
 }
 
 async function deleteBankbuchungen() {
-  if(!confirm("Möchtest du wirklich alle Bankbuchungen (ab Zeile 2) löschen? Dies kann nicht rückgängig gemacht werden!")) return;
-  showLoader('Lösche Bankbuchungen...');
-  try {
-    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Bankbuchungen!A2:G:clear`, { method: 'POST', headers: { 'Authorization': `Bearer ${accessToken}` } });
-    showToast('Bankbuchungen gelöscht.'); await loadFromSheets();
-  } catch(e) { showToast('Fehler: ' + e.message, 'error'); }
-  hideLoader();
+if(!confirm("Möchtest du wirklich alle Bankbuchungen (ab Zeile 2) löschen? Dies kann nicht rückgängig gemacht werden!")) return;
+showLoader('Lösche Bankbuchungen...');
+try {
+await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Bankbuchungen!A2:H:clear`, { method: 'POST', headers: { 'Authorization': `Bearer ${accessToken}` } });
+showToast('Bankbuchungen gelöscht.'); await loadFromSheets();
+} catch(e) { showToast('Fehler: ' + e.message, 'error'); }
+hideLoader();
 }
 </script>
+
 </body>
 </html>
