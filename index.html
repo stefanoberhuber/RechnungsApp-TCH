@@ -1,9 +1,3 @@
-code
-Html
-play_circle
-download
-content_copy
-expand_less
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -327,7 +321,18 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
       <h4 style="color:var(--success); margin-bottom:10px; font-size:14px;">✅ Gedeckte Rechnungen</h4>
       <div class="table-wrap" style="margin-bottom:25px;">
         <table>
-          <thead><tr><th>Rech. Datum</th><th>Rechnr.</th><th>Lieferant</th><th class="text-right">Betrag</th><th>Buchungstext Bank</th><th>Bank Datum</th><th>KI Konfidenz</th><th>Foto</th></tr></thead>
+          <thead>
+            <tr>
+              <th id="th-k-rechdatum" onclick="setKassaSort('rechDatum')" class="cursor-pointer">Rech. Datum</th>
+              <th>Rechnr.</th>
+              <th id="th-k-lieferant" onclick="setKassaSort('lieferant')" class="cursor-pointer">Lieferant</th>
+              <th id="th-k-betrag" onclick="setKassaSort('betrag')" class="cursor-pointer text-right">Betrag</th>
+              <th>Buchungstext Bank</th>
+              <th id="th-k-bankdatum" onclick="setKassaSort('bankDatum')" class="cursor-pointer">Bank Datum</th>
+              <th>KI Konfidenz</th>
+              <th>Foto</th>
+            </tr>
+          </thead>
           <tbody id="abg-gedeckt-tbody"></tbody>
         </table>
       </div>
@@ -460,6 +465,8 @@ const KATEGORIEN = [
 
 let sortCol = 'datum';
 let sortDir = -1;
+let kassaSortCol = 'bankDatum';
+let kassaSortDir = -1;
 
 const formatEur = num => new Intl.NumberFormat('de-AT', { style: 'currency', currency: 'EUR' }).format(num || 0);
 const formatDate = iso => {
@@ -784,10 +791,43 @@ function setSort(col) {
   renderRechnungen();
 }
 
+function setKassaSort(col) {
+  if (kassaSortCol === col) {
+    kassaSortDir *= -1;
+  } else {
+    kassaSortCol = col;
+    kassaSortDir = -1;
+  }
+  updateKassapruefungUI();
+}
+
 function updateSortHeaders() {
   document.getElementById('th-datum').innerText = 'Datum' + (sortCol === 'datum' ? (sortDir === 1 ? ' ↑' : ' ↓') : '');
   document.getElementById('th-lieferant').innerText = 'Lieferant' + (sortCol === 'lieferant' ? (sortDir === 1 ? ' ↑' : ' ↓') : '');
   document.getElementById('th-betrag').innerText = 'Betrag' + (sortCol === 'betrag' ? (sortDir === 1 ? ' ↑' : ' ↓') : '');
+}
+
+function updateKassaSortHeaders() {
+    const baseTexts = {
+        'th-k-rechdatum': 'Rech. Datum',
+        'th-k-lieferant': 'Lieferant',
+        'th-k-betrag': 'Betrag',
+        'th-k-bankdatum': 'Bank Datum'
+    };
+    for (const id in baseTexts) {
+        const el = document.getElementById(id);
+        if (el) el.innerText = baseTexts[id];
+    }
+    const colMap = {
+        rechDatum: 'th-k-rechdatum',
+        lieferant: 'th-k-lieferant',
+        betrag: 'th-k-betrag',
+        bankDatum: 'th-k-bankdatum'
+    };
+    const activeThId = colMap[kassaSortCol];
+    if (document.getElementById(activeThId)) {
+        document.getElementById(activeThId).innerText += (kassaSortDir === 1 ? ' ↑' : ' ↓');
+    }
 }
 
 function renderRechnungen() {
@@ -1222,9 +1262,42 @@ function updateKassapruefungUI() {
   document.getElementById('tile-ohnerech-sum').innerText = formatEur(unmatchedAusgaben.reduce((s, b) => s + Math.abs(b.betrag), 0));
   document.getElementById('tile-einzahl-count').innerText = einzahlungenCount;
 
-  document.getElementById('abg-gedeckt-tbody').innerHTML = matchedAusgaben.map(b => {
+  updateKassaSortHeaders();
+
+  let gedecktData = matchedAusgaben.map(b => {
     const r = rechnungen.find(x => x.id === b.rechnungID);
-    if (!r) return '';
+    return { bankData: b, rechData: r || null };
+  }).filter(item => item.rechData);
+
+  gedeckData.sort((a, b) => {
+    let valA, valB;
+    switch (kassaSortCol) {
+      case 'rechDatum':
+        valA = new Date(a.rechData.datum || 0);
+        valB = new Date(b.rechData.datum || 0);
+        break;
+      case 'bankDatum':
+        valA = new Date(a.bankData.datum || 0);
+        valB = new Date(b.bankData.datum || 0);
+        break;
+      case 'lieferant':
+        valA = (a.rechData.lieferant || '').toLowerCase();
+        valB = (b.rechData.lieferant || '').toLowerCase();
+        break;
+      case 'betrag':
+        valA = a.rechData.betrag || 0;
+        valB = b.rechData.betrag || 0;
+        break;
+      default: return 0;
+    }
+    if (valA < valB) return -1 * kassaSortDir;
+    if (valA > valB) return 1 * kassaSortDir;
+    return 0;
+  });
+
+  document.getElementById('abg-gedeckt-tbody').innerHTML = gedecktData.map(item => {
+    const r = item.rechData;
+    const b = item.bankData;
     return `
       <tr class="bg-white border-b">
         <td>${formatDate(r.datum)}</td><td>${r.rechnr || '-'}</td><td>${r.lieferant}</td>
