@@ -1,9 +1,15 @@
+code
+Html
+play_circle
+download
+content_copy
+expand_less
 <!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>TC Rechnungen</title>
+<title>TC Hopfgarten Rechnungsverwaltung</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#153048">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -27,7 +33,7 @@ header { background: var(--navy); color: white; padding: 0 20px; display: flex; 
 .header-login-btn:hover { background:rgba(255,255,255,0.08); }
 nav { background: var(--navy); display: flex; gap: 2px; padding: 0 10px; overflow-x: auto; scrollbar-width: none; }
 nav::-webkit-scrollbar { display: none; }
-.tab { padding: 12px 16px; color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; transition: 0.2s; }
+.tab { padding: 12px 16px; color: var(--white); font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; transition: 0.2s; }
 .tab.active { color: var(--gold-light); border-bottom-color: var(--gold); }
 
 main { max-width: 1100px; margin: 0 auto; padding: 20px 16px; }
@@ -111,7 +117,7 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
 <body>
 <div id="global-loader"><div class="spinner"></div><span id="loader-text">Lade Daten...</span></div>
 <header>
-<div class="header-brand">🎾 TC Rechnungen</div>
+<div class="header-brand">🎾 TC Hopfgarten Rechnungsverwaltung</div>
 <div class="header-actions">
   <div id="auth-status" style="font-size:11px; opacity:0.8;">Nicht angemeldet</div>
   <button class="btn btn-sm btn-outline header-login-btn" id="auth-login-btn" onclick="loginGoogle()">🔐 Mit Google anmelden</button>
@@ -226,8 +232,6 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
         <option value="Alle">Alle Stati</option>
         <option value="Offen">Nur Offen</option>
         <option value="Erfasst">Erfasst</option>
-        <option value="Geprüft">Geprüft</option>
-        <option value="Freigegeben">Freigegeben</option>
         <option value="Bezahlt">Bezahlt</option>
       </select>
       <select id="filt-kat" onchange="renderRechnungen()">
@@ -725,8 +729,6 @@ function renderDashboard() {
       <td>
         <select onchange="changeStatus('${r.rowIndex}', this.value)" style="padding:4px;font-size:11px;border-radius:4px;">
           <option value="Erfasst" ${r.status === 'Erfasst' ? 'selected' : ''}>Erfasst</option>
-          <option value="Geprüft" ${r.status === 'Geprüft' ? 'selected' : ''}>Geprüft</option>
-          <option value="Freigegeben" ${r.status === 'Freigegeben' ? 'selected' : ''}>Freigegeben</option>
           <option value="Bezahlt" ${r.status === 'Bezahlt' ? 'selected' : ''}>Bezahlt</option>
         </select>
       </td>
@@ -918,22 +920,24 @@ function handleFiles(input) {
   });
 }
 
-async function uploadToDrive(base64obj, idPrefix) {
-  const metadata = { name: `${idPrefix}_${base64obj.name}`, parents: [settings.folderId] };
-  const boundary = '-------314159265358979323846';
-  const body = '\r\n--' + boundary + '\r\n' +
-    'Content-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) +
-    '\r\n--' + boundary + '\r\n' +
-    'Content-Type: ' + base64obj.type + '\r\nContent-Transfer-Encoding: base64\r\n\r\n' + base64obj.data +
-    '\r\n--' + boundary + '--';
+async function uploadToDrive(base64obj, idPrefix, index = 0, totalFiles = 1) {
+    const extension = base64obj.name.split('.').pop() || (base64obj.type.split('/')[1] || 'bin');
+    let filename = (totalFiles > 1) ? `${idPrefix}_${index + 1}` : idPrefix;
+    const metadata = { name: `${filename}.${extension}`, parents: [settings.folderId] };
+    const boundary = '-------314159265358979323846';
+    const body = '\r\n--' + boundary + '\r\n' +
+        'Content-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) +
+        '\r\n--' + boundary + '\r\n' +
+        'Content-Type: ' + base64obj.type + '\r\nContent-Transfer-Encoding: base64\r\n\r\n' + base64obj.data +
+        '\r\n--' + boundary + '--';
 
-  const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': `multipart/related; boundary=${boundary}` },
-    body: body
-  });
-  const data = await res.json();
-  return data.webViewLink || '';
+    const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': `multipart/related; boundary=${boundary}` },
+        body: body
+    });
+    const data = await res.json();
+    return data.webViewLink || '';
 }
 
 async function extractAI() {
@@ -995,16 +999,17 @@ Verwende exakt diese Keys und keine anderen:
     showToast('✨ Felder ausgefüllt!');
 
     if (tc_autoupload) {
-      showLoader('Lade Foto in Drive (Auto-Upload)...');
-      const idPrefix = pendingRechnungId || getCurrentRechnungFingerprint(editingRechnungId);
-      for (let f of currentFilesBase64) {
-        const link = await uploadToDrive(f, idPrefix);
-        if (link) preUploadedLinks.push(link);
-      }
-      currentFilesBase64 = [];
-      document.getElementById('preview-container').innerHTML = '<div style="font-size:12px;color:var(--success);font-weight:bold;margin-bottom:10px;">✅ Fotos in Drive gespeichert</div>';
-      document.getElementById('ai-btn').style.display = 'none';
-      showToast('⚡ Auto-Upload erfolgreich');
+        showLoader('Lade Foto in Drive (Auto-Upload)...');
+        const idPrefix = pendingRechnungId || getCurrentRechnungFingerprint(editingRechnungId);
+        for (let i = 0; i < currentFilesBase64.length; i++) {
+            const link = await uploadToDrive(currentFilesBase64[i], idPrefix, i, currentFilesBase64.length);
+            if (link) preUploadedLinks.push(link);
+        }
+        currentFilesBase64 = [];
+        document.getElementById('preview-container').innerHTML = '<div style="font-size:12px;color:var(--success);font-weight:bold;margin-bottom:10px;">✅ Fotos in Drive gespeichert</div>';
+        document.getElementById('ai-btn').style.display = 'none';
+        showToast('⚡ Auto-Upload erfolgreich');
+        await saveRechnung();
     }
   } catch (e) {
     showToast('KI Fehler beim Auslesen. Bitte manuell ergänzen.', 'error');
@@ -1024,11 +1029,11 @@ async function saveRechnung() {
     let links = [...preUploadedLinks];
 
     if (currentFilesBase64.length > 0 && settings.folderId) {
-      const idPrefix = isEdit ? editingRechnungId : id;
-      for (let f of currentFilesBase64) {
-        const link = await uploadToDrive(f, idPrefix);
-        if (link) links.push(link);
-      }
+        const idPrefix = isEdit ? editingRechnungId : id;
+        for (let i = 0; i < currentFilesBase64.length; i++) {
+            const link = await uploadToDrive(currentFilesBase64[i], idPrefix, i, currentFilesBase64.length);
+            if (link) links.push(link);
+        }
     }
 
     const rowData = [
@@ -1253,6 +1258,9 @@ function updateKassapruefungUI() {
     if (flt === 'Ohne') mf = !b.rechnungID;
     return mt && mf;
   });
+  
+  filteredKZ.sort((a, b) => new Date(b.datum) - new Date(a.datum));
+  
   document.getElementById('kz-count').innerText = `${filteredKZ.length} von ${ausgaben.length} Zahlungen`;
   document.getElementById('kz-tbody').innerHTML = filteredKZ.map(b => {
     const r = b.rechnungID ? rechnungen.find(x => x.id === b.rechnungID) : null;
