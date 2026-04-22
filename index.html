@@ -11,7 +11,7 @@
 <script src="https://apis.google.com/js/api.js" async defer></script>
 <style>
 :root {
---navy: rgb(21, 48, 72); --navy-mid: rgb(32, 68, 102); --navy-light: rgb(45, 95, 140);
+--navy: rgb(21, 48, 72); --navy-mid: rgb(21, 48, 72); --navy-light: rgb(45, 95, 140);
 --gold: #c9a84c; --gold-light: #e8c97a;
 --cream: #f8f5f0; --white: #ffffff;
 --gray-100: #f3f4f6; --gray-200: #e5e7eb; --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280; --gray-600: #4b5563; --gray-800: #1f2937;
@@ -22,7 +22,10 @@ body { background: var(--cream); color: var(--gray-800); min-height: 100vh; padd
 
 header { background: var(--navy); color: white; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
 .header-brand { display: flex; align-items: center; gap: 10px; font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; }
-nav { background: var(--navy-mid); display: flex; gap: 2px; padding: 0 10px; overflow-x: auto; scrollbar-width: none; }
+.header-actions { display:flex; align-items:center; gap:10px; }
+.header-login-btn { color:white; border-color:rgba(255,255,255,0.5); }
+.header-login-btn:hover { background:rgba(255,255,255,0.08); }
+nav { background: var(--navy); display: flex; gap: 2px; padding: 0 10px; overflow-x: auto; scrollbar-width: none; }
 nav::-webkit-scrollbar { display: none; }
 .tab { padding: 12px 16px; color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; transition: 0.2s; }
 .tab.active { color: var(--gold-light); border-bottom-color: var(--gold); }
@@ -87,8 +90,7 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
 .badge { padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
 .badge-bezahlt { background: #d1fae5; color: #065f46; }
 .badge-erfasst { background: #e5e7eb; color: #374151; }
-.badge-gepruft { background: #fef3c7; color: #b45309; }
-.badge-geprüft { background: #fef3c7; color: #b45309; }
+.badge-gepruft, .badge-geprüft { background: #fef3c7; color: #b45309; }
 .badge-freigegeben { background: #dbeafe; color: #1e40af; }
 .badge-offen { background: #fee2e2; color: #991b1b; }
 
@@ -110,7 +112,10 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
 <div id="global-loader"><div class="spinner"></div><span id="loader-text">Lade Daten...</span></div>
 <header>
 <div class="header-brand">🎾 TC Rechnungen</div>
-<div id="auth-status" style="font-size:11px; opacity:0.8;">Nicht angemeldet</div>
+<div class="header-actions">
+  <div id="auth-status" style="font-size:11px; opacity:0.8;">Nicht angemeldet</div>
+  <button class="btn btn-sm btn-outline header-login-btn" id="auth-login-btn" onclick="loginGoogle()">🔐 Mit Google anmelden</button>
+</div>
 </header>
 <nav>
 <div class="tab active" onclick="showTab('dashboard')">📊 Dashboard</div>
@@ -272,7 +277,7 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
 
 <div id="page-kassapruefung" class="page">
   <div class="card">
-    <div class="card-title" style="margin-bottom:5px;">Kassaprüfung & Bankabgleich</div>
+    <div class="card-title" style="margin-bottom:5px;">Kassaprüfung &amp; Bankabgleich</div>
     <div style="font-size:12px; color:var(--gray-500); margin-bottom:20px;">Lade den CSV-Kontoauszug (Raiffeisen) hoch. Einzahlungen werden ignoriert, Datenschutz ist aktiv. KI Abgleich startet automatisch.</div>
 
     <div class="filter-bar" style="background:var(--white); border:1px solid var(--gray-200); justify-content:space-between;">
@@ -430,6 +435,7 @@ let currentFilesBase64 = [];
 let preUploadedLinks = [];
 let editingRechnungId = null;
 let currentAssignFingerprint = null;
+let pendingRechnungId = null;
 
 const KATEGORIEN = [
   'Getränke (Brauunion, Kaffee)',
@@ -458,6 +464,51 @@ const formatDate = iso => {
   return parts.length === 3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : iso;
 };
 
+function sanitizeFingerprintPart(str, fallback = 'Ohne-Wert') {
+  const s = String(str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9äöüÄÖÜß\-\s]/g, ' ')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^[-_]+|[-_]+$/g, '')
+    .substring(0, 60);
+  return s || fallback;
+}
+
+function ensureUniqueRechnungId(baseId, currentId = null) {
+  if (!baseId) return 'Unbekannt';
+  let candidate = baseId;
+  let counter = 2;
+  while (rechnungen.some(r => r.id === candidate && r.id !== currentId)) {
+    candidate = `${baseId}_${counter}`;
+    counter++;
+  }
+  return candidate;
+}
+
+function buildRechnungFingerprint(datum, lieferant, notiz, currentId = null) {
+  const d = (datum || new Date().toISOString().slice(0,10)).slice(0,10);
+  const lieferantTeil = sanitizeFingerprintPart(lieferant, 'Ohne-Lieferant');
+  const notizTeil = sanitizeFingerprintPart(notiz, 'Ohne-Notiz');
+  return ensureUniqueRechnungId(`${d}_${lieferantTeil}_${notizTeil}`, currentId);
+}
+
+function getCurrentRechnungFingerprint(currentId = null) {
+  return buildRechnungFingerprint(
+    document.getElementById('f-datum').value,
+    document.getElementById('f-firma').value.trim(),
+    document.getElementById('f-notiz').value.trim(),
+    currentId
+  );
+}
+
+function updateAuthUI() {
+  const loggedIn = !!accessToken;
+  const statusEl = document.getElementById('auth-status');
+  const btn = document.getElementById('auth-login-btn');
+  statusEl.innerHTML = loggedIn ? '✅ Cloud Verbunden' : 'Nicht angemeldet';
+  btn.style.display = loggedIn ? 'none' : 'inline-flex';
+}
+
 window.onload = () => {
   document.getElementById('s-username').value = settings.userName || '';
   document.getElementById('s-client').value = settings.clientId || '';
@@ -471,6 +522,7 @@ window.onload = () => {
   }
 
   initDates();
+  updateAuthUI();
 
   if (settings.clientId) initGoogleAuth();
 };
@@ -546,7 +598,7 @@ function initGoogleAuth() {
     callback: async (response) => {
       if (response.error) { showToast('Login fehlgeschlagen', 'error'); return; }
       accessToken = response.access_token;
-      document.getElementById('auth-status').innerHTML = '✅ Cloud Verbunden';
+      updateAuthUI();
       showToast('Erfolgreich angemeldet!');
       await ensureBankbuchungenHeader();
       showTab('dashboard');
@@ -696,6 +748,8 @@ function jumpTo(filterType) {
     const ym = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
     document.getElementById('filt-text').value = ym;
   }
+  sortCol = 'datum';
+  sortDir = -1;
   renderRechnungen();
 }
 
@@ -814,6 +868,7 @@ function validateForm() {
 
 function resetForm() {
   editingRechnungId = null;
+  pendingRechnungId = null;
   document.querySelectorAll('.form-grid input, .form-grid textarea, .form-grid select').forEach(i => { i.value = ''; i.style.borderColor = ''; });
   document.getElementById('preview-container').innerHTML = '';
   document.getElementById('ai-btn').style.display = 'none';
@@ -822,12 +877,16 @@ function resetForm() {
   btn.classList.remove('btn-warning');
   currentFilesBase64 = [];
   preUploadedLinks = [];
+  const fileInput = document.getElementById('file-input');
+  if (fileInput) fileInput.value = '';
 }
 
 function handleFiles(input) {
   const files = input.files;
   if (!files.length) return;
   currentFilesBase64 = [];
+  preUploadedLinks = [];
+  pendingRechnungId = null;
   const container = document.getElementById('preview-container');
   container.innerHTML = '';
   document.getElementById('ai-btn').style.display = 'block';
@@ -873,7 +932,8 @@ async function uploadToDrive(base64obj, idPrefix) {
     headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': `multipart/related; boundary=${boundary}` },
     body: body
   });
-  return (await res.json()).webViewLink;
+  const data = await res.json();
+  return data.webViewLink || '';
 }
 
 async function extractAI() {
@@ -931,11 +991,12 @@ Verwende exakt diese Keys und keine anderen:
       if (el && el.value.trim()) el.style.borderColor = '';
     });
 
+    pendingRechnungId = getCurrentRechnungFingerprint(editingRechnungId);
     showToast('✨ Felder ausgefüllt!');
 
     if (tc_autoupload) {
       showLoader('Lade Foto in Drive (Auto-Upload)...');
-      const idPrefix = 'R-' + Date.now().toString().slice(-6);
+      const idPrefix = pendingRechnungId || getCurrentRechnungFingerprint(editingRechnungId);
       for (let f of currentFilesBase64) {
         const link = await uploadToDrive(f, idPrefix);
         if (link) preUploadedLinks.push(link);
@@ -959,12 +1020,13 @@ async function saveRechnung() {
   showLoader('Speichere Beleg...');
   try {
     let isEdit = editingRechnungId != null;
-    const id = isEdit ? editingRechnungId : 'R-' + Date.now().toString().slice(-6);
+    let id = isEdit ? editingRechnungId : (pendingRechnungId || getCurrentRechnungFingerprint(null));
     let links = [...preUploadedLinks];
 
     if (currentFilesBase64.length > 0 && settings.folderId) {
+      const idPrefix = isEdit ? editingRechnungId : id;
       for (let f of currentFilesBase64) {
-        const link = await uploadToDrive(f, id);
+        const link = await uploadToDrive(f, idPrefix);
         if (link) links.push(link);
       }
     }
@@ -1003,7 +1065,7 @@ async function saveRechnung() {
     showToast('✅ Gespeichert!');
     resetForm();
     await loadFromSheets();
-    showTab('rechnungen');
+    showTab('dashboard');
   } catch (e) {
     showToast('Fehler: ' + e.message, 'error');
   }
@@ -1014,6 +1076,7 @@ function editRechnung(id) {
   const r = rechnungen.find(x => x.id === id);
   if (!r) return;
   editingRechnungId = id;
+  pendingRechnungId = id;
   document.getElementById('f-firma').value = r.lieferant || '';
   document.getElementById('f-datum').value = r.datum || '';
   document.getElementById('f-betrag').value = r.betrag || '';
