@@ -570,7 +570,7 @@ async function loadFromSheets() {
     // 1. RECHNUNGEN
     const resR = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A:K`, { headers: { 'Authorization': `Bearer ${accessToken}` } });
     const dataR = await resR.json();
-    rechnungen = [];
+    rechnungen =[];
     const rowsR = dataR.values ||[];
     for(let i = 1; i < rowsR.length; i++) {
       const r = rowsR[i];
@@ -630,7 +630,7 @@ function renderDashboard() {
   document.getElementById('d-pruef-betrag').innerText = formatEur(zurPruefung.reduce((s,r)=>s+r.betrag, 0));
   document.getElementById('d-pruef-anzahl').innerText = zurPruefung.length + ' Belege';
 
-  const sortedOffen = [...offen].sort((a,b) => new Date(b.datum) - new Date(a.datum));
+  const sortedOffen =[...offen].sort((a,b) => new Date(b.datum) - new Date(a.datum));
   const tbody = document.getElementById('dash-tbody');
   tbody.innerHTML = sortedOffen.slice(0,6).map(r => `
     <tr>
@@ -824,7 +824,7 @@ function handleFiles(input) {
 }
 
 async function uploadToDrive(base64obj, idPrefix) {
-  const metadata = { name: `${idPrefix}_${base64obj.name}`, parents: [settings.folderId] };
+  const metadata = { name: `${idPrefix}_${base64obj.name}`, parents:[settings.folderId] };
   const boundary = '-------314159265358979323846';
   const body = "\r\n--" + boundary + "\r\n" +
     'Content-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) +
@@ -877,9 +877,11 @@ Felder: lieferant (String), datum (YYYY-MM-DD), betrag (Zahl, mit Punkt), rechnr
         if(mk) document.getElementById('f-kategorie').value = mk;
     }
     
-    // Clear validation red borders for filled fields['f-firma', 'f-datum', 'f-betrag', 'f-rechnr', 'f-kategorie'].forEach(id => {
+    // Clear validation red borders for filled fields
+    const reqFields =['f-firma', 'f-datum', 'f-betrag', 'f-rechnr', 'f-kategorie'];
+    reqFields.forEach(id => {
       const el = document.getElementById(id);
-      if (el.value.trim()) el.style.borderColor = '';
+      if (el && el.value.trim()) el.style.borderColor = '';
     });
 
     showToast('✨ Felder ausgefüllt!');
@@ -929,7 +931,7 @@ async function saveRechnung() {
        if(links.length === 0) rowData[10] = r.fotolink || ''; 
        rowData[7] = r.status;
        await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A${r.rowIndex}:K${r.rowIndex}?valueInputOption=USER_ENTERED`, {
-          method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ values:[rowData] })
+          method: 'PUT', headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ values: [rowData] })
        });
     } else {
        await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A1:append?valueInputOption=USER_ENTERED`, {
