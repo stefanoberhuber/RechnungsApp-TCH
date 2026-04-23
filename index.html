@@ -803,6 +803,7 @@ async function loadFromSheets() {
   if (!accessToken || !settings.sheetId) return;
   showLoader('Lade Datenbank...');
   try {
+    await ensureBankbuchungenHeader();
     const resR = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A:L`, {
       headers: { 'Authorization': `Bearer ${accessToken}` }
     });
