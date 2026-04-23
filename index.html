@@ -640,15 +640,7 @@ function showApp() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app-container').style.display = 'block';
     updateAuthUI();
-    
-    // Wir setzen manuell den Dashboard-Tab auf aktiv
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('page-dashboard').classList.add('active');
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab')[0].classList.add('active');
-
-    // Wir erzwingen das Laden der Daten direkt hier
-    loadFromSheets();
+    showTab('erfassen');
 }
 
 
@@ -748,10 +740,12 @@ function extractJSON(text) {
 
 function initGoogleAuth() {
   if (!settings.clientId) return;
+  
   if (typeof google === 'undefined' || !google.accounts) {
     setTimeout(initGoogleAuth, 500);
     return;
   }
+  
   try {
     tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: settings.clientId,
@@ -759,12 +753,11 @@ function initGoogleAuth() {
       callback: (response) => {
         if (response && response.access_token) {
           accessToken = response.access_token;
-          // Token ist da -> App anzeigen
           showApp();
         }
       },
     });
-    // Automatischer Login-Versuch ohne Popup
+    // Silent Login Versuch beim Laden der Seite
     tokenClient.requestAccessToken({ prompt: '' });
   } catch (e) {
     console.error('Auth Init Error:', e);
