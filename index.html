@@ -287,17 +287,8 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
 
 <div id="page-kassapruefung" class="page">
   <div class="card">
-    <div class="card-title" style="margin-bottom:5px;">Kassaprüfung <span style="font-family: 'Playfair Display', serif; font-style: italic; font-weight: 400;">&amp;</span> Bankabgleich</div>
+    <div class="card-title" style="margin-bottom:5px;">Kassaprüfung und Bankabgleich</div>
     <div style="font-size:12px; color:var(--gray-500); margin-bottom:20px;">Lade den CSV-Kontoauszug (Raiffeisen) hoch. Einzahlungen werden ignoriert, Datenschutz ist aktiv. KI Abgleich startet automatisch.</div>
-
-    <div class="filter-bar" style="background:var(--white); border:1px solid var(--gray-200); justify-content:flex-end;">
-      <div style="display:flex; gap:10px; align-items:center;">
-        <label class="btn btn-outline btn-sm" style="margin:0; cursor:pointer;">
-          <input type="file" accept=".csv" onchange="handleBankCSV(this)" style="display:none;">
-          📥 Raiffeisen CSV Upload
-        </label>
-      </div>
-    </div>
 
     <div id="kassa-checksum"></div>
 
@@ -311,9 +302,12 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
       <div class="stat-card" style="border-left:4px solid var(--danger)">
         <div class="stat-label">❌ Ohne Rechnung</div><div class="stat-value" id="tile-ohnerech-sum">€ 0,00</div><div id="tile-ohnerech-count" style="font-size:11px;color:#666">0 Ausgaben</div>
       </div>
-      <div class="stat-card" style="border-left:4px solid var(--gray-400)">
-        <div class="stat-label">ℹ️ Einzahlungen</div><div class="stat-value" id="tile-einzahl-count" style="color:var(--gray-500)">0</div><div style="font-size:11px;color:#666">Ignoriert gem. Datenschutz</div>
-      </div>
+      <label class="stat-card hover-card cursor-pointer" style="border-left:4px solid var(--navy); display:flex; flex-direction:column; justify-content:center; margin:0;">
+        <input type="file" accept=".csv" onchange="handleBankCSV(this)" style="display:none;">
+        <div class="stat-label" style="color:var(--navy);">📥 Aktion</div>
+        <div class="stat-value" style="font-size: 17px; margin-top: 2px;">CSV Upload</div>
+        <div style="font-size:11px;color:#666; margin-top:4px;">Raiffeisen Kontoauszug</div>
+      </label>
     </div>
 
     <div class="kassa-tabs">
@@ -1360,7 +1354,6 @@ function updateKassapruefungUI() {
   document.getElementById('tile-ohnebuchung-sum').innerText = formatEur(unmatchedRech.reduce((s, r) => s + r.betrag, 0));
   document.getElementById('tile-ohnerech-count').innerText = unmatchedAusgaben.length + ' Ausgaben';
   document.getElementById('tile-ohnerech-sum').innerText = formatEur(unmatchedAusgaben.reduce((s, b) => s + Math.abs(b.betrag), 0));
-  document.getElementById('tile-einzahl-count').innerText = einzahlungenCount;
 
   applySortArrow('th-kged-rdat', 'rechDatum', kGedCol, kGedDir);
   applySortArrow('th-kged-rnr', 'rechnr', kGedCol, kGedDir);
