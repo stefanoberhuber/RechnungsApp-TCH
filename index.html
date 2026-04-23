@@ -701,6 +701,7 @@ async function loadFromSheets() {
     updateKassapruefungUI();
   } catch (e) {
     showToast('Fehler beim Laden: ' + e.message, 'error');
+    console.error(e);
   }
   hideLoader();
 }
