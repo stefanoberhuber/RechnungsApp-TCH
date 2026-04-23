@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>TC Hopfgarten Rechnungsverwaltung</title>
 <link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="logo512.png">
+<link rel="apple-touch-icon" href="logo512.png">
 <meta name="theme-color" content="#153048">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -21,7 +23,7 @@
 body { background: var(--cream); color: var(--gray-800); min-height: 100vh; padding-bottom: 40px; }
 
 header { background: var(--navy); color: white; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
-.header-brand { display: flex; align-items: center; gap: 10px; font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.header-brand { display: flex; align-items: center; gap: 10px; white-space: nowrap; overflow: hidden; }
 .header-actions { display:flex; align-items:center; gap:10px; flex-shrink: 0; }
 .header-login-btn { color:white; border-color:rgba(255,255,255,0.5); }
 .header-login-btn:hover { background:rgba(255,255,255,0.08); }
@@ -117,7 +119,10 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
 <body>
 <div id="global-loader"><div class="spinner"></div><span id="loader-text">Lade Daten...</span></div>
 <header>
-<div class="header-brand">🎾 TC Hopfgarten</div>
+<div class="header-brand">
+  <img src="logo512.png" alt="Icon" style="height: 34px; width: 34px; border-radius: 4px; flex-shrink: 0; object-fit: contain;">
+  <img src="logo_breit.png" alt="TC Hopfgarten" style="height: 20px; max-width: 150px; object-fit: contain; flex-shrink: 1;">
+</div>
 <div class="header-actions">
   <div id="auth-status" style="font-size:11px; opacity:0.8;">Nicht angemeldet</div>
   <button class="btn btn-sm btn-outline header-login-btn" id="auth-login-btn" onclick="loginGoogle()">🔐 Mit Google anmelden</button>
