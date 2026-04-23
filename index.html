@@ -640,7 +640,8 @@ function showApp() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app-container').style.display = 'block';
     updateAuthUI();
-    loadFromSheets();
+    // showTab('dashboard') setzt den Tab auf aktiv UND lädt die Daten automatisch
+    showTab('dashboard');
 }
 
 
@@ -753,15 +754,13 @@ function initGoogleAuth() {
       callback: (response) => {
         if (response && response.access_token) {
           accessToken = response.access_token;
+          // showApp wird erst aufgerufen, wenn accessToken definitiv existiert
           showApp();
-        } else {
-          // Silent login failed
-          console.log("Silent login fehlgeschlagen, Login-Screen wird angezeigt.");
         }
       },
     });
-    // Attempt silent login
-    tokenClient.requestAccessToken({ prompt: 'none' });
+    // Versucht den leisen Login beim Start
+    tokenClient.requestAccessToken({ prompt: '' });
   } catch (e) {
     console.error('Auth Init Error:', e);
   }
