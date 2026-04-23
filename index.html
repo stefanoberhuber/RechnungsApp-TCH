@@ -194,6 +194,12 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
       <div class="form-group"><label>Rechnungsdatum *</label><input type="date" id="f-datum"></div>
       <div class="form-group"><label>Betrag (€) *</label><input type="number" id="f-betrag" step="0.01"></div>
       <div class="form-group"><label>Rechnungs-Nr. *</label><input type="text" id="f-rechnr"></div>
+      <div class="form-group"><label>Zahlungsart *</label>
+        <select id="f-zahlungsart">
+          <option value="Banküberweisung">🏦 Banküberweisung</option>
+          <option value="Barzahlung">💵 Barzahlung</option>
+        </select>
+      </div>
       <div class="form-group"><label>Kategorie *</label>
         <select id="f-kategorie">
           <option value="">-- Bitte wählen --</option>
@@ -271,6 +277,7 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
             <th onclick="setSort('rechnr')" class="cursor-pointer" id="th-rechnr">Rechnungsnr.</th>
             <th onclick="setSort('lieferant')" class="cursor-pointer" id="th-lieferant">Lieferant</th>
             <th onclick="setSort('betrag')" class="cursor-pointer text-right" id="th-betrag">Betrag</th>
+            <th onclick="setSort('zahlungsart')" class="cursor-pointer text-center" id="th-zahlungsart">Zahlart</th>
             <th>Kategorie</th>
             <th>Notiz</th>
             <th onclick="setSort('status')" class="cursor-pointer" id="th-status">Status</th>
@@ -302,7 +309,7 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
       <div class="stat-card" style="border-left:4px solid var(--danger)">
         <div class="stat-label">❌ Ohne Rechnung</div><div class="stat-value" id="tile-ohnerech-sum">€ 0,00</div><div id="tile-ohnerech-count" style="font-size:11px;color:#666">0 Ausgaben</div>
       </div>
-      <label class="stat-card hover-card cursor-pointer" style="border-left:4px solid var(--navy); display:flex; flex-direction:column; justify-content:center; margin:0;">
+      <label class="stat-card hover-card cursor-pointer" style="border-left:4px solid var(--navy); display:flex; flex-direction:column; justify-content:center; margin:0; background:var(--gray-100);">
         <input type="file" accept=".csv" onchange="handleBankCSV(this)" style="display:none;">
         <div class="stat-label" style="color:var(--navy);">📥 Aktion</div>
         <div class="stat-value" style="font-size: 17px; margin-top: 2px;">CSV Upload</div>
@@ -341,7 +348,7 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
       </div>
 
       <h4 style="color:var(--warning); margin-bottom:10px; font-size:14px;">⚠️ Rechnungen ohne Bankbuchung</h4>
-      <div style="font-size:11px; color:var(--gray-500); margin-bottom:10px;">Noch nicht bezahlt oder Buchung fehlt im Auszug.</div>
+      <div style="font-size:11px; color:var(--gray-500); margin-bottom:10px;">Noch nicht bezahlt oder Buchung fehlt im Auszug. (Gilt nur für Banküberweisungen)</div>
       <input type="text" id="search-ob" class="filter-input-full" placeholder="Suche in Lieferant, Rechnr, Notiz..." oninput="updateKassapruefungUI()">
       <div class="table-wrap" style="margin-bottom:35px;">
         <table>
@@ -405,9 +412,15 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
     <div class="card-title">Ausgaben nach Kategorie</div>
     
     <div class="filter-bar" style="background:var(--white); border:1px solid var(--gray-200); margin-bottom: 25px;">
-      <div style="display:flex; gap:10px; align-items:center;">
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <label style="margin:0;">Von:</label><input type="date" id="ausw-von" onchange="renderAuswertung()">
         <label style="margin:0;">Bis:</label><input type="date" id="ausw-bis" onchange="renderAuswertung()">
+        <label style="margin:0; margin-left:10px;">Zahlart:</label>
+        <select id="ausw-zahlart" onchange="renderAuswertung()">
+          <option value="Alle">Alle</option>
+          <option value="Banküberweisung">🏦 Banküberweisung</option>
+          <option value="Barzahlung">💵 Barzahlung</option>
+        </select>
       </div>
     </div>
 
@@ -671,7 +684,6 @@ function extractJSON(text) {
 function initGoogleAuth() {
   if (!settings.clientId) return;
   
-  // Prevent missing Google reference if async/defer script takes too long
   if (typeof google === 'undefined' || !google.accounts) {
     setTimeout(initGoogleAuth, 500);
     return;
@@ -730,7 +742,7 @@ async function loadFromSheets() {
   if (!accessToken || !settings.sheetId) return;
   showLoader('Lade Datenbank...');
   try {
-    const resR = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A:K`, {
+    const resR = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A:L`, {
       headers: { 'Authorization': `Bearer ${accessToken}` }
     });
     const dataR = await resR.json();
@@ -751,7 +763,8 @@ async function loadFromSheets() {
           status: r[7] || 'Erfasst',
           notiz: r[8],
           erfasstVon: r[9],
-          fotolink: r[10]
+          fotolink: r[10],
+          zahlungsart: r[11] || 'Banküberweisung'
         });
       }
     }
@@ -887,6 +900,7 @@ function renderRechnungen() {
   applySortArrow('th-rechnr', 'rechnr', sortCol, sortDir);
   applySortArrow('th-lieferant', 'lieferant', sortCol, sortDir);
   applySortArrow('th-betrag', 'betrag', sortCol, sortDir);
+  applySortArrow('th-zahlungsart', 'zahlungsart', sortCol, sortDir);
   applySortArrow('th-status', 'status', sortCol, sortDir);
 
   const text = document.getElementById('filt-text').value.toLowerCase();
@@ -922,6 +936,7 @@ function renderRechnungen() {
       <td>${r.rechnr || '-'}</td>
       <td class="font-bold">${r.lieferant}</td>
       <td class="text-right font-bold">${formatEur(r.betrag)}</td>
+      <td class="text-center" title="${r.zahlungsart}">${r.zahlungsart === 'Barzahlung' ? '💵 Bar' : '🏦 Bank'}</td>
       <td class="text-xs text-gray-500">${r.kategorie}</td>
       <td class="text-xs text-gray-500 italic">${(r.notiz || '').substring(0, 40)}</td>
       <td><span class="badge badge-${String(r.status || '').toLowerCase().replace('ü', 'u')}">${r.status}</span></td>
@@ -932,14 +947,18 @@ function renderRechnungen() {
         <button class="btn btn-sm btn-danger" title="Löschen" onclick="deleteRechnung('${r.rowIndex}')">🗑️</button>
       </td>
     </tr>
-  `).join('') || '<tr><td colspan="10" class="text-center p-4">Keine Treffer zur Suche.</td></tr>';
+  `).join('') || '<tr><td colspan="11" class="text-center p-4">Keine Treffer zur Suche.</td></tr>';
 }
 
 function renderAuswertung() {
   const von = document.getElementById('ausw-von').value;
   const bis = document.getElementById('ausw-bis').value;
+  const zart = document.getElementById('ausw-zahlart').value;
 
-  const filtered = rechnungen.filter(r => isDateInRange(r.datum, von, bis));
+  const filtered = rechnungen.filter(r => 
+    isDateInRange(r.datum, von, bis) && 
+    (zart === 'Alle' || (r.zahlungsart || 'Banküberweisung') === zart)
+  );
 
   const sums = {};
   KATEGORIEN.forEach(k => sums[k] = 0);
@@ -974,7 +993,7 @@ async function deleteRechnung(rowIndex) {
   if (!confirm('Rechnung wirklich löschen?')) return;
   showLoader('Lösche...');
   try {
-    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A${rowIndex}:K${rowIndex}:clear`, {
+    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A${rowIndex}:L${rowIndex}:clear`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${accessToken}` }
     });
@@ -987,7 +1006,7 @@ async function deleteRechnung(rowIndex) {
 }
 
 function validateForm() {
-  const req = ['f-firma', 'f-datum', 'f-betrag', 'f-rechnr', 'f-kategorie'];
+  const req = ['f-firma', 'f-datum', 'f-betrag', 'f-rechnr', 'f-kategorie', 'f-zahlungsart'];
   let valid = true;
   req.forEach(id => {
     const el = document.getElementById(id);
@@ -1002,6 +1021,7 @@ function resetForm() {
   editingRechnungId = null;
   pendingRechnungId = null;
   document.querySelectorAll('.form-grid input, .form-grid textarea, .form-grid select').forEach(i => { i.value = ''; i.style.borderColor = ''; });
+  document.getElementById('f-zahlungsart').value = 'Banküberweisung';
   document.getElementById('preview-container').innerHTML = '';
   document.getElementById('ai-btn').style.display = 'none';
   const btn = document.getElementById('btn-save');
@@ -1177,14 +1197,15 @@ async function saveRechnung() {
       'Erfasst',
       document.getElementById('f-notiz').value,
       settings.userName || 'Admin',
-      links.join(', ')
+      links.join(', '),
+      document.getElementById('f-zahlungsart').value
     ];
 
     if (isEdit) {
       const r = rechnungen.find(x => x.id === id);
       if (links.length === 0) rowData[10] = r.fotolink || '';
       rowData[7] = r.status;
-      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A${r.rowIndex}:K${r.rowIndex}?valueInputOption=USER_ENTERED`, {
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A${r.rowIndex}:L${r.rowIndex}?valueInputOption=USER_ENTERED`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ values: [rowData] })
@@ -1217,6 +1238,7 @@ function editRechnung(id) {
   document.getElementById('f-betrag').value = r.betrag || '';
   document.getElementById('f-rechnr').value = r.rechnr || '';
   document.getElementById('f-kategorie').value = r.kategorie || '';
+  document.getElementById('f-zahlungsart').value = r.zahlungsart || 'Banküberweisung';
   document.getElementById('f-notiz').value = r.notiz || '';
 
   document.getElementById('ai-btn').style.display = 'none';
@@ -1338,15 +1360,16 @@ function updateKassapruefungUI() {
         <div class="text-gray-500">Anzahl Buchungen:</div><div class="font-bold">${ausgaben.length}</div>
         <div class="text-gray-500">Summe Ausgaben:</div><div style="font-weight:800; font-size:15px; color:var(--danger);">${formatEur(summe)}</div>
       </div>
-      <div style="margin-top:10px; font-size:11px; color:var(--gray-500);">→ Bitte mit Kontoauszug der Raiffeisen abgleichen</div>
+      <div style="margin-top:10px; font-size:11px; color:var(--gray-500);">→ Bitte mit Kontoauszug der Raiffeisen abgleichen (Spiegelt nur Banküberweisungen wider)</div>
     </div>
   `;
 
   const matchedAusgaben = ausgaben.filter(b => b.rechnungID);
   const unmatchedAusgaben = ausgaben.filter(b => !b.rechnungID);
   const matchedIds = new Set(matchedAusgaben.map(b => b.rechnungID));
+  
   const matchedRech = rechnungenZeit.filter(r => matchedIds.has(r.id));
-  const unmatchedRech = rechnungenZeit.filter(r => !matchedIds.has(r.id));
+  const unmatchedRech = rechnungenZeit.filter(r => !matchedIds.has(r.id) && r.zahlungsart !== 'Barzahlung');
 
   document.getElementById('tile-gedeck-count').innerText = matchedRech.length + ' Rechnungen';
   document.getElementById('tile-gedeck-sum').innerText = formatEur(matchedRech.reduce((s, r) => s + r.betrag, 0));
@@ -1511,7 +1534,7 @@ async function startGeminiAbgleich(isAuto = false) {
   const bis = '';
   const ausgaben = bankbuchungen.filter(b => isDateInRange(b.datum, von, bis) && !b.rechnungID);
   const vergebeneIds = new Set(bankbuchungen.filter(b => b.rechnungID).map(b => b.rechnungID));
-  const offene = rechnungen.filter(r => r.status !== 'Bezahlt' && !vergebeneIds.has(r.id));
+  const offene = rechnungen.filter(r => r.status !== 'Bezahlt' && !vergebeneIds.has(r.id) && r.zahlungsart !== 'Barzahlung');
 
   if (ausgaben.length === 0) {
     if (!isAuto) showToast('Keine offenen Ausgaben zum Abgleichen.');
@@ -1576,7 +1599,7 @@ function openZuordnenModal(fp) {
   const von = '';
   const bis = '';
   const vergebeneIds = new Set(bankbuchungen.filter(b => b.rechnungID).map(b => b.rechnungID));
-  const offene = rechnungen.filter(r => isDateInRange(r.datum, von, bis) && r.status !== 'Bezahlt' && !vergebeneIds.has(r.id));
+  const offene = rechnungen.filter(r => isDateInRange(r.datum, von, bis) && r.status !== 'Bezahlt' && !vergebeneIds.has(r.id) && r.zahlungsart !== 'Barzahlung');
   document.getElementById('modal-select').innerHTML = '<option value="">-- Rechnung wählen --</option>' +
     offene.map(r => `<option value="${r.id}">${formatDate(r.datum)} | ${formatEur(r.betrag)} | ${r.lieferant}</option>`).join('');
   document.getElementById('modal-overlay').style.display = 'flex';
