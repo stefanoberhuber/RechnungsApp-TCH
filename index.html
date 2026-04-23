@@ -22,12 +22,24 @@
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'DM Sans', sans-serif; }
 body { background: var(--cream); color: var(--gray-800); min-height: 100vh; padding-bottom: 40px; }
 
-.top-bar { position: sticky; top: 0; z-index: 100; }
+.top-bar { position: sticky; top: 0; z-index: 100; position: relative; }
+.top-bar::after {
+  content: '';
+  position: absolute;
+  top: 60px; /* Header height */
+  bottom: 0;
+  right: 0;
+  width: 120px;
+  background: linear-gradient(to right, rgba(21, 48, 72, 0), var(--navy) 50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
 header { background: var(--navy); color: white; padding: 0 20px; display: flex; align-items: center; justify-content: flex-start; height: 60px; }
 .logo-breit-left { height: 45px; object-fit: contain; }
-.main-logo { position: absolute; top: 5px; right: 20px; height: 90px; width: 90px; z-index: 101; object-fit: contain; }
+.main-logo { position: absolute; top: 5px; right: 20px; height: 90px; width: 90px; z-index: 2; object-fit: contain; }
 
-nav { background: var(--navy); display: flex; gap: 2px; padding: 0 10px; padding-right: 120px; overflow-x: auto; scrollbar-width: none; }
+nav { background: var(--navy); display: flex; gap: 2px; padding: 0 10px; padding-right: 130px; overflow-x: auto; scrollbar-width: none; }
 nav::-webkit-scrollbar { display: none; }
 .tab { padding: 12px 16px; color: var(--white); font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; transition: 0.2s; }
 .tab.active { color: var(--gold-light); border-bottom-color: var(--gold); }
@@ -135,7 +147,7 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
 <body>
 
 <div id="login-screen">
-  <img src="logo512.png" alt="TC Hopfgarten Logo" style="width:120px; height:120px; margin-bottom: 20px;">
+  <img src="tchopfgarten_2024_wappen_entwicklung_farbe_rz.png" alt="TC Hopfgarten Logo" style="width:120px; height:auto; margin-bottom: 20px;">
   <h1 style="font-family:'Playfair Display', serif; color:var(--navy); font-size:24px; margin-bottom: 10px;">Rechnungsverwaltung</h1>
   <p style="color:var(--gray-600); margin-bottom: 30px;">Bitte melde dich mit deinem Google-Konto an.</p>
   <button class="btn btn-primary" style="padding: 12px 24px;" onclick="loginGoogle(true)">🔐 Mit Google anmelden</button>
