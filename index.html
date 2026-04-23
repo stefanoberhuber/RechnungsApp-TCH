@@ -636,11 +636,16 @@ function updateAuthUI() {
   }
 }
 
-function showApp() {
+async function showApp() {
+    // 1. Login-Schirm weg, App-Inhalt herzeigen
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app-container').style.display = 'block';
+    
+    // 2. Status-Punkt auf grün setzen
     updateAuthUI();
-    showTab('erfassen');
+    
+    // 3. DATEN JETZT LADEN (Da wir jetzt den accessToken sicher haben)
+    await loadFromSheets();
 }
 
 
@@ -752,12 +757,14 @@ function initGoogleAuth() {
       scope: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file',
       callback: (response) => {
         if (response && response.access_token) {
+          // Schlüssel speichern
           accessToken = response.access_token;
+          // Jetzt erst die App und das Laden der Daten triggern
           showApp();
         }
       },
     });
-    // Silent Login Versuch beim Laden der Seite
+    // Automatischer Login-Versuch beim Start
     tokenClient.requestAccessToken({ prompt: '' });
   } catch (e) {
     console.error('Auth Init Error:', e);
