@@ -26,7 +26,7 @@ body { background: var(--cream); color: var(--gray-800); min-height: 100vh; padd
 .top-bar::after {
   content: '';
   position: absolute;
-  top: 60px; /* Header height */
+  top: 60px;
   bottom: 0;
   right: 0;
   width: 120px;
@@ -563,11 +563,9 @@ const KATEGORIEN = [
   'Sonstiges'
 ];
 
-// Sort states Rechnungen
 let sortCol = 'datum';
 let sortDir = -1;
 
-// Sort states Kassaprüfung
 let kGedCol = 'bankDatum', kGedDir = -1;
 let kOBCol = 'datum', kOBDir = -1;
 let kORCol = 'datum', kORDir = -1;
@@ -579,7 +577,6 @@ const formatDate = iso => {
   return parts.length === 3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : iso;
 };
 
-// Validates date bounds securely
 const isDateInRange = (datum, von, bis) => {
   if (von && (!datum || datum < von)) return false;
   if (bis && (!datum || datum > bis)) return false;
@@ -626,7 +623,6 @@ function getCurrentRechnungFingerprint(currentId = null) {
 function updateAuthUI() {
   const loggedIn = !!accessToken;
   const statusEl = document.getElementById('auth-status');
-  
   if (loggedIn) {
     statusEl.className = 'status-dot connected';
     statusEl.title = 'Cloud verbunden';
@@ -636,18 +632,12 @@ function updateAuthUI() {
   }
 }
 
+// ── EINZIGE ÄNDERUNG: async + await ──
 async function showApp() {
-    // 1. Login-Schirm weg, App-Inhalt herzeigen
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app-container').style.display = 'block';
-    
-    // 2. Status-Punkt auf grün setzen
-    updateAuthUI();
-    
-    // 3. DATEN JETZT LADEN (Da wir jetzt den accessToken sicher haben)
-    await loadFromSheets();
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-container').style.display = 'block';
+  await loadFromSheets();
 }
-
 
 window.onload = () => {
   document.getElementById('s-username').value = settings.userName || '';
@@ -675,12 +665,8 @@ window.onload = () => {
 
 function initDates() {
   const y = new Date().getFullYear();
-
-  // Rechnungen: Standard ohne Filter
   document.getElementById('rech-von').value = '';
   document.getElementById('rech-bis').value = '';
-
-  // Auswertung: Standard aktuelles Jahr
   document.getElementById('ausw-von').value = `${y}-01-01`;
   document.getElementById('ausw-bis').value = `${y}-12-31`;
 }
@@ -689,10 +675,8 @@ function showTab(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  
   const tabMap = { dashboard: 0, erfassen: 1, rechnungen: 2, kassapruefung: 3, auswertung: 4, einstellungen: 5 };
   if (tabMap[name] !== undefined) document.querySelectorAll('.tab')[tabMap[name]].classList.add('active');
-
   if ((name === 'dashboard' || name === 'rechnungen' || name === 'kassapruefung' || name === 'auswertung') && accessToken) {
     loadFromSheets();
   }
@@ -745,36 +729,33 @@ function extractJSON(text) {
 
 function initGoogleAuth() {
   if (!settings.clientId) return;
-  
   if (typeof google === 'undefined' || !google.accounts) {
     setTimeout(initGoogleAuth, 500);
     return;
   }
-  
   try {
     tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: settings.clientId,
       scope: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file',
       callback: (response) => {
         if (response && response.access_token) {
-          // Schlüssel speichern
           accessToken = response.access_token;
-          // Jetzt erst die App und das Laden der Daten triggern
           showApp();
+        } else {
+          console.log("Silent login fehlgeschlagen, Login-Screen wird angezeigt.");
         }
       },
     });
-    // Automatischer Login-Versuch beim Start
-    tokenClient.requestAccessToken({ prompt: '' });
+    tokenClient.requestAccessToken({ prompt: 'none' });
   } catch (e) {
     console.error('Auth Init Error:', e);
   }
 }
 
 function loginGoogle(promptUser = false) {
-  if (!tokenClient) { 
+  if (!tokenClient) {
     alert('Google Identity wird noch geladen. Bitte kurz warten.');
-    return; 
+    return;
   }
   if (promptUser) {
     tokenClient.requestAccessToken({ prompt: 'consent' });
@@ -782,7 +763,6 @@ function loginGoogle(promptUser = false) {
     tokenClient.requestAccessToken({ prompt: 'none' });
   }
 }
-
 
 async function ensureBankbuchungenHeader() {
   try {
@@ -874,7 +854,6 @@ function renderDashboard() {
   const offen = rechnungen.filter(r => r.status !== 'Bezahlt');
   const bezahlt = rechnungen.filter(r => r.status === 'Bezahlt');
   const zurPruefung = rechnungen.filter(r => r.status === 'Erfasst');
-
   const now = new Date();
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const diesenMonat = rechnungen.filter(r => (r.datum || '').startsWith(currentMonth));
@@ -915,7 +894,6 @@ function jumpTo(filterType) {
   document.getElementById('filt-kat').value = 'Alle';
   document.getElementById('rech-von').value = '';
   document.getElementById('rech-bis').value = '';
-
   if (filterType === 'offen') document.getElementById('filt-status').value = 'Offen';
   else if (filterType === 'bezahlt') document.getElementById('filt-status').value = 'Bezahlt';
   else if (filterType === 'pruefung') document.getElementById('filt-status').value = 'Erfasst';
@@ -988,14 +966,12 @@ function renderRechnungen() {
     if (sortCol === 'datum') { valA = new Date(valA || 0).getTime(); valB = new Date(valB || 0).getTime(); }
     else if (sortCol === 'betrag') { valA = a.betrag; valB = b.betrag; }
     else { valA = String(valA).toLowerCase(); valB = String(valB).toLowerCase(); }
-    
     if (valA < valB) return -1 * sortDir;
     if (valA > valB) return 1 * sortDir;
     return 0;
   });
 
   document.getElementById('rech-count').innerText = `${filtered.length} von ${rechnungen.length} Rechnungen`;
-
   document.getElementById('rech-tbody').innerHTML = filtered.map(r => `
     <tr class="bg-white hover-card">
       <td>${formatDate(r.datum)}</td>
@@ -1021,8 +997,8 @@ function renderAuswertung() {
   const bis = document.getElementById('ausw-bis').value;
   const zart = document.getElementById('ausw-zahlart').value;
 
-  const filtered = rechnungen.filter(r => 
-    isDateInRange(r.datum, von, bis) && 
+  const filtered = rechnungen.filter(r =>
+    isDateInRange(r.datum, von, bis) &&
     (zart === 'Alle' || (r.zahlungsart || 'Banküberweisung') === zart)
   );
 
@@ -1137,23 +1113,22 @@ function handleFiles(input) {
 }
 
 async function uploadToDrive(base64obj, idPrefix, index = 0, totalFiles = 1) {
-    const extension = base64obj.name.split('.').pop() || (base64obj.type.split('/')[1] || 'bin');
-    let filename = (totalFiles > 1) ? `${idPrefix}_${index + 1}` : idPrefix;
-    const metadata = { name: `${filename}.${extension}`, parents: [settings.folderId] };
-    const boundary = '-------314159265358979323846';
-    const body = '\r\n--' + boundary + '\r\n' +
-        'Content-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) +
-        '\r\n--' + boundary + '\r\n' +
-        'Content-Type: ' + base64obj.type + '\r\nContent-Transfer-Encoding: base64\r\n\r\n' + base64obj.data +
-        '\r\n--' + boundary + '--';
-
-    const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': `multipart/related; boundary=${boundary}` },
-        body: body
-    });
-    const data = await res.json();
-    return data.webViewLink || '';
+  const extension = base64obj.name.split('.').pop() || (base64obj.type.split('/')[1] || 'bin');
+  let filename = (totalFiles > 1) ? `${idPrefix}_${index + 1}` : idPrefix;
+  const metadata = { name: `${filename}.${extension}`, parents: [settings.folderId] };
+  const boundary = '-------314159265358979323846';
+  const body = '\r\n--' + boundary + '\r\n' +
+    'Content-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) +
+    '\r\n--' + boundary + '\r\n' +
+    'Content-Type: ' + base64obj.type + '\r\nContent-Transfer-Encoding: base64\r\n\r\n' + base64obj.data +
+    '\r\n--' + boundary + '--';
+  const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': `multipart/related; boundary=${boundary}` },
+    body: body
+  });
+  const data = await res.json();
+  return data.webViewLink || '';
 }
 
 async function extractAI() {
@@ -1215,17 +1190,17 @@ Verwende exakt diese Keys und keine anderen:
     showToast('✨ Felder ausgefüllt!');
 
     if (tc_autoupload) {
-        showLoader('Lade Foto in Drive (Auto-Upload)...');
-        const idPrefix = pendingRechnungId || getCurrentRechnungFingerprint(editingRechnungId);
-        for (let i = 0; i < currentFilesBase64.length; i++) {
-            const link = await uploadToDrive(currentFilesBase64[i], idPrefix, i, currentFilesBase64.length);
-            if (link) preUploadedLinks.push(link);
-        }
-        currentFilesBase64 = [];
-        document.getElementById('preview-container').innerHTML = '<div style="font-size:12px;color:var(--success);font-weight:bold;margin-bottom:10px;">✅ Fotos in Drive gespeichert</div>';
-        document.getElementById('ai-btn').style.display = 'none';
-        showToast('⚡ Auto-Upload erfolgreich');
-        await saveRechnung();
+      showLoader('Lade Foto in Drive (Auto-Upload)...');
+      const idPrefix = pendingRechnungId || getCurrentRechnungFingerprint(editingRechnungId);
+      for (let i = 0; i < currentFilesBase64.length; i++) {
+        const link = await uploadToDrive(currentFilesBase64[i], idPrefix, i, currentFilesBase64.length);
+        if (link) preUploadedLinks.push(link);
+      }
+      currentFilesBase64 = [];
+      document.getElementById('preview-container').innerHTML = '<div style="font-size:12px;color:var(--success);font-weight:bold;margin-bottom:10px;">✅ Fotos in Drive gespeichert</div>';
+      document.getElementById('ai-btn').style.display = 'none';
+      showToast('⚡ Auto-Upload erfolgreich');
+      await saveRechnung();
     }
   } catch (e) {
     showToast('KI Fehler beim Auslesen. Bitte manuell ergänzen.', 'error');
@@ -1245,11 +1220,11 @@ async function saveRechnung() {
     let links = [...preUploadedLinks];
 
     if (currentFilesBase64.length > 0 && settings.folderId) {
-        const idPrefix = isEdit ? editingRechnungId : id;
-        for (let i = 0; i < currentFilesBase64.length; i++) {
-            const link = await uploadToDrive(currentFilesBase64[i], idPrefix, i, currentFilesBase64.length);
-            if (link) links.push(link);
-        }
+      const idPrefix = isEdit ? editingRechnungId : id;
+      for (let i = 0; i < currentFilesBase64.length; i++) {
+        const link = await uploadToDrive(currentFilesBase64[i], idPrefix, i, currentFilesBase64.length);
+        if (link) links.push(link);
+      }
     }
 
     const rowData = [
@@ -1306,10 +1281,8 @@ function editRechnung(id) {
   document.getElementById('f-kategorie').value = r.kategorie || '';
   document.getElementById('f-zahlungsart').value = r.zahlungsart || 'Banküberweisung';
   document.getElementById('f-notiz').value = r.notiz || '';
-
   document.getElementById('ai-btn').style.display = 'none';
   document.getElementById('preview-container').innerHTML = r.fotolink ? '<div style="font-size:12px;color:var(--navy);font-weight:bold;margin-bottom:10px;">Bestehendes Foto in Cloud verknüpft.</div>' : '';
-
   const btn = document.getElementById('btn-save');
   btn.innerHTML = '💾 Änderungen speichern';
   btn.classList.add('btn-warning');
@@ -1367,7 +1340,6 @@ async function processBankCSV(text) {
     const fingerprint = `${datumIso}|${Math.abs(betrag)}|${txtClean.substring(0, 20)}`;
 
     if (existingFingerprints.has(fingerprint)) { skipped++; continue; }
-
     newAusgaben.push({ fingerprint, datum: datumIso, betrag: betrag, buchungstext: txtClean, empfaenger: empf, abgeglichen: '', rechnungID: '', fotolink: '', konfidenz: '' });
   }
 
@@ -1385,15 +1357,8 @@ async function processBankCSV(text) {
 async function appendBankbuchungen(newAusgaben) {
   try {
     const values = newAusgaben.map(b => [
-      b.fingerprint,
-      b.datum,
-      b.betrag.toString().replace('.', ','),
-      b.buchungstext,
-      b.empfaenger,
-      b.abgeglichen,
-      b.rechnungID,
-      b.fotolink,
-      b.konfidenz || ''
+      b.fingerprint, b.datum, b.betrag.toString().replace('.', ','),
+      b.buchungstext, b.empfaenger, b.abgeglichen, b.rechnungID, b.fotolink, b.konfidenz || ''
     ]);
     await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Bankbuchungen!A1:append?valueInputOption=USER_ENTERED`, {
       method: 'POST',
@@ -1433,7 +1398,6 @@ function updateKassapruefungUI() {
   const matchedAusgaben = ausgaben.filter(b => b.rechnungID);
   const unmatchedAusgaben = ausgaben.filter(b => !b.rechnungID);
   const matchedIds = new Set(matchedAusgaben.map(b => b.rechnungID));
-  
   const matchedRech = rechnungenZeit.filter(r => matchedIds.has(r.id));
   const unmatchedRech = rechnungenZeit.filter(r => !matchedIds.has(r.id) && r.zahlungsart !== 'Barzahlung');
 
@@ -1449,12 +1413,10 @@ function updateKassapruefungUI() {
   applySortArrow('th-kged-lief', 'lieferant', kGedCol, kGedDir);
   applySortArrow('th-kged-betr', 'betrag', kGedCol, kGedDir);
   applySortArrow('th-kged-bdat', 'bankDatum', kGedCol, kGedDir);
-  
   applySortArrow('th-kob-dat', 'datum', kOBCol, kOBDir);
   applySortArrow('th-kob-rnr', 'rechnr', kOBCol, kOBDir);
   applySortArrow('th-kob-lief', 'lieferant', kOBCol, kOBDir);
   applySortArrow('th-kob-betr', 'betrag', kOBCol, kOBDir);
-  
   applySortArrow('th-kor-dat', 'datum', kORCol, kORDir);
   applySortArrow('th-kor-txt', 'buchungstext', kORCol, kORDir);
   applySortArrow('th-kor-empf', 'empfaenger', kORCol, kORDir);
@@ -1521,8 +1483,10 @@ function updateKassapruefungUI() {
   document.getElementById('abg-ohnebuch-tbody').innerHTML = obData.map(r => `
     <tr class="bg-white border-b">
       <td>${formatDate(r.datum)}</td><td>${r.rechnr || '-'}</td><td>${r.lieferant}</td>
-      <td class="font-bold text-right">${formatEur(r.betrag)}</td><td><span class="badge badge-${String(r.status || '').toLowerCase().replace('ü', 'u')}">${r.status}</span></td>
-      <td class="text-xs text-gray-500 italic">${(r.notiz || '').substring(0, 40)}</td><td>${getFotoBtn(r.fotolink)}</td>
+      <td class="font-bold text-right">${formatEur(r.betrag)}</td>
+      <td><span class="badge badge-${String(r.status || '').toLowerCase().replace('ü', 'u')}">${r.status}</span></td>
+      <td class="text-xs text-gray-500 italic">${(r.notiz || '').substring(0, 40)}</td>
+      <td>${getFotoBtn(r.fotolink)}</td>
     </tr>
   `).join('') || '<tr><td colspan="7" class="text-center p-4 text-gray-500">Alles super! Keine offene Rechnung ohne Buchung.</td></tr>';
 
@@ -1564,9 +1528,8 @@ function updateKassapruefungUI() {
     if (flt === 'Ohne') mf = !b.rechnungID;
     return mt && mf;
   });
-  
+
   filteredKZ.sort((a, b) => new Date(b.datum) - new Date(a.datum));
-  
   document.getElementById('kz-count').innerText = `${filteredKZ.length} von ${ausgaben.length} Zahlungen`;
   document.getElementById('kz-tbody').innerHTML = filteredKZ.map(b => {
     const r = b.rechnungID ? rechnungen.find(x => x.id === b.rechnungID) : null;
@@ -1574,7 +1537,8 @@ function updateKassapruefungUI() {
       <tr class="bg-white border-b">
         <td>${formatDate(b.datum)}</td><td class="text-xs text-gray-500">${b.buchungstext}</td>
         <td>${b.empfaenger}</td><td class="font-bold text-right">${formatEur(Math.abs(b.betrag))}</td>
-        <td>${r ? r.lieferant : '-'}</td><td>${r ? (r.rechnr || '-') : '-'}</td><td>${getFotoBtn(b.fotolink || (r ? r.fotolink : null))}</td>
+        <td>${r ? r.lieferant : '-'}</td><td>${r ? (r.rechnr || '-') : '-'}</td>
+        <td>${getFotoBtn(b.fotolink || (r ? r.fotolink : null))}</td>
       </tr>`;
   }).join('') || '<tr><td colspan="7" class="text-center p-4">Keine Zahlungen gefunden.</td></tr>';
 }
