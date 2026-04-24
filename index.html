@@ -11,7 +11,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="TCH Rechnungen">
-
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://apis.google.com/js/api.js" async defer></script>
@@ -22,10 +21,13 @@
 --cream: #f8f5f0; --white: #ffffff;
 --gray-100: #f3f4f6; --gray-200: #e5e7eb; --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280; --gray-600: #4b5563; --gray-800: #1f2937;
 --success: #2d7a4f; --warning: #b45309; --danger: #991b1b;
+--bottom-nav-height: 65px;
+--safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'DM Sans', sans-serif; }
 body { background: var(--cream); color: var(--gray-800); min-height: 100vh; padding-bottom: 40px; }
 
+/* ── TOP BAR ── */
 .top-bar { position: sticky; top: 0; z-index: 100; position: relative; }
 .top-bar::after {
   content: '';
@@ -39,14 +41,148 @@ body { background: var(--cream); color: var(--gray-800); min-height: 100vh; padd
   z-index: 1;
 }
 
-header { background: var(--navy); color: white; padding: 0 20px; display: flex; align-items: center; justify-content: flex-start; height: 60px; }
+header {
+  background: var(--navy);
+  color: white;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  position: relative;
+}
 .logo-breit-left { height: 45px; object-fit: contain; }
-.main-logo { position: absolute; top: 5px; right: 20px; height: 90px; width: 90px; z-index: 2; object-fit: contain; }
 
-nav { background: var(--navy); display: flex; gap: 2px; padding: 0 10px; padding-right: 130px; overflow-x: auto; scrollbar-width: none; }
+/* Desktop: Wappen rechts */
+.main-logo {
+  position: absolute;
+  top: 5px;
+  right: 20px;
+  height: 90px;
+  width: 90px;
+  z-index: 2;
+  object-fit: contain;
+}
+
+/* Mobile: Zahnrad statt Wappen */
+.mobile-settings-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: rgba(255,255,255,0.6);
+  font-size: 22px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+.mobile-settings-btn:hover { color: rgba(255,255,255,0.9); }
+
+/* Desktop nav (top) */
+nav {
+  background: var(--navy);
+  display: flex;
+  gap: 2px;
+  padding: 0 10px;
+  padding-right: 130px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
 nav::-webkit-scrollbar { display: none; }
-.tab { padding: 12px 16px; color: var(--white); font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; transition: 0.2s; }
+.tab {
+  padding: 12px 16px;
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+  transition: 0.2s;
+}
 .tab.active { color: var(--gold-light); border-bottom-color: var(--gold); }
+
+/* ── BOTTOM NAV (mobile only) ── */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: var(--navy);
+  height: calc(var(--bottom-nav-height) + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  box-shadow: 0 -2px 20px rgba(0,0,0,0.25);
+  align-items: center;
+  justify-content: space-around;
+}
+.bn-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  padding: 8px 10px;
+  border-radius: 10px;
+  transition: 0.2s;
+  flex: 1;
+  color: rgba(255,255,255,0.45);
+  min-width: 0;
+}
+.bn-item.active { color: var(--gold-light); }
+.bn-item:active { transform: scale(0.92); }
+.bn-icon { font-size: 20px; line-height: 1; }
+.bn-label { font-size: 9.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; }
+
+/* FAB center button (Erfassen) */
+.bn-fab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  flex: 1;
+  color: var(--gold-light);
+  position: relative;
+}
+.bn-fab-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  box-shadow: 0 4px 14px rgba(201,168,76,0.55);
+  margin-top: -18px;
+  transition: 0.2s;
+}
+.bn-fab:active .bn-fab-circle { transform: scale(0.92); background: #b8973d; }
+.bn-fab-label { font-size: 9.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+.bn-fab.active .bn-fab-label { color: var(--gold-light); }
+.bn-fab.active .bn-fab-circle { background: #b8973d; box-shadow: 0 4px 14px rgba(201,168,76,0.7); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 700px) {
+  /* Hide desktop nav & wappen */
+  nav { display: none; }
+  .main-logo { display: none; }
+  .top-bar::after { display: none; }
+
+  /* Show mobile elements */
+  .mobile-settings-btn { display: flex; align-items: center; justify-content: center; }
+  .bottom-nav { display: flex; }
+
+  /* Content padding for bottom nav */
+  body { padding-bottom: calc(var(--bottom-nav-height) + var(--safe-bottom) + 16px); }
+  main { padding: 16px 12px; }
+
+  /* Toast above bottom nav */
+  #toast { bottom: calc(var(--bottom-nav-height) + var(--safe-bottom) + 12px); right: 12px; left: 12px; text-align: center; }
+}
 
 main { max-width: 1100px; margin: 0 auto; padding: 20px 16px; }
 .page { display: none; animation: fadeIn 0.3s; }
@@ -159,11 +295,17 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
 
 <div id="app-container">
   <div id="global-loader"><div class="spinner"></div><span id="loader-text">Lade Daten...</span></div>
+
   <div class="top-bar">
     <header>
       <img src="logo_breit.png" alt="TC Hopfgarten" class="logo-breit-left">
+      <!-- Desktop: Wappen -->
+      <img src="logo512.png" alt="TC Hopfgarten Logo" class="main-logo">
+      <!-- Mobile: Zahnrad -->
+      <button class="mobile-settings-btn" onclick="showTab('einstellungen')" title="Einstellungen">⚙️</button>
     </header>
-    <nav>
+    <!-- Desktop Nav -->
+    <nav id="desktop-nav">
       <div class="tab active" onclick="showTab('dashboard')">📊 Dashboard</div>
       <div class="tab" onclick="showTab('erfassen')">➕ Erfassen</div>
       <div class="tab" onclick="showTab('rechnungen')">📋 Rechnungen</div>
@@ -171,8 +313,32 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
       <div class="tab" onclick="showTab('auswertung')">📈 Auswertung</div>
       <div class="tab" onclick="showTab('einstellungen')">⚙️ Setup</div>
     </nav>
-    <img src="logo512.png" alt="TC Hopfgarten Logo" class="main-logo">
   </div>
+
+  <!-- Mobile Bottom Nav -->
+  <nav class="bottom-nav">
+    <div class="bn-item active" id="bn-dashboard" onclick="showTab('dashboard')">
+      <span class="bn-icon">📊</span>
+      <span class="bn-label">Dashboard</span>
+    </div>
+    <div class="bn-item" id="bn-rechnungen" onclick="showTab('rechnungen')">
+      <span class="bn-icon">📋</span>
+      <span class="bn-label">Rechnungen</span>
+    </div>
+    <div class="bn-fab" id="bn-erfassen" onclick="showTab('erfassen')">
+      <div class="bn-fab-circle">➕</div>
+      <span class="bn-fab-label">Erfassen</span>
+    </div>
+    <div class="bn-item" id="bn-kassapruefung" onclick="showTab('kassapruefung')">
+      <span class="bn-icon">🏦</span>
+      <span class="bn-label">Kassa</span>
+    </div>
+    <div class="bn-item" id="bn-auswertung" onclick="showTab('auswertung')">
+      <span class="bn-icon">📈</span>
+      <span class="bn-label">Auswertung</span>
+    </div>
+  </nav>
+
   <main>
   <div id="page-dashboard" class="page active">
     <div class="stats-row">
@@ -567,9 +733,11 @@ const KATEGORIEN = [
   'Sonstiges'
 ];
 
+// Sort states Rechnungen
 let sortCol = 'datum';
 let sortDir = -1;
 
+// Sort states Kassaprüfung
 let kGedCol = 'bankDatum', kGedDir = -1;
 let kOBCol = 'datum', kOBDir = -1;
 let kORCol = 'datum', kORDir = -1;
@@ -624,19 +792,17 @@ function getCurrentRechnungFingerprint(currentId = null) {
   );
 }
 
-function updateAuthUI() {
-  const loggedIn = !!accessToken;
-  const statusEl = document.getElementById('auth-status');
-  if (loggedIn) {
-    statusEl.className = 'status-dot connected';
-    statusEl.title = 'Cloud verbunden';
-  } else {
-    statusEl.className = 'status-dot disconnected';
-    statusEl.title = 'Nicht angemeldet';
-  }
+// ── NEU: Bottom Nav aktiven Tab setzen ──
+function updateBottomNav(name) {
+  const ids = ['dashboard', 'rechnungen', 'erfassen', 'kassapruefung', 'auswertung'];
+  ids.forEach(id => {
+    const el = document.getElementById('bn-' + id);
+    if (el) el.classList.remove('active');
+  });
+  const active = document.getElementById('bn-' + name);
+  if (active) active.classList.add('active');
 }
 
-// ── EINZIGE ÄNDERUNG: async + await ──
 async function showApp() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-container').style.display = 'block';
@@ -678,9 +844,18 @@ function initDates() {
 function showTab(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+
+  // Desktop tabs
+  document.querySelectorAll('#desktop-nav .tab').forEach(t => t.classList.remove('active'));
   const tabMap = { dashboard: 0, erfassen: 1, rechnungen: 2, kassapruefung: 3, auswertung: 4, einstellungen: 5 };
-  if (tabMap[name] !== undefined) document.querySelectorAll('.tab')[tabMap[name]].classList.add('active');
+  const desktopTabs = document.querySelectorAll('#desktop-nav .tab');
+  if (tabMap[name] !== undefined && desktopTabs[tabMap[name]]) {
+    desktopTabs[tabMap[name]].classList.add('active');
+  }
+
+  // ── NEU: Bottom Nav sync ──
+  updateBottomNav(name);
+
   if ((name === 'dashboard' || name === 'rechnungen' || name === 'kassapruefung' || name === 'auswertung') && accessToken) {
     loadFromSheets();
   }
@@ -733,10 +908,12 @@ function extractJSON(text) {
 
 function initGoogleAuth() {
   if (!settings.clientId) return;
+  
   if (typeof google === 'undefined' || !google.accounts) {
     setTimeout(initGoogleAuth, 500);
     return;
   }
+  
   try {
     tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: settings.clientId,
@@ -757,9 +934,9 @@ function initGoogleAuth() {
 }
 
 function loginGoogle(promptUser = false) {
-  if (!tokenClient) {
+  if (!tokenClient) { 
     alert('Google Identity wird noch geladen. Bitte kurz warten.');
-    return;
+    return; 
   }
   if (promptUser) {
     tokenClient.requestAccessToken({ prompt: 'consent' });
@@ -858,6 +1035,7 @@ function renderDashboard() {
   const offen = rechnungen.filter(r => r.status !== 'Bezahlt');
   const bezahlt = rechnungen.filter(r => r.status === 'Bezahlt');
   const zurPruefung = rechnungen.filter(r => r.status === 'Erfasst');
+
   const now = new Date();
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const diesenMonat = rechnungen.filter(r => (r.datum || '').startsWith(currentMonth));
@@ -898,6 +1076,7 @@ function jumpTo(filterType) {
   document.getElementById('filt-kat').value = 'Alle';
   document.getElementById('rech-von').value = '';
   document.getElementById('rech-bis').value = '';
+
   if (filterType === 'offen') document.getElementById('filt-status').value = 'Offen';
   else if (filterType === 'bezahlt') document.getElementById('filt-status').value = 'Bezahlt';
   else if (filterType === 'pruefung') document.getElementById('filt-status').value = 'Erfasst';
@@ -970,12 +1149,14 @@ function renderRechnungen() {
     if (sortCol === 'datum') { valA = new Date(valA || 0).getTime(); valB = new Date(valB || 0).getTime(); }
     else if (sortCol === 'betrag') { valA = a.betrag; valB = b.betrag; }
     else { valA = String(valA).toLowerCase(); valB = String(valB).toLowerCase(); }
+    
     if (valA < valB) return -1 * sortDir;
     if (valA > valB) return 1 * sortDir;
     return 0;
   });
 
   document.getElementById('rech-count').innerText = `${filtered.length} von ${rechnungen.length} Rechnungen`;
+
   document.getElementById('rech-tbody').innerHTML = filtered.map(r => `
     <tr class="bg-white hover-card">
       <td>${formatDate(r.datum)}</td>
@@ -1001,8 +1182,8 @@ function renderAuswertung() {
   const bis = document.getElementById('ausw-bis').value;
   const zart = document.getElementById('ausw-zahlart').value;
 
-  const filtered = rechnungen.filter(r =>
-    isDateInRange(r.datum, von, bis) &&
+  const filtered = rechnungen.filter(r => 
+    isDateInRange(r.datum, von, bis) && 
     (zart === 'Alle' || (r.zahlungsart || 'Banküberweisung') === zart)
   );
 
@@ -1117,22 +1298,23 @@ function handleFiles(input) {
 }
 
 async function uploadToDrive(base64obj, idPrefix, index = 0, totalFiles = 1) {
-  const extension = base64obj.name.split('.').pop() || (base64obj.type.split('/')[1] || 'bin');
-  let filename = (totalFiles > 1) ? `${idPrefix}_${index + 1}` : idPrefix;
-  const metadata = { name: `${filename}.${extension}`, parents: [settings.folderId] };
-  const boundary = '-------314159265358979323846';
-  const body = '\r\n--' + boundary + '\r\n' +
-    'Content-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) +
-    '\r\n--' + boundary + '\r\n' +
-    'Content-Type: ' + base64obj.type + '\r\nContent-Transfer-Encoding: base64\r\n\r\n' + base64obj.data +
-    '\r\n--' + boundary + '--';
-  const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': `multipart/related; boundary=${boundary}` },
-    body: body
-  });
-  const data = await res.json();
-  return data.webViewLink || '';
+    const extension = base64obj.name.split('.').pop() || (base64obj.type.split('/')[1] || 'bin');
+    let filename = (totalFiles > 1) ? `${idPrefix}_${index + 1}` : idPrefix;
+    const metadata = { name: `${filename}.${extension}`, parents: [settings.folderId] };
+    const boundary = '-------314159265358979323846';
+    const body = '\r\n--' + boundary + '\r\n' +
+        'Content-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) +
+        '\r\n--' + boundary + '\r\n' +
+        'Content-Type: ' + base64obj.type + '\r\nContent-Transfer-Encoding: base64\r\n\r\n' + base64obj.data +
+        '\r\n--' + boundary + '--';
+
+    const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': `multipart/related; boundary=${boundary}` },
+        body: body
+    });
+    const data = await res.json();
+    return data.webViewLink || '';
 }
 
 async function extractAI() {
@@ -1194,17 +1376,17 @@ Verwende exakt diese Keys und keine anderen:
     showToast('✨ Felder ausgefüllt!');
 
     if (tc_autoupload) {
-      showLoader('Lade Foto in Drive (Auto-Upload)...');
-      const idPrefix = pendingRechnungId || getCurrentRechnungFingerprint(editingRechnungId);
-      for (let i = 0; i < currentFilesBase64.length; i++) {
-        const link = await uploadToDrive(currentFilesBase64[i], idPrefix, i, currentFilesBase64.length);
-        if (link) preUploadedLinks.push(link);
-      }
-      currentFilesBase64 = [];
-      document.getElementById('preview-container').innerHTML = '<div style="font-size:12px;color:var(--success);font-weight:bold;margin-bottom:10px;">✅ Fotos in Drive gespeichert</div>';
-      document.getElementById('ai-btn').style.display = 'none';
-      showToast('⚡ Auto-Upload erfolgreich');
-      await saveRechnung();
+        showLoader('Lade Foto in Drive (Auto-Upload)...');
+        const idPrefix = pendingRechnungId || getCurrentRechnungFingerprint(editingRechnungId);
+        for (let i = 0; i < currentFilesBase64.length; i++) {
+            const link = await uploadToDrive(currentFilesBase64[i], idPrefix, i, currentFilesBase64.length);
+            if (link) preUploadedLinks.push(link);
+        }
+        currentFilesBase64 = [];
+        document.getElementById('preview-container').innerHTML = '<div style="font-size:12px;color:var(--success);font-weight:bold;margin-bottom:10px;">✅ Fotos in Drive gespeichert</div>';
+        document.getElementById('ai-btn').style.display = 'none';
+        showToast('⚡ Auto-Upload erfolgreich');
+        await saveRechnung();
     }
   } catch (e) {
     showToast('KI Fehler beim Auslesen. Bitte manuell ergänzen.', 'error');
@@ -1224,11 +1406,11 @@ async function saveRechnung() {
     let links = [...preUploadedLinks];
 
     if (currentFilesBase64.length > 0 && settings.folderId) {
-      const idPrefix = isEdit ? editingRechnungId : id;
-      for (let i = 0; i < currentFilesBase64.length; i++) {
-        const link = await uploadToDrive(currentFilesBase64[i], idPrefix, i, currentFilesBase64.length);
-        if (link) links.push(link);
-      }
+        const idPrefix = isEdit ? editingRechnungId : id;
+        for (let i = 0; i < currentFilesBase64.length; i++) {
+            const link = await uploadToDrive(currentFilesBase64[i], idPrefix, i, currentFilesBase64.length);
+            if (link) links.push(link);
+        }
     }
 
     const rowData = [
@@ -1285,8 +1467,10 @@ function editRechnung(id) {
   document.getElementById('f-kategorie').value = r.kategorie || '';
   document.getElementById('f-zahlungsart').value = r.zahlungsart || 'Banküberweisung';
   document.getElementById('f-notiz').value = r.notiz || '';
+
   document.getElementById('ai-btn').style.display = 'none';
   document.getElementById('preview-container').innerHTML = r.fotolink ? '<div style="font-size:12px;color:var(--navy);font-weight:bold;margin-bottom:10px;">Bestehendes Foto in Cloud verknüpft.</div>' : '';
+
   const btn = document.getElementById('btn-save');
   btn.innerHTML = '💾 Änderungen speichern';
   btn.classList.add('btn-warning');
@@ -1344,6 +1528,7 @@ async function processBankCSV(text) {
     const fingerprint = `${datumIso}|${Math.abs(betrag)}|${txtClean.substring(0, 20)}`;
 
     if (existingFingerprints.has(fingerprint)) { skipped++; continue; }
+
     newAusgaben.push({ fingerprint, datum: datumIso, betrag: betrag, buchungstext: txtClean, empfaenger: empf, abgeglichen: '', rechnungID: '', fotolink: '', konfidenz: '' });
   }
 
@@ -1361,8 +1546,15 @@ async function processBankCSV(text) {
 async function appendBankbuchungen(newAusgaben) {
   try {
     const values = newAusgaben.map(b => [
-      b.fingerprint, b.datum, b.betrag.toString().replace('.', ','),
-      b.buchungstext, b.empfaenger, b.abgeglichen, b.rechnungID, b.fotolink, b.konfidenz || ''
+      b.fingerprint,
+      b.datum,
+      b.betrag.toString().replace('.', ','),
+      b.buchungstext,
+      b.empfaenger,
+      b.abgeglichen,
+      b.rechnungID,
+      b.fotolink,
+      b.konfidenz || ''
     ]);
     await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Bankbuchungen!A1:append?valueInputOption=USER_ENTERED`, {
       method: 'POST',
@@ -1402,6 +1594,7 @@ function updateKassapruefungUI() {
   const matchedAusgaben = ausgaben.filter(b => b.rechnungID);
   const unmatchedAusgaben = ausgaben.filter(b => !b.rechnungID);
   const matchedIds = new Set(matchedAusgaben.map(b => b.rechnungID));
+  
   const matchedRech = rechnungenZeit.filter(r => matchedIds.has(r.id));
   const unmatchedRech = rechnungenZeit.filter(r => !matchedIds.has(r.id) && r.zahlungsart !== 'Barzahlung');
 
@@ -1417,10 +1610,12 @@ function updateKassapruefungUI() {
   applySortArrow('th-kged-lief', 'lieferant', kGedCol, kGedDir);
   applySortArrow('th-kged-betr', 'betrag', kGedCol, kGedDir);
   applySortArrow('th-kged-bdat', 'bankDatum', kGedCol, kGedDir);
+  
   applySortArrow('th-kob-dat', 'datum', kOBCol, kOBDir);
   applySortArrow('th-kob-rnr', 'rechnr', kOBCol, kOBDir);
   applySortArrow('th-kob-lief', 'lieferant', kOBCol, kOBDir);
   applySortArrow('th-kob-betr', 'betrag', kOBCol, kOBDir);
+  
   applySortArrow('th-kor-dat', 'datum', kORCol, kORDir);
   applySortArrow('th-kor-txt', 'buchungstext', kORCol, kORDir);
   applySortArrow('th-kor-empf', 'empfaenger', kORCol, kORDir);
@@ -1487,10 +1682,8 @@ function updateKassapruefungUI() {
   document.getElementById('abg-ohnebuch-tbody').innerHTML = obData.map(r => `
     <tr class="bg-white border-b">
       <td>${formatDate(r.datum)}</td><td>${r.rechnr || '-'}</td><td>${r.lieferant}</td>
-      <td class="font-bold text-right">${formatEur(r.betrag)}</td>
-      <td><span class="badge badge-${String(r.status || '').toLowerCase().replace('ü', 'u')}">${r.status}</span></td>
-      <td class="text-xs text-gray-500 italic">${(r.notiz || '').substring(0, 40)}</td>
-      <td>${getFotoBtn(r.fotolink)}</td>
+      <td class="font-bold text-right">${formatEur(r.betrag)}</td><td><span class="badge badge-${String(r.status || '').toLowerCase().replace('ü', 'u')}">${r.status}</span></td>
+      <td class="text-xs text-gray-500 italic">${(r.notiz || '').substring(0, 40)}</td><td>${getFotoBtn(r.fotolink)}</td>
     </tr>
   `).join('') || '<tr><td colspan="7" class="text-center p-4 text-gray-500">Alles super! Keine offene Rechnung ohne Buchung.</td></tr>';
 
@@ -1532,8 +1725,9 @@ function updateKassapruefungUI() {
     if (flt === 'Ohne') mf = !b.rechnungID;
     return mt && mf;
   });
-
+  
   filteredKZ.sort((a, b) => new Date(b.datum) - new Date(a.datum));
+  
   document.getElementById('kz-count').innerText = `${filteredKZ.length} von ${ausgaben.length} Zahlungen`;
   document.getElementById('kz-tbody').innerHTML = filteredKZ.map(b => {
     const r = b.rechnungID ? rechnungen.find(x => x.id === b.rechnungID) : null;
@@ -1541,8 +1735,7 @@ function updateKassapruefungUI() {
       <tr class="bg-white border-b">
         <td>${formatDate(b.datum)}</td><td class="text-xs text-gray-500">${b.buchungstext}</td>
         <td>${b.empfaenger}</td><td class="font-bold text-right">${formatEur(Math.abs(b.betrag))}</td>
-        <td>${r ? r.lieferant : '-'}</td><td>${r ? (r.rechnr || '-') : '-'}</td>
-        <td>${getFotoBtn(b.fotolink || (r ? r.fotolink : null))}</td>
+        <td>${r ? r.lieferant : '-'}</td><td>${r ? (r.rechnr || '-') : '-'}</td><td>${getFotoBtn(b.fotolink || (r ? r.fotolink : null))}</td>
       </tr>`;
   }).join('') || '<tr><td colspan="7" class="text-center p-4">Keine Zahlungen gefunden.</td></tr>';
 }
