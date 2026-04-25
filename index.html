@@ -165,7 +165,7 @@ nav::-webkit-scrollbar { display: none; }
   transition: 0.2s;
 }
 .bn-fab:active .bn-fab-circle { transform: scale(0.92); background: #b8973d; }
-.bn-fab-label { font-size: 9.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+.bn-label { font-size: 8.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0px; white-space: nowrap; overflow: hidden; }
 .bn-fab.active .bn-fab-label { color: var(--gold-light); }
 .bn-fab.active .bn-fab-circle { background: #b8973d; box-shadow: 0 4px 14px rgba(201,168,76,0.7); }
 
@@ -321,26 +321,28 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
 
   <!-- Mobile Bottom Nav -->
 <nav class="bottom-nav" style="display:flex; justify-content:space-evenly;">
-    <div class="bn-item active" id="bn-dashboard" onclick="showTab('dashboard')">
-      <span class="bn-icon">📊</span>
-      <span class="bn-label">Dashboard</span>
-    </div>
-    <div class="bn-item" id="bn-rechnungen" onclick="showTab('rechnungen')">
-      <span class="bn-icon">📋</span>
-      <span class="bn-label">Rechnungen</span>
-    </div>
+<div class="bn-item active" id="bn-dashboard" onclick="showTab('dashboard')">
+  <span class="bn-icon">📊</span>
+  <span class="bn-label">Dashboard</span>
+</div>
+<div class="bn-item" id="bn-rechnungen" onclick="showTab('rechnungen')">
+  <span class="bn-icon">📋</span>
+  <span class="bn-label">Rechnungen</span>
+</div>
+
     <div class="bn-fab" id="bn-erfassen" onclick="showTab('erfassen')">
       <div class="bn-fab-circle">➕</div>
       <span class="bn-fab-label">Erfassen</span>
     </div>
-    <div class="bn-item" id="bn-kassapruefung" onclick="showTab('kassapruefung')">
-      <span class="bn-icon">🏦</span>
-      <span class="bn-label">Kassa</span>
-    </div>
-    <div class="bn-item" id="bn-auswertung" onclick="showTab('auswertung')">
-      <span class="bn-icon">📈</span>
-      <span class="bn-label">Auswertung</span>
-    </div>
+<div class="bn-item" id="bn-kassapruefung" onclick="showTab('kassapruefung')">
+  <span class="bn-icon">🏦</span>
+  <span class="bn-label">Kassa</span>
+</div>
+<div class="bn-item" id="bn-auswertung" onclick="showTab('auswertung')">
+  <span class="bn-icon">📈</span>
+  <span class="bn-label">Analyse</span>
+</div>
+
   </nav>
 
   <main>
