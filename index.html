@@ -123,13 +123,15 @@ nav::-webkit-scrollbar { display: none; }
   justify-content: center;
   gap: 3px;
   cursor: pointer;
-  padding: 8px 10px;
+  padding: 8px 0;
   border-radius: 10px;
   transition: 0.2s;
-  flex: 1;
+  flex: 1 1 0;
+  width: 0;
   color: rgba(255,255,255,0.45);
   min-width: 0;
 }
+
 .bn-item.active { color: var(--gold-light); }
 .bn-item:active { transform: scale(0.92); }
 .bn-icon { font-size: 20px; line-height: 1; }
