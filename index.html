@@ -113,10 +113,9 @@ nav::-webkit-scrollbar { display: none; }
   height: calc(var(--bottom-nav-height) + var(--safe-bottom));
   padding-bottom: var(--safe-bottom);
   box-shadow: 0 -2px 20px rgba(0,0,0,0.25);
-  display: none; /* bleibt none, wird per media query überschrieben */
+  align-items: center;
+  justify-content: space-around;
 }
-
-
 .bn-item {
   display: flex;
   flex-direction: column;
@@ -127,8 +126,10 @@ nav::-webkit-scrollbar { display: none; }
   padding: 8px 0;
   border-radius: 10px;
   transition: 0.2s;
-  flex: 1;
+  flex: 1 1 0;
+  width: 0;
   color: rgba(255,255,255,0.45);
+  min-width: 0;
 }
 
 .bn-item.active { color: var(--gold-light); }
@@ -141,13 +142,16 @@ nav::-webkit-scrollbar { display: none; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 3px;
   cursor: pointer;
-  flex: 1;
+  flex: 1 1 0;
+  width: 0;
   color: var(--gold-light);
   position: relative;
+  padding-bottom: 6px;
 }
+
 
 .bn-fab-circle {
   width: 52px;
@@ -159,7 +163,7 @@ nav::-webkit-scrollbar { display: none; }
   justify-content: center;
   font-size: 24px;
   box-shadow: 0 4px 14px rgba(201,168,76,0.55);
-  margin-top: -18px;
+  margin-top: -22px;
   transition: 0.2s;
 }
 .bn-fab:active .bn-fab-circle { transform: scale(0.92); background: #b8973d; }
@@ -176,16 +180,7 @@ nav::-webkit-scrollbar { display: none; }
 
   /* Show mobile elements */
   .mobile-settings-btn { display: flex; align-items: center; justify-content: center; }
-.bottom-nav { 
-  display: flex; 
-  align-items: stretch;
-  justify-content: stretch;
-}
-.bottom-nav > * {
-  flex: 1;
-  min-width: 0;
-}
-
+  .bottom-nav { display: flex; }
 
   /* Content padding for bottom nav */
   body { padding-bottom: calc(var(--bottom-nav-height) + var(--safe-bottom) + 16px); }
@@ -269,9 +264,9 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
 .k-tab { padding: 10px 15px; font-weight: 600; font-size: 13px; color: var(--gray-500); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
 .k-tab.active { color: var(--navy); border-bottom-color: var(--navy); }
 
-#toast { position: fixed; bottom: 20px; right: 20px; background: var(--navy); color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px; transform: translateY(100px); opacity: 0; transition: 0.3s; }
+#toast { position: fixed; bottom: 20px; right: 20px; background: var(--navy); color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px; transform: translateY(100px); opacity: 0; transition: all 0.3s; z-index: 4000; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 #toast.show { transform: translateY(0); opacity: 1; }
-#global-loader { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.85); z-index: 5000; align-items: center; justify-content: center; flex-direction: column; font-weight: 600; color: var(--navy); }
+#global-loader { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.85); z-index: 5000; align-items: center; justify-content: center; flex-direction: column; font-weight: 600; color: var(--navy); backdrop-filter: blur(2px); }
 .spinner { width: 34px; height: 34px; border: 4px solid var(--gray-200); border-top-color: var(--navy); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 12px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -327,29 +322,29 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
   </div>
 
   <!-- Mobile Bottom Nav -->
-  <nav class="bottom-nav">
-    <div class="bn-item active" id="bn-dashboard" onclick="showTab('dashboard')">
-      <span class="bn-icon">📊</span>
-      <span class="bn-label">Dashboard</span>
-    </div>
-    <div class="bn-item" id="bn-rechnungen" onclick="showTab('rechnungen')">
-      <span class="bn-icon">📋</span>
-      <span class="bn-label">Rechnungen</span>
-    </div>
+<nav class="bottom-nav" style="display:flex; justify-content:space-around; align-items:flex-end; padding-bottom: var(--safe-bottom);">
+<div class="bn-item active" id="bn-dashboard" onclick="showTab('dashboard')">
+  <span class="bn-icon">📊</span>
+  <span class="bn-label">Dashboard</span>
+</div>
+<div class="bn-item" id="bn-rechnungen" onclick="showTab('rechnungen')">
+  <span class="bn-icon">📋</span>
+  <span class="bn-label">Rechnungen</span>
+</div>
 
     <div class="bn-fab" id="bn-erfassen" onclick="showTab('erfassen')">
       <div class="bn-fab-circle">➕</div>
       <span class="bn-fab-label">Erfassen</span>
     </div>
+<div class="bn-item" id="bn-kassapruefung" onclick="showTab('kassapruefung')">
+  <span class="bn-icon">🏦</span>
+  <span class="bn-label">Kassa</span>
+</div>
+<div class="bn-item" id="bn-auswertung" onclick="showTab('auswertung')">
+  <span class="bn-icon">📈</span>
+  <span class="bn-label">Analyse</span>
+</div>
 
-    <div class="bn-item" id="bn-kassapruefung" onclick="showTab('kassapruefung')">
-      <span class="bn-icon">🏦</span>
-      <span class="bn-label">Kassa</span>
-    </div>
-    <div class="bn-item" id="bn-auswertung" onclick="showTab('auswertung')">
-      <span class="bn-icon">📈</span>
-      <span class="bn-label">Analyse</span>
-    </div>
   </nav>
 
   <main>
@@ -1008,6 +1003,7 @@ async function loadFromSheets() {
         });
       }
     }
+
     const resB = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Bankbuchungen!A:I`, {
       headers: { 'Authorization': `Bearer ${accessToken}` }
     });
@@ -1016,317 +1012,873 @@ async function loadFromSheets() {
     const rowsB = dataB.values || [];
     for (let i = 1; i < rowsB.length; i++) {
       const b = rowsB[i];
-      if (b[1]) {
-        const betrag = parseFloat((b[2] || '0').replace(',', '.')) || 0;
-        if (betrag >= 0) {
-          einzahlungenCount++;
-        } else {
-          bankbuchungen.push({
-            fingerprint: b[0],
-            datum: b[1],
-            betrag: Math.abs(betrag),
-            buchungstext: b[3],
-            empfaenger: b[4],
-            abgeglichen: b[5],
-            rechnungId: b[6],
-            fotoLink: b[7],
-            konfidenz: b[8]
-          });
-        }
+      if (b[0] && b[0] !== 'Fingerprint') {
+        bankbuchungen.push({
+          rowIndex: i + 1,
+          fingerprint: b[0],
+          datum: b[1],
+          betrag: parseFloat((b[2] || '0').replace(',', '.')),
+          buchungstext: b[3],
+          empfaenger: b[4],
+          abgeglichen: b[5],
+          rechnungID: b[6],
+          fotolink: b[7],
+          konfidenz: b[8] || ''
+        });
       }
     }
+
     renderDashboard();
-    hideLoader();
+    renderRechnungen();
+    updateKassapruefungUI();
+    renderAuswertung();
   } catch (e) {
-    console.error('Load Error:', e);
-    hideLoader();
-    showToast('Fehler beim Laden der Daten', 'error');
+    showToast('Fehler beim Laden: ' + e.message, 'error');
+    console.error(e);
   }
+  hideLoader();
 }
 
 function renderDashboard() {
+  const offen = rechnungen.filter(r => r.status !== 'Bezahlt');
+  const bezahlt = rechnungen.filter(r => r.status === 'Bezahlt');
+  const zurPruefung = rechnungen.filter(r => r.status === 'Erfasst');
+
   const now = new Date();
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  
-  let openTotal = 0, openCount = 0;
-  let monthTotal = 0, monthCount = 0;
-  let paidTotal = 0, paidCount = 0;
-  let reviewTotal = 0, reviewCount = 0;
-  
-  const recent = [];
-  
-  rechnungen.forEach(r => {
-    const betrag = r.betrag || 0;
-    if (r.status !== 'Bezahlt') {
-      openTotal += betrag;
-      openCount++;
-    }
-    if (r.datum && r.datum.startsWith(currentMonth)) {
-      monthTotal += betrag;
-      monthCount++;
-    }
-    if (r.status === 'Bezahlt') {
-      paidTotal += betrag;
-      paidCount++;
-    }
-    if (r.status === 'Geprüft' || r.status === 'Geprüft') {
-      reviewTotal += betrag;
-      reviewCount++;
-    }
-    if (r.status !== 'Bezahlt') {
-      recent.push(r);
-    }
-  });
-  
-  recent.sort((a, b) => (b.datum || '').localeCompare(a.datum || ''));
-  
-  document.getElementById('d-offen-betrag').textContent = formatEur(openTotal);
-  document.getElementById('d-offen-anzahl').textContent = `${openCount} Belege`;
-  document.getElementById('d-monat-betrag').textContent = formatEur(monthTotal);
-  document.getElementById('d-monat-anzahl').textContent = `${monthCount} Belege`;
-  document.getElementById('d-bezahlt-betrag').textContent = formatEur(paidTotal);
-  document.getElementById('d-bezahlt-anzahl').textContent = `${paidCount} Belege`;
-  document.getElementById('d-pruef-betrag').textContent = formatEur(reviewTotal);
-  document.getElementById('d-pruef-anzahl').textContent = `${reviewCount} Belege`;
-  
+  const diesenMonat = rechnungen.filter(r => (r.datum || '').startsWith(currentMonth));
+
+  document.getElementById('d-offen-betrag').innerText = formatEur(offen.reduce((s, r) => s + r.betrag, 0));
+  document.getElementById('d-offen-anzahl').innerText = offen.length + ' Belege';
+  document.getElementById('d-bezahlt-betrag').innerText = formatEur(bezahlt.reduce((s, r) => s + r.betrag, 0));
+  document.getElementById('d-bezahlt-anzahl').innerText = bezahlt.length + ' Belege';
+  document.getElementById('d-monat-betrag').innerText = formatEur(diesenMonat.reduce((s, r) => s + r.betrag, 0));
+  document.getElementById('d-monat-anzahl').innerText = diesenMonat.length + ' Belege';
+  document.getElementById('d-pruef-betrag').innerText = formatEur(zurPruefung.reduce((s, r) => s + r.betrag, 0));
+  document.getElementById('d-pruef-anzahl').innerText = zurPruefung.length + ' Belege';
+
+  const sortedOffen = [...offen].sort((a, b) => new Date(b.datum) - new Date(a.datum));
   const tbody = document.getElementById('dash-tbody');
-  tbody.innerHTML = recent.slice(0, 10).map(r => `
+  tbody.innerHTML = sortedOffen.slice(0, 6).map(r => `
     <tr>
       <td>${formatDate(r.datum)}</td>
       <td>${r.rechnr || '-'}</td>
-      <td>${r.lieferant || '-'}</td>
+      <td><strong>${r.lieferant}</strong><br><span style="font-size:10px;color:var(--gray-500)">${r.kategorie}</span></td>
       <td class="text-right font-bold">${formatEur(r.betrag)}</td>
-      <td>${r.notiz || '-'}</td>
-      <td><span class="badge badge-${r.status.toLowerCase().replace('ü', 'ue')}">${r.status}</span></td>
-      <td><button class="btn btn-sm btn-outline" onclick="editRechnung('${r.id}')">Bearbeiten</button></td>
+      <td class="text-xs text-gray-500 italic">${(r.notiz || '').substring(0, 40)}</td>
+      <td><span class="badge badge-${String(r.status || '').toLowerCase().replace('ü', 'u')}">${r.status}</span></td>
+      <td>
+        <select onchange="changeStatus('${r.rowIndex}', this.value)" style="padding:4px;font-size:11px;border-radius:4px;">
+          <option value="Erfasst" ${r.status === 'Erfasst' ? 'selected' : ''}>Erfasst</option>
+          <option value="Bezahlt" ${r.status === 'Bezahlt' ? 'selected' : ''}>Bezahlt</option>
+        </select>
+      </td>
     </tr>
-  `).join('');
+  `).join('') || '<tr><td colspan="7" class="text-center p-4">Keine offenen Rechnungen 🎉</td></tr>';
 }
 
-function jumpTo(filter) {
-  if (filter === 'offen') {
-    document.getElementById('filt-status').value = 'Nur Offen';
-  } else if (filter === 'monat') {
-    const now = new Date();
-    document.getElementById('rech-von').value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
-    document.getElementById('rech-bis').value = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0, 10);
-  } else if (filter === 'bezahlt') {
-    document.getElementById('filt-status').value = 'Bezahlt';
-  } else if (filter === 'pruefung') {
-    document.getElementById('filt-status').value = 'Alle Stati';
-  }
-  renderRechnungen();
+function jumpTo(filterType) {
   showTab('rechnungen');
+  document.getElementById('filt-text').value = '';
+  document.getElementById('filt-status').value = 'Alle';
+  document.getElementById('filt-kat').value = 'Alle';
+  document.getElementById('rech-von').value = '';
+  document.getElementById('rech-bis').value = '';
+
+  if (filterType === 'offen') document.getElementById('filt-status').value = 'Offen';
+  else if (filterType === 'bezahlt') document.getElementById('filt-status').value = 'Bezahlt';
+  else if (filterType === 'pruefung') document.getElementById('filt-status').value = 'Erfasst';
+  else if (filterType === 'monat') {
+    const y = new Date().getFullYear();
+    const m = String(new Date().getMonth() + 1).padStart(2, '0');
+    document.getElementById('rech-von').value = `${y}-${m}-01`;
+    document.getElementById('rech-bis').value = `${y}-${m}-31`;
+  }
+  sortCol = 'datum';
+  sortDir = -1;
+  renderRechnungen();
 }
 
-function renderRechnungen() {
-  const von = document.getElementById('rech-von').value;
-  const bis = document.getElementById('rech-bis').value;
-  const text = document.getElementById('filt-text').value.toLowerCase();
-  const status = document.getElementById('filt-status').value;
-  const kategorie = document.getElementById('filt-kat').value;
-  
-  let filtered = rechnungen.filter(r => {
-    if (von && r.datum < von) return false;
-    if (bis && r.datum > bis) return false;
-    if (status !== 'Alle' && r.status !== status) return false;
-    if (kategorie !== 'Alle' && r.kategorie !== kategorie) return false;
-    if (text && !(r.lieferant.toLowerCase().includes(text) || r.rechnr.toLowerCase().includes(text) || (r.notiz || '').toLowerCase().includes(text))) return false;
-    return true;
-  });
-  
-  if (sortDir === 1) {
-    filtered.sort((a, b) => {
-      const aVal = a[sortCol] || '';
-      const bVal = b[sortCol] || '';
-      return typeof aVal === 'number' ? aVal - bVal : aVal.localeCompare(bVal);
+async function changeStatus(rowIndex, newStatus) {
+  showLoader('Aktualisiere Status...');
+  try {
+    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!H${rowIndex}?valueInputOption=USER_ENTERED`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values: [[newStatus]] })
     });
-  } else {
-    filtered.sort((a, b) => {
-      const aVal = a[sortCol] || '';
-      const bVal = b[sortCol] || '';
-      return typeof aVal === 'number' ? bVal - aVal : bVal.localeCompare(aVal);
-    });
+    showToast('Status aktualisiert!');
+    await loadFromSheets();
+  } catch (e) {
+    showToast('Fehler: ' + e.message, 'error');
   }
-  
-  document.getElementById('rech-count').textContent = `${filtered.length} von ${rechnungen.length} Rechnungen`;
-  
-  const tbody = document.getElementById('rech-tbody');
-  tbody.innerHTML = filtered.map(r => `
-    <tr>
-      <td>${formatDate(r.datum)}</td>
-      <td>${r.rechnr || '-'}</td>
-      <td>${r.lieferant || '-'}</td>
-      <td class="text-right font-bold">${formatEur(r.betrag)}</td>
-      <td class="text-center">${r.zahlungsart === 'Banküberweisung' ? '🏦' : '💵'}</td>
-      <td>${r.kategorie || '-'}</td>
-      <td>${r.notiz || '-'}</td>
-      <td><span class="badge badge-${r.status.toLowerCase().replace('ü', 'ue').replace('ö', 'oe')}">${r.status}</span></td>
-      <td>${r.erfasstVon || '-'}</td>
-      <td>${r.fotolink ? '<a href="' + r.fotolink + '" target="_blank">📎</a>' : '-'}</td>
-      <td><button class="btn btn-sm btn-outline" onclick="editRechnung('${r.id}')">✏️</button></td>
-    </tr>
-  `).join('');
+  hideLoader();
+}
+
+function applySortArrow(thId, col, currentSortCol, currentSortDir) {
+  const el = document.getElementById(thId);
+  if (!el) return;
+  el.innerText = el.innerText.replace(/ [↑↓]/g, '');
+  if (col === currentSortCol) {
+    el.innerText += currentSortDir === 1 ? ' ↑' : ' ↓';
+  }
 }
 
 function setSort(col) {
-  if (sortCol === col) {
-    sortDir *= -1;
-  } else {
-    sortCol = col;
-    sortDir = -1;
-  }
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = 1; if (col === 'datum') sortDir = -1; }
   renderRechnungen();
 }
 
-async function editRechnung(id) {
-  const r = rechnungen.find(x => x.id === id);
-  if (!r) return;
-  
-  editingRechnungId = id;
-  document.getElementById('f-firma').value = r.lieferant || '';
-  document.getElementById('f-datum').value = r.datum || '';
-  document.getElementById('f-betrag').value = r.betrag || '';
-  document.getElementById('f-rechnr').value = r.rechnr || '';
-  document.getElementById('f-zahlungsart').value = r.zahlungsart || 'Banküberweisung';
-  document.getElementById('f-kategorie').value = r.kategorie || '';
-  document.getElementById('f-notiz').value = r.notiz || '';
-  
-  showTab('erfassen');
+function renderRechnungen() {
+  applySortArrow('th-datum', 'datum', sortCol, sortDir);
+  applySortArrow('th-rechnr', 'rechnr', sortCol, sortDir);
+  applySortArrow('th-lieferant', 'lieferant', sortCol, sortDir);
+  applySortArrow('th-betrag', 'betrag', sortCol, sortDir);
+  applySortArrow('th-zahlungsart', 'zahlungsart', sortCol, sortDir);
+  applySortArrow('th-status', 'status', sortCol, sortDir);
+
+  const text = document.getElementById('filt-text').value.toLowerCase();
+  const status = document.getElementById('filt-status').value;
+  const kat = document.getElementById('filt-kat').value;
+  const von = document.getElementById('rech-von').value;
+  const bis = document.getElementById('rech-bis').value;
+
+  let filtered = rechnungen.filter(r => {
+    let matchText = (r.lieferant || '').toLowerCase().includes(text) || (r.rechnr || '').toLowerCase().includes(text) || (r.notiz || '').toLowerCase().includes(text);
+    let matchStatus = status === 'Alle' ? true : (status === 'Offen' ? r.status !== 'Bezahlt' : r.status === status);
+    let matchKat = kat === 'Alle' ? true : r.kategorie === kat;
+    let matchDate = isDateInRange(r.datum, von, bis);
+    return matchText && matchStatus && matchKat && matchDate;
+  });
+
+  filtered.sort((a, b) => {
+    let valA = a[sortCol] || '', valB = b[sortCol] || '';
+    if (sortCol === 'datum') { valA = new Date(valA || 0).getTime(); valB = new Date(valB || 0).getTime(); }
+    else if (sortCol === 'betrag') { valA = a.betrag; valB = b.betrag; }
+    else { valA = String(valA).toLowerCase(); valB = String(valB).toLowerCase(); }
+    
+    if (valA < valB) return -1 * sortDir;
+    if (valA > valB) return 1 * sortDir;
+    return 0;
+  });
+
+  document.getElementById('rech-count').innerText = `${filtered.length} von ${rechnungen.length} Rechnungen`;
+
+  document.getElementById('rech-tbody').innerHTML = filtered.map(r => `
+    <tr class="bg-white hover-card">
+      <td>${formatDate(r.datum)}</td>
+      <td>${r.rechnr || '-'}</td>
+      <td class="font-bold">${r.lieferant}</td>
+      <td class="text-right font-bold">${formatEur(r.betrag)}</td>
+      <td class="text-center" title="${r.zahlungsart}">${r.zahlungsart === 'Barzahlung' ? '💵 Bar' : '🏦 Bank'}</td>
+      <td class="text-xs text-gray-500">${r.kategorie}</td>
+      <td class="text-xs text-gray-500 italic">${(r.notiz || '').substring(0, 40)}</td>
+      <td><span class="badge badge-${String(r.status || '').toLowerCase().replace('ü', 'u')}">${r.status}</span></td>
+      <td class="text-xs">${r.erfasstVon || '-'}</td>
+      <td>${getFotoBtn(r.fotolink)}</td>
+      <td>
+        <button class="btn btn-sm btn-outline" title="Bearbeiten" onclick="editRechnung('${r.id}')">✏️</button>
+        <button class="btn btn-sm btn-danger" title="Löschen" onclick="deleteRechnung('${r.rowIndex}')">🗑️</button>
+      </td>
+    </tr>
+  `).join('') || '<tr><td colspan="11" class="text-center p-4">Keine Treffer zur Suche.</td></tr>';
 }
 
-async function saveRechnung() {
-  const firma = document.getElementById('f-firma').value.trim();
-  const datum = document.getElementById('f-datum').value;
-  const betrag = parseFloat(document.getElementById('f-betrag').value) || 0;
-  const rechnr = document.getElementById('f-rechnr').value.trim();
-  const zahlungsart = document.getElementById('f-zahlungsart').value;
-  const kategorie = document.getElementById('f-kategorie').value;
-  const notiz = document.getElementById('f-notiz').value.trim();
-  
-  if (!firma || !datum || !betrag || !rechnr || !kategorie) {
-    showToast('Bitte alle Pflichtfelder ausfüllen', 'error');
-    return;
-  }
-  
-  showLoader('Speichere Rechnung...');
-  
+function renderAuswertung() {
+  const von = document.getElementById('ausw-von').value;
+  const bis = document.getElementById('ausw-bis').value;
+  const zart = document.getElementById('ausw-zahlart').value;
+
+  const filtered = rechnungen.filter(r => 
+    isDateInRange(r.datum, von, bis) && 
+    (zart === 'Alle' || (r.zahlungsart || 'Banküberweisung') === zart)
+  );
+
+  const sums = {};
+  KATEGORIEN.forEach(k => sums[k] = 0);
+  let total = 0;
+
+  filtered.forEach(r => {
+    let kat = r.kategorie || 'Sonstiges';
+    if (sums[kat] === undefined) sums[kat] = 0;
+    sums[kat] += r.betrag;
+    total += r.betrag;
+  });
+
+  let html = '';
+  KATEGORIEN.forEach(kat => {
+    html += `<tr><td>${kat}</td><td class="text-right font-bold">${formatEur(-sums[kat])}</td></tr>`;
+  });
+
+  document.getElementById('ausw-tbody').innerHTML = html;
+  document.getElementById('ausw-tfoot').innerHTML = `
+    <tr>
+      <td style="font-weight:700; padding:12px 10px; font-size:15px; color:var(--navy);">Gesamtausgaben</td>
+      <td class="text-right font-bold" style="padding:12px 10px; font-size:16px; color:var(--navy);">${formatEur(-total)}</td>
+    </tr>`;
+}
+
+function getFotoBtn(link) {
+  if (!link || link.trim() === '') return '<span style="color:#ccc;font-size:16px;">🖼️</span>';
+  return `<button class="btn btn-sm btn-outline" onclick="window.open('${link.split(',')[0].trim()}','_blank')" style="padding:2px 6px;">🖼️</button>`;
+}
+
+async function deleteRechnung(rowIndex) {
+  if (!confirm('Rechnung wirklich löschen?')) return;
+  showLoader('Lösche...');
   try {
-    let rechnungId = editingRechnungId || getCurrentRechnungFingerprint();
-    
-    const values = [[
-      rechnungId,
-      datum,
-      firma,
-      betrag.toString().replace('.', ','),
-      kategorie,
-      rechnr,
-      '',
-      'Erfasst',
-      notiz,
-      settings.userName || 'Unbekannt',
-      preUploadedLinks[0] || '',
-      zahlungsart
-    ]];
-    
-    if (editingRechnungId) {
-      const rech = rechnungen.find(r => r.id === editingRechnungId);
-      if (!rech) {
-        hideLoader();
-        showToast('Rechnung nicht gefunden', 'error');
-        return;
-      }
-      
-      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A${rech.rowIndex}:L${rech.rowIndex}?valueInputOption=USER_ENTERED`, {
-        method: 'PUT',
-        headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ values })
-      });
-    } else {
-      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A:L?valueInputOption=USER_ENTERED`, {
-        method: 'APPEND',
-        headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ values })
-      });
-    }
-    
-    if (tc_autoupload && preUploadedLinks.length > 0) {
-      // Auto-upload already done
-    }
-    
-    resetForm();
+    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A${rowIndex}:L${rowIndex}:clear`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${accessToken}` }
+    });
+    showToast('Gelöscht!');
     await loadFromSheets();
-    showToast(editingRechnungId ? 'Rechnung aktualisiert' : 'Rechnung gespeichert');
   } catch (e) {
-    console.error('Save Error:', e);
-    showToast('Fehler beim Speichern', 'error');
+    showToast('Fehler: ' + e.message, 'error');
   }
-  
   hideLoader();
+}
+
+function validateForm() {
+  const req = ['f-firma', 'f-datum', 'f-betrag', 'f-rechnr', 'f-kategorie', 'f-zahlungsart'];
+  let valid = true;
+  req.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el.value.trim()) { el.style.borderColor = 'var(--danger)'; valid = false; }
+    else { el.style.borderColor = ''; }
+  });
+  if (!valid) showToast('Bitte alle rot markierten Pflichtfelder ausfüllen', 'error');
+  return valid;
 }
 
 function resetForm() {
   editingRechnungId = null;
-  document.getElementById('f-firma').value = '';
-  document.getElementById('f-datum').value = new Date().toISOString().slice(0, 10);
-  document.getElementById('f-betrag').value = '';
-  document.getElementById('f-rechnr').value = '';
+  pendingRechnungId = null;
+  document.querySelectorAll('.form-grid input, .form-grid textarea, .form-grid select').forEach(i => { i.value = ''; i.style.borderColor = ''; });
   document.getElementById('f-zahlungsart').value = 'Banküberweisung';
-  document.getElementById('f-kategorie').value = '';
-  document.getElementById('f-notiz').value = '';
   document.getElementById('preview-container').innerHTML = '';
   document.getElementById('ai-btn').style.display = 'none';
+  const btn = document.getElementById('btn-save');
+  btn.innerHTML = '💾 In Cloud speichern';
+  btn.classList.remove('btn-warning');
   currentFilesBase64 = [];
   preUploadedLinks = [];
+  const fileInput = document.getElementById('file-input');
+  if (fileInput) fileInput.value = '';
 }
 
 function handleFiles(input) {
-  // Placeholder for file handling
+  const files = input.files;
+  if (!files.length) return;
+  currentFilesBase64 = [];
+  preUploadedLinks = [];
+  pendingRechnungId = null;
+  const container = document.getElementById('preview-container');
+  container.innerHTML = '';
+  document.getElementById('ai-btn').style.display = 'block';
+
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const b64 = e.target.result;
+      if (file.type === 'application/pdf') {
+        currentFilesBase64.push({ type: 'application/pdf', data: b64.split(',')[1], name: file.name });
+        container.innerHTML += `<embed src="${b64}" type="application/pdf" class="preview-item">`;
+      } else {
+        const img = new Image();
+        img.onload = () => {
+          const cvs = document.createElement('canvas');
+          let w = img.width, h = img.height;
+          const maxW = 1200;
+          if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+          cvs.width = w; cvs.height = h;
+          cvs.getContext('2d').drawImage(img, 0, 0, w, h);
+          const comp = cvs.toDataURL('image/jpeg', 0.8);
+          currentFilesBase64.push({ type: 'image/jpeg', data: comp.split(',')[1], name: file.name });
+          container.innerHTML += `<img src="${comp}" class="preview-item">`;
+        };
+        img.src = b64;
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadToDrive(base64obj, idPrefix, index = 0, totalFiles = 1) {
+    const extension = base64obj.name.split('.').pop() || (base64obj.type.split('/')[1] || 'bin');
+    let filename = (totalFiles > 1) ? `${idPrefix}_${index + 1}` : idPrefix;
+    const metadata = { name: `${filename}.${extension}`, parents: [settings.folderId] };
+    const boundary = '-------314159265358979323846';
+    const body = '\r\n--' + boundary + '\r\n' +
+        'Content-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) +
+        '\r\n--' + boundary + '\r\n' +
+        'Content-Type: ' + base64obj.type + '\r\nContent-Transfer-Encoding: base64\r\n\r\n' + base64obj.data +
+        '\r\n--' + boundary + '--';
+
+    const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': `multipart/related; boundary=${boundary}` },
+        body: body
+    });
+    const data = await res.json();
+    return data.webViewLink || '';
 }
 
 async function extractAI() {
-  // Placeholder for AI extraction
+  if (!settings.geminiKey) { showToast('Gemini API Key fehlt', 'error'); return; }
+  if (!currentFilesBase64.length) return;
+  showLoader('KI analysiert Beleg(e)...');
+
+  try {
+    const prompt = `Analysiere diesen Beleg. Du MUSST ein einziges JSON-Objekt (KEIN Array) zurückgeben.
+Verwende exakt diese Keys und keine anderen:
+- "lieferant" (String, Firmenname)
+- "datum" (String, YYYY-MM-DD)
+- "betrag" (Zahl mit Punkt, ohne Währung)
+- "rechnr" (String)
+- "notiz" (String, sehr kurz)
+- "kategorie" (Wähle exakt einen: [${KATEGORIEN.join(', ')}]. Wenn nichts passt, verwende exakt "Sonstiges")`;
+
+    const parts = [{ text: prompt }];
+    currentFilesBase64.forEach(f => parts.push({ inline_data: { mime_type: f.type, data: f.data } }));
+
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${settings.geminiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts }], generationConfig: { temperature: 0.1, responseMimeType: 'application/json' } })
+    });
+
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+
+    let parsedData = extractJSON(data.candidates[0].content.parts[0].text);
+    let parsed = Array.isArray(parsedData) ? parsedData[0] : parsedData;
+
+    if (parsed.lieferant) document.getElementById('f-firma').value = parsed.lieferant;
+    if (parsed.datum) {
+      let d = parsed.datum;
+      if (d.includes('.')) {
+        const p = d.split('.');
+        if (p.length === 3) d = `${p[2]}-${p[1]}-${p[0]}`;
+      }
+      document.getElementById('f-datum').value = d.substring(0, 10);
+    }
+    if (parsed.betrag !== undefined && parsed.betrag !== null) {
+      let b = parseFloat(String(parsed.betrag).replace(',', '.'));
+      if (!isNaN(b)) document.getElementById('f-betrag').value = b;
+    }
+    if (parsed.rechnr) document.getElementById('f-rechnr').value = parsed.rechnr;
+    if (parsed.notiz) document.getElementById('f-notiz').value = parsed.notiz;
+    if (parsed.kategorie) {
+      let mk = KATEGORIEN.find(k => k.toLowerCase() === String(parsed.kategorie).toLowerCase());
+      document.getElementById('f-kategorie').value = mk || 'Sonstiges';
+    }
+
+    ['f-firma', 'f-datum', 'f-betrag', 'f-rechnr', 'f-kategorie'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.value.trim()) el.style.borderColor = '';
+    });
+
+    pendingRechnungId = getCurrentRechnungFingerprint(editingRechnungId);
+    showToast('✨ Felder ausgefüllt!');
+
+    if (tc_autoupload) {
+        showLoader('Lade Foto in Drive (Auto-Upload)...');
+        const idPrefix = pendingRechnungId || getCurrentRechnungFingerprint(editingRechnungId);
+        for (let i = 0; i < currentFilesBase64.length; i++) {
+            const link = await uploadToDrive(currentFilesBase64[i], idPrefix, i, currentFilesBase64.length);
+            if (link) preUploadedLinks.push(link);
+        }
+        currentFilesBase64 = [];
+        document.getElementById('preview-container').innerHTML = '<div style="font-size:12px;color:var(--success);font-weight:bold;margin-bottom:10px;">✅ Fotos in Drive gespeichert</div>';
+        document.getElementById('ai-btn').style.display = 'none';
+        showToast('⚡ Auto-Upload erfolgreich');
+        await saveRechnung();
+    }
+  } catch (e) {
+    showToast('KI Fehler beim Auslesen. Bitte manuell ergänzen.', 'error');
+    console.error(e);
+  }
+  hideLoader();
 }
 
-async function handleBankCSV(input) {
-  // Placeholder for CSV handling
+async function saveRechnung() {
+  if (!accessToken) { showToast('Nicht angemeldet!', 'error'); return; }
+  if (!validateForm()) return;
+
+  showLoader('Speichere Beleg...');
+  try {
+    let isEdit = editingRechnungId != null;
+    let id = isEdit ? editingRechnungId : (pendingRechnungId || getCurrentRechnungFingerprint(null));
+    let links = [...preUploadedLinks];
+
+    if (currentFilesBase64.length > 0 && settings.folderId) {
+        const idPrefix = isEdit ? editingRechnungId : id;
+        for (let i = 0; i < currentFilesBase64.length; i++) {
+            const link = await uploadToDrive(currentFilesBase64[i], idPrefix, i, currentFilesBase64.length);
+            if (link) links.push(link);
+        }
+    }
+
+    const rowData = [
+      id,
+      document.getElementById('f-datum').value,
+      document.getElementById('f-firma').value.trim(),
+      document.getElementById('f-betrag').value.replace('.', ','),
+      document.getElementById('f-kategorie').value,
+      document.getElementById('f-rechnr').value,
+      '',
+      'Erfasst',
+      document.getElementById('f-notiz').value,
+      settings.userName || 'Admin',
+      links.join(', '),
+      document.getElementById('f-zahlungsart').value
+    ];
+
+    if (isEdit) {
+      const r = rechnungen.find(x => x.id === id);
+      if (links.length === 0) rowData[10] = r.fotolink || '';
+      rowData[7] = r.status;
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A${r.rowIndex}:L${r.rowIndex}?valueInputOption=USER_ENTERED`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ values: [rowData] })
+      });
+    } else {
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A1:append?valueInputOption=USER_ENTERED`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ values: [rowData] })
+      });
+    }
+
+    showToast('✅ Gespeichert!');
+    resetForm();
+    await loadFromSheets();
+    showTab('dashboard');
+  } catch (e) {
+    showToast('Fehler: ' + e.message, 'error');
+  }
+  hideLoader();
+}
+
+function editRechnung(id) {
+  const r = rechnungen.find(x => x.id === id);
+  if (!r) return;
+  editingRechnungId = id;
+  pendingRechnungId = id;
+  document.getElementById('f-firma').value = r.lieferant || '';
+  document.getElementById('f-datum').value = r.datum || '';
+  document.getElementById('f-betrag').value = r.betrag || '';
+  document.getElementById('f-rechnr').value = r.rechnr || '';
+  document.getElementById('f-kategorie').value = r.kategorie || '';
+  document.getElementById('f-zahlungsart').value = r.zahlungsart || 'Banküberweisung';
+  document.getElementById('f-notiz').value = r.notiz || '';
+
+  document.getElementById('ai-btn').style.display = 'none';
+  document.getElementById('preview-container').innerHTML = r.fotolink ? '<div style="font-size:12px;color:var(--navy);font-weight:bold;margin-bottom:10px;">Bestehendes Foto in Cloud verknüpft.</div>' : '';
+
+  const btn = document.getElementById('btn-save');
+  btn.innerHTML = '💾 Änderungen speichern';
+  btn.classList.add('btn-warning');
+  showTab('erfassen');
+  window.scrollTo(0, 0);
 }
 
 function switchKassaTab(idx) {
+  document.getElementById('ktab-0').classList.remove('active');
+  document.getElementById('ktab-1').classList.remove('active');
+  document.getElementById('ktab-' + idx).classList.add('active');
   document.getElementById('ksub-0').style.display = idx === 0 ? 'block' : 'none';
   document.getElementById('ksub-1').style.display = idx === 1 ? 'block' : 'none';
-  document.getElementById('ktab-0').classList.toggle('active', idx === 0);
-  document.getElementById('ktab-1').classList.toggle('active', idx === 1);
 }
+
+function handleBankCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => processBankCSV(e.target.result);
+  reader.readAsText(file, 'windows-1252');
+}
+
+const anonymisiereIBAN = t => String(t || '').replace(/[A-Z]{2}\d{2}[\d\s]{10,30}/g, m => {
+  const c = m.replace(/\s/g, '');
+  return c.substring(0, 2) + '****' + c.slice(-4);
+});
+const entferneBIC = t => String(t || '').replace(/BIC\s+Empfänger:\s*[A-Z0-9]+/gi, '').trim();
+const extrahiereEmpfaenger = t => {
+  const m = String(t || '').match(/Empfänger:\s*(.+?)(?=IBAN|BIC|Zahlungsreferenz|$)/i);
+  return m ? m[1].trim().substring(0, 50) : '';
+};
+
+async function processBankCSV(text) {
+  showLoader('Verarbeite CSV...');
+  const lines = text.split('\n').filter(l => l.trim());
+  let newAusgaben = [];
+  let existingFingerprints = new Set(bankbuchungen.map(b => b.fingerprint));
+  let skipped = 0;
+  einzahlungenCount = 0;
+
+  for (const line of lines) {
+    const parts = line.split(';').map(p => p.replace(/"/g, '').trim());
+    if (parts.length < 5) continue;
+    let betrag = parseFloat(parts[3].replace(/\./g, '').replace(',', '.'));
+    if (isNaN(betrag)) continue;
+    if (betrag >= 0) { einzahlungenCount++; continue; }
+
+    let rawText = parts[1];
+    let txtClean = entferneBIC(anonymisiereIBAN(rawText)).substring(0, 60);
+    const empf = extrahiereEmpfaenger(rawText);
+
+    const [d, m, y] = parts[0].split('.');
+    const datumIso = `${y}-${m}-${d}`;
+    const fingerprint = `${datumIso}|${Math.abs(betrag)}|${txtClean.substring(0, 20)}`;
+
+    if (existingFingerprints.has(fingerprint)) { skipped++; continue; }
+
+    newAusgaben.push({ fingerprint, datum: datumIso, betrag: betrag, buchungstext: txtClean, empfaenger: empf, abgeglichen: '', rechnungID: '', fotolink: '', konfidenz: '' });
+  }
+
+  if (newAusgaben.length > 0) {
+    await appendBankbuchungen(newAusgaben);
+    showToast(`${newAusgaben.length} neu, ${skipped} Dupl. Starte KI-Abgleich...`);
+    await startGeminiAbgleich(true);
+  } else {
+    showToast(`Keine neuen Bankbuchungen. ${skipped} Duplikate.`);
+    updateKassapruefungUI();
+    hideLoader();
+  }
+}
+
+async function appendBankbuchungen(newAusgaben) {
+  try {
+    const values = newAusgaben.map(b => [
+      b.fingerprint,
+      b.datum,
+      b.betrag.toString().replace('.', ','),
+      b.buchungstext,
+      b.empfaenger,
+      b.abgeglichen,
+      b.rechnungID,
+      b.fotolink,
+      b.konfidenz || ''
+    ]);
+    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Bankbuchungen!A1:append?valueInputOption=USER_ENTERED`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values })
+    });
+    await loadFromSheets();
+  } catch (e) {
+    showToast('Fehler: ' + e.message, 'error');
+  }
+}
+
+function setSortKGed(col) { if (kGedCol === col) kGedDir *= -1; else { kGedCol = col; kGedDir = -1; } updateKassapruefungUI(); }
+function setSortKOB(col) { if (kOBCol === col) kOBDir *= -1; else { kOBCol = col; kOBDir = -1; } updateKassapruefungUI(); }
+function setSortKOR(col) { if (kORCol === col) kORDir *= -1; else { kORCol = col; kORDir = -1; } updateKassapruefungUI(); }
 
 function updateKassapruefungUI() {
-  // Placeholder for Kassaprüfung UI
+  const von = '';
+  const bis = '';
+
+  const ausgaben = bankbuchungen.filter(b => isDateInRange(b.datum, von, bis));
+  const rechnungenZeit = rechnungen.filter(r => isDateInRange(r.datum, von, bis));
+  const summe = ausgaben.reduce((s, b) => s + Math.abs(b.betrag), 0);
+
+  document.getElementById('kassa-checksum').innerHTML = `
+    <div style="background:#fff; border-left:4px solid var(--navy); padding:15px; margin-bottom:20px; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+      <div style="font-weight:700; color:var(--navy); margin-bottom:10px;">PRÜFSUMME AUSGABEN</div>
+      <div style="display:grid; grid-template-columns: 140px 1fr; gap:5px; font-size:13px;">
+        <div class="text-gray-500">Zeitraum:</div><div class="font-bold">Gesamter Zeitraum</div>
+        <div class="text-gray-500">Anzahl Buchungen:</div><div class="font-bold">${ausgaben.length}</div>
+        <div class="text-gray-500">Summe Ausgaben:</div><div style="font-weight:800; font-size:15px; color:var(--danger);">${formatEur(summe)}</div>
+      </div>
+      <div style="margin-top:10px; font-size:11px; color:var(--gray-500);">→ Bitte mit Kontoauszug der Raiffeisen abgleichen (Spiegelt nur Banküberweisungen wider)</div>
+    </div>
+  `;
+
+  const matchedAusgaben = ausgaben.filter(b => b.rechnungID);
+  const unmatchedAusgaben = ausgaben.filter(b => !b.rechnungID);
+  const matchedIds = new Set(matchedAusgaben.map(b => b.rechnungID));
+  
+  const matchedRech = rechnungenZeit.filter(r => matchedIds.has(r.id));
+  const unmatchedRech = rechnungenZeit.filter(r => !matchedIds.has(r.id) && r.zahlungsart !== 'Barzahlung');
+
+  document.getElementById('tile-gedeck-count').innerText = matchedRech.length + ' Rechnungen';
+  document.getElementById('tile-gedeck-sum').innerText = formatEur(matchedRech.reduce((s, r) => s + r.betrag, 0));
+  document.getElementById('tile-ohnebuchung-count').innerText = unmatchedRech.length + ' Rechnungen';
+  document.getElementById('tile-ohnebuchung-sum').innerText = formatEur(unmatchedRech.reduce((s, r) => s + r.betrag, 0));
+  document.getElementById('tile-ohnerech-count').innerText = unmatchedAusgaben.length + ' Ausgaben';
+  document.getElementById('tile-ohnerech-sum').innerText = formatEur(unmatchedAusgaben.reduce((s, b) => s + Math.abs(b.betrag), 0));
+
+  applySortArrow('th-kged-rdat', 'rechDatum', kGedCol, kGedDir);
+  applySortArrow('th-kged-rnr', 'rechnr', kGedCol, kGedDir);
+  applySortArrow('th-kged-lief', 'lieferant', kGedCol, kGedDir);
+  applySortArrow('th-kged-betr', 'betrag', kGedCol, kGedDir);
+  applySortArrow('th-kged-bdat', 'bankDatum', kGedCol, kGedDir);
+  
+  applySortArrow('th-kob-dat', 'datum', kOBCol, kOBDir);
+  applySortArrow('th-kob-rnr', 'rechnr', kOBCol, kOBDir);
+  applySortArrow('th-kob-lief', 'lieferant', kOBCol, kOBDir);
+  applySortArrow('th-kob-betr', 'betrag', kOBCol, kOBDir);
+  
+  applySortArrow('th-kor-dat', 'datum', kORCol, kORDir);
+  applySortArrow('th-kor-txt', 'buchungstext', kORCol, kORDir);
+  applySortArrow('th-kor-empf', 'empfaenger', kORCol, kORDir);
+  applySortArrow('th-kor-betr', 'betrag', kORCol, kORDir);
+
+  const searchGed = document.getElementById('search-ged').value.toLowerCase();
+  let gedecktData = matchedAusgaben.map(b => {
+    const r = rechnungen.find(x => x.id === b.rechnungID);
+    return { bankData: b, rechData: r || null };
+  }).filter(item => {
+    if (!item.rechData) return false;
+    if (!searchGed) return true;
+    const txt = `${item.rechData.lieferant} ${item.rechData.rechnr} ${item.bankData.buchungstext}`.toLowerCase();
+    return txt.includes(searchGed);
+  });
+
+  gedecktData.sort((a, b) => {
+    let valA, valB;
+    switch (kGedCol) {
+      case 'rechDatum': valA = new Date(a.rechData.datum || 0); valB = new Date(b.rechData.datum || 0); break;
+      case 'bankDatum': valA = new Date(a.bankData.datum || 0); valB = new Date(b.bankData.datum || 0); break;
+      case 'lieferant': valA = (a.rechData.lieferant || '').toLowerCase(); valB = (b.rechData.lieferant || '').toLowerCase(); break;
+      case 'rechnr': valA = (a.rechData.rechnr || '').toLowerCase(); valB = (b.rechData.rechnr || '').toLowerCase(); break;
+      case 'betrag': valA = a.rechData.betrag || 0; valB = b.rechData.betrag || 0; break;
+      default: return 0;
+    }
+    if (valA < valB) return -1 * kGedDir;
+    if (valA > valB) return 1 * kGedDir;
+    return 0;
+  });
+
+  document.getElementById('abg-gedeckt-tbody').innerHTML = gedecktData.map(item => {
+    const r = item.rechData;
+    const b = item.bankData;
+    return `
+      <tr class="bg-white border-b">
+        <td>${formatDate(r.datum)}</td><td>${r.rechnr || '-'}</td><td>${r.lieferant}</td>
+        <td class="font-bold text-right">${formatEur(r.betrag)}</td><td class="text-xs text-gray-500">${b.buchungstext}</td>
+        <td>${formatDate(b.datum)}</td><td>${getKonfBadge(b.konfidenz)}</td><td>${getFotoBtn(b.fotolink || r.fotolink)}</td>
+      </tr>`;
+  }).join('') || '<tr><td colspan="8" class="text-center p-4">Keine passenden Rechnungen gefunden.</td></tr>';
+
+  const searchOB = document.getElementById('search-ob').value.toLowerCase();
+  let obData = unmatchedRech.filter(r => {
+    if (!searchOB) return true;
+    const txt = `${r.lieferant} ${r.rechnr} ${r.notiz}`.toLowerCase();
+    return txt.includes(searchOB);
+  });
+
+  obData.sort((a, b) => {
+    let valA, valB;
+    switch (kOBCol) {
+      case 'datum': valA = new Date(a.datum || 0); valB = new Date(b.datum || 0); break;
+      case 'lieferant': valA = String(a.lieferant || '').toLowerCase(); valB = String(b.lieferant || '').toLowerCase(); break;
+      case 'rechnr': valA = String(a.rechnr || '').toLowerCase(); valB = String(b.rechnr || '').toLowerCase(); break;
+      case 'betrag': valA = a.betrag || 0; valB = b.betrag || 0; break;
+      default: return 0;
+    }
+    if (valA < valB) return -1 * kOBDir;
+    if (valA > valB) return 1 * kOBDir;
+    return 0;
+  });
+
+  document.getElementById('abg-ohnebuch-tbody').innerHTML = obData.map(r => `
+    <tr class="bg-white border-b">
+      <td>${formatDate(r.datum)}</td><td>${r.rechnr || '-'}</td><td>${r.lieferant}</td>
+      <td class="font-bold text-right">${formatEur(r.betrag)}</td><td><span class="badge badge-${String(r.status || '').toLowerCase().replace('ü', 'u')}">${r.status}</span></td>
+      <td class="text-xs text-gray-500 italic">${(r.notiz || '').substring(0, 40)}</td><td>${getFotoBtn(r.fotolink)}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="7" class="text-center p-4 text-gray-500">Alles super! Keine offene Rechnung ohne Buchung.</td></tr>';
+
+  const searchOR = document.getElementById('search-or').value.toLowerCase();
+  let orData = unmatchedAusgaben.filter(b => {
+    if (!searchOR) return true;
+    const txt = `${b.buchungstext} ${b.empfaenger}`.toLowerCase();
+    return txt.includes(searchOR);
+  });
+
+  orData.sort((a, b) => {
+    let valA, valB;
+    switch (kORCol) {
+      case 'datum': valA = new Date(a.datum || 0); valB = new Date(b.datum || 0); break;
+      case 'buchungstext': valA = String(a.buchungstext || '').toLowerCase(); valB = String(b.buchungstext || '').toLowerCase(); break;
+      case 'empfaenger': valA = String(a.empfaenger || '').toLowerCase(); valB = String(b.empfaenger || '').toLowerCase(); break;
+      case 'betrag': valA = Math.abs(a.betrag || 0); valB = Math.abs(b.betrag || 0); break;
+      default: return 0;
+    }
+    if (valA < valB) return -1 * kORDir;
+    if (valA > valB) return 1 * kORDir;
+    return 0;
+  });
+
+  document.getElementById('abg-ohnerech-tbody').innerHTML = orData.map(b => `
+    <tr class="bg-white border-b">
+      <td>${formatDate(b.datum)}</td><td class="text-xs text-gray-500">${b.buchungstext}</td>
+      <td>${b.empfaenger}</td><td class="font-bold text-right">${formatEur(Math.abs(b.betrag))}</td>
+      <td><button class="btn btn-sm btn-outline" onclick="openZuordnenModal('${b.fingerprint}')">Zuordnen</button></td>
+    </tr>
+  `).join('') || '<tr><td colspan="5" class="text-center p-4 text-gray-500">Alle Bankausgaben haben eine Rechnung!</td></tr>';
+
+  const txt = document.getElementById('kz-text')?.value.toLowerCase() || '';
+  const flt = document.getElementById('kz-filter')?.value || 'Alle';
+  const filteredKZ = ausgaben.filter(b => {
+    let mt = (b.buchungstext || '').toLowerCase().includes(txt) || (b.empfaenger || '').toLowerCase().includes(txt);
+    let mf = true;
+    if (flt === 'Mit') mf = !!b.rechnungID;
+    if (flt === 'Ohne') mf = !b.rechnungID;
+    return mt && mf;
+  });
+  
+  filteredKZ.sort((a, b) => new Date(b.datum) - new Date(a.datum));
+  
+  document.getElementById('kz-count').innerText = `${filteredKZ.length} von ${ausgaben.length} Zahlungen`;
+  document.getElementById('kz-tbody').innerHTML = filteredKZ.map(b => {
+    const r = b.rechnungID ? rechnungen.find(x => x.id === b.rechnungID) : null;
+    return `
+      <tr class="bg-white border-b">
+        <td>${formatDate(b.datum)}</td><td class="text-xs text-gray-500">${b.buchungstext}</td>
+        <td>${b.empfaenger}</td><td class="font-bold text-right">${formatEur(Math.abs(b.betrag))}</td>
+        <td>${r ? r.lieferant : '-'}</td><td>${r ? (r.rechnr || '-') : '-'}</td><td>${getFotoBtn(b.fotolink || (r ? r.fotolink : null))}</td>
+      </tr>`;
+  }).join('') || '<tr><td colspan="7" class="text-center p-4">Keine Zahlungen gefunden.</td></tr>';
 }
 
-function setSortKGed(col) {
-  kGedCol = col;
+function getKonfBadge(k) {
+  const v = String(k || '').toLowerCase();
+  if (v === 'hoch') return '<span class="badge" style="background:#d1fae5;color:#065f46;">Hoch</span>';
+  if (v === 'mittel') return '<span class="badge" style="background:#fef3c7;color:#b45309;">Mittel</span>';
+  if (v === 'niedrig') return '<span class="badge" style="background:#ffedd5;color:#c2410c;">Niedrig</span>';
+  return '<span class="badge" style="background:#e5e7eb;color:#374151;">Manuell</span>';
 }
 
-function setSortKOB(col) {
-  kOBCol = col;
+async function setRechnungBezahlt(rowIndex) {
+  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!H${rowIndex}?valueInputOption=USER_ENTERED`, {
+    method: 'PUT',
+    headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values: [['Bezahlt']] })
+  });
 }
 
-function setSortKOR(col) {
-  kORCol = col;
-}
+async function startGeminiAbgleich(isAuto = false) {
+  const von = '';
+  const bis = '';
+  const ausgaben = bankbuchungen.filter(b => isDateInRange(b.datum, von, bis) && !b.rechnungID);
+  const vergebeneIds = new Set(bankbuchungen.filter(b => b.rechnungID).map(b => b.rechnungID));
+  const offene = rechnungen.filter(r => r.status !== 'Bezahlt' && !vergebeneIds.has(r.id) && r.zahlungsart !== 'Barzahlung');
 
-async function startGeminiAbgleich(auto) {
-  // Placeholder for Gemini integration
-}
-
-async function renderAuswertung() {
-  // Placeholder for Auswertung
-}
-
-function deleteBankbuchungen() {
-  if (confirm('Sicher? Alle Bankbuchungen werden gelöscht!')) {
-    showToast('Funktion im Demo nicht verfügbar');
+  if (ausgaben.length === 0) {
+    if (!isAuto) showToast('Keine offenen Ausgaben zum Abgleichen.');
+    hideLoader();
+    return;
   }
+
+  showLoader('Gemini analysiert Zuordnungen...');
+  try {
+    const prompt = `Du bist Buchhaltungsassistent für einen österreichischen Tennisverein. Ordne jede Bankausgabe einer Rechnung zu.
+Regeln: Ähnliche Firmennamen matchen, Betragsabweichung bis 2% ok, Datum max 14 Tage Diff. "niedrig" Konfidenz wenn nur Betrag stimmt.
+Eine Rechnung darf nur einmal zugeordnet werden.
+Bankausgaben: ${JSON.stringify(ausgaben.map(a => ({fingerprint: a.fingerprint, datum: a.datum, betrag: Math.abs(a.betrag), text: a.buchungstext, empf: a.empfaenger})))}
+Rechnungen: ${JSON.stringify(offene.map(r => ({id: r.id, datum: r.datum, lieferant: r.lieferant, betrag: r.betrag, rechnr: r.rechnr})))}
+Antworte AUSSCHLIESSLICH mit JSON-Array:[{"bank_fingerprint":"...", "rechnung_id":"...", "konfidenz":"hoch|mittel|niedrig", "begruendung":"..."}]`;
+
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${settings.geminiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.1, responseMimeType: 'application/json' } })
+    });
+
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    const matches = extractJSON(data.candidates[0].content.parts[0].text);
+
+    let updates = 0;
+    const usedRechnungIds = new Set();
+    const usedFingerprints = new Set();
+
+    for (let m of matches) {
+      if (!m || !m.rechnung_id || m.rechnung_id === 'null') continue;
+      if (usedRechnungIds.has(m.rechnung_id) || usedFingerprints.has(m.bank_fingerprint)) continue;
+      const b = bankbuchungen.find(x => x.fingerprint === m.bank_fingerprint && !x.rechnungID);
+      const r = rechnungen.find(x => x.id === m.rechnung_id && x.status !== 'Bezahlt');
+      if (b && r) {
+        b.rechnungID = m.rechnung_id;
+        b.abgeglichen = 'ja';
+        b.konfidenz = m.konfidenz || 'manuell';
+        b.fotolink = r.fotolink || '';
+        await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Bankbuchungen!F${b.rowIndex}:I${b.rowIndex}?valueInputOption=USER_ENTERED`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ values: [['ja', r.id, b.fotolink, b.konfidenz]] })
+        });
+        await setRechnungBezahlt(r.rowIndex);
+        usedRechnungIds.add(m.rechnung_id);
+        usedFingerprints.add(m.bank_fingerprint);
+        updates++;
+      }
+    }
+    showToast(`Abgleich fertig. ${updates} Zuordnungen gefunden!`);
+    await loadFromSheets();
+  } catch (e) {
+    showToast('KI Fehler: ' + e.message, 'error');
+  }
+  hideLoader();
+}
+
+function openZuordnenModal(fp) {
+  currentAssignFingerprint = fp;
+  const von = '';
+  const bis = '';
+  const vergebeneIds = new Set(bankbuchungen.filter(b => b.rechnungID).map(b => b.rechnungID));
+  const offene = rechnungen.filter(r => isDateInRange(r.datum, von, bis) && r.status !== 'Bezahlt' && !vergebeneIds.has(r.id) && r.zahlungsart !== 'Barzahlung');
+  document.getElementById('modal-select').innerHTML = '<option value="">-- Rechnung wählen --</option>' +
+    offene.map(r => `<option value="${r.id}">${formatDate(r.datum)} | ${formatEur(r.betrag)} | ${r.lieferant}</option>`).join('');
+  document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+async function confirmZuordnung() {
+  const rid = document.getElementById('modal-select').value;
+  if (!rid) return;
+  const b = bankbuchungen.find(x => x.fingerprint === currentAssignFingerprint);
+  if (!b) return;
+  const r = rechnungen.find(x => x.id === rid);
+  if (!r) return;
+
+  showLoader('Speichere Zuordnung...');
+  try {
+    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Bankbuchungen!F${b.rowIndex}:I${b.rowIndex}?valueInputOption=USER_ENTERED`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values: [['ja', rid, r.fotolink || '', 'manuell']] })
+    });
+    await setRechnungBezahlt(r.rowIndex);
+    document.getElementById('modal-overlay').style.display = 'none';
+    showToast('Manuell zugeordnet!');
+    await loadFromSheets();
+  } catch (e) {
+    showToast('Fehler: ' + e.message, 'error');
+  }
+  hideLoader();
+}
+
+async function deleteBankbuchungen() {
+  if (!confirm('Möchtest du wirklich alle Bankbuchungen (ab Zeile 2) löschen? Dies kann nicht rückgängig gemacht werden!')) return;
+  showLoader('Lösche Bankbuchungen...');
+  try {
+    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Bankbuchungen!A2:I:clear`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${accessToken}` }
+    });
+    showToast('Bankbuchungen gelöscht.');
+    await loadFromSheets();
+  } catch (e) {
+    showToast('Fehler: ' + e.message, 'error');
+  }
+  hideLoader();
 }
 </script>
 </body>
