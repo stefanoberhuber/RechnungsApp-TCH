@@ -141,7 +141,7 @@ nav::-webkit-scrollbar { display: none; }
 
   /* Show mobile elements */
   .mobile-settings-btn { display: flex; align-items: center; justify-content: center; }
-  .bottom-nav { display: flex; }
+  .bottom-nav { display: flex !important; justify-content: space-around; align-items: center; }
 
   /* Content padding for bottom nav */
   body { padding-bottom: calc(var(--bottom-nav-height) + var(--safe-bottom) + 16px); }
@@ -289,8 +289,8 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
   </div>
 
   <!-- Mobile Bottom Nav -->
-   <nav class="bottom-nav" id="bottom-nav" style="display:flex; justify-content:space-around; align-items:center;">
-    <div class="bn-item active" id="bn-dashboard" onclick="showTab('dashboard')">
+   <nav class="bottom-nav" id="bottom-nav">
+  <div class="bn-item active" id="bn-dashboard" onclick="showTab('dashboard')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/>
         <path d="M9 21V12h6v9"/>
