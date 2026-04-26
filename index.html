@@ -291,10 +291,12 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
   <!-- Mobile Bottom Nav -->
    <nav class="bottom-nav" id="bottom-nav">
   <div class="bn-item active" id="bn-dashboard" onclick="showTab('dashboard')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/>
-        <path d="M9 21V12h6v9"/>
+       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="4" rx="1"/>
+        <rect x="3" y="10" width="10" height="4" rx="1"/>
+        <rect x="3" y="17" width="14" height="4" rx="1"/>
       </svg>
+
     </div>
 
     <div class="bn-item" id="bn-rechnungen" onclick="showTab('rechnungen')">
@@ -316,10 +318,11 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
 
     <div class="bn-item" id="bn-kassapruefung" onclick="showTab('kassapruefung')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 10.5L12 4l9 6.5"/>
-        <path d="M4 10.5V20h16V10.5"/>
-        <rect x="9" y="14" width="6" height="6"/>
+        <rect x="2" y="6" width="20" height="13" rx="2"/>
+        <path d="M2 10h20"/>
+        <path d="M6 14h4"/>
       </svg>
+
     </div>
 
     <div class="bn-item" id="bn-auswertung" onclick="showTab('auswertung')">
