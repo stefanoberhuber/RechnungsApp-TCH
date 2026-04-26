@@ -21,7 +21,7 @@
 --cream: #f8f5f0; --white: #ffffff;
 --gray-100: #f3f4f6; --gray-200: #e5e7eb; --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280; --gray-600: #4b5563; --gray-800: #1f2937;
 --success: #2d7a4f; --warning: #b45309; --danger: #991b1b;
---bottom-nav-height: 65px;
+--bottom-nav-height: 80px;
 --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'DM Sans', sans-serif; }
@@ -351,18 +351,6 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
         <div class="stat-label">Gesamt Offen</div><div class="stat-value" id="d-offen-betrag">€ 0,00</div><div id="d-offen-anzahl" style="font-size:11px;color:#666">0 Belege</div>
         <div class="hover-hint">→ anzeigen</div>
       </div>
-      <div class="stat-card hover-card cursor-pointer" onclick="jumpTo('monat')">
-        <div class="stat-label">Diesen Monat</div><div class="stat-value" id="d-monat-betrag">€ 0,00</div><div id="d-monat-anzahl" style="font-size:11px;color:#666">0 Belege</div>
-        <div class="hover-hint">→ anzeigen</div>
-      </div>
-      <div class="stat-card hover-card cursor-pointer" onclick="jumpTo('bezahlt')">
-        <div class="stat-label">Bezahlt (Gesamt)</div><div class="stat-value" id="d-bezahlt-betrag" style="color:var(--success)">€ 0,00</div><div id="d-bezahlt-anzahl" style="font-size:11px;color:#666">0 Belege</div>
-        <div class="hover-hint">→ anzeigen</div>
-      </div>
-      <div class="stat-card hover-card cursor-pointer" onclick="jumpTo('pruefung')">
-        <div class="stat-label">Zur Prüfung</div><div class="stat-value" id="d-pruef-betrag" style="color:var(--warning)">€ 0,00</div><div id="d-pruef-anzahl" style="font-size:11px;color:#666">0 Belege</div>
-        <div class="hover-hint">→ anzeigen</div>
-      </div>
     </div>
 
     <div class="card">
@@ -457,9 +445,8 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
         </div>
         <input type="text" id="filt-text" placeholder="Suche (Firma, Nr, Notiz)..." style="flex:1; min-width:150px;" oninput="renderRechnungen()">
         <select id="filt-status" onchange="renderRechnungen()">
-          <option value="Alle">Alle Stati</option>
-          <option value="Offen">Nur Offen</option>
-          <option value="Erfasst">Erfasst</option>
+          <option value="Alle">Alle</option>
+          <option value="Offen">Offen</option>
           <option value="Bezahlt">Bezahlt</option>
         </select>
         <select id="filt-kat" onchange="renderRechnungen()">
@@ -511,17 +498,19 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
       <div style="font-size:12px; color:var(--gray-500); margin-bottom:20px;">Lade den CSV-Kontoauszug (Raiffeisen) hoch. Einzahlungen werden ignoriert, Datenschutz ist aktiv. KI Abgleich startet automatisch.</div>
 
       <div id="kassa-checksum"></div>
-
-      <div class="stats-row" style="margin-bottom:25px;">
-        <div class="stat-card" style="border-left:4px solid var(--success)">
+        <div class="stat-card hover-card cursor-pointer" onclick="openKSection('ged')" style="border-left:4px solid var(--success)">
           <div class="stat-label">✅ Gedeckt</div><div class="stat-value" id="tile-gedeck-sum">€ 0,00</div><div id="tile-gedeck-count" style="font-size:11px;color:#666">0 Rechnungen</div>
+          <div class="hover-hint">→ anzeigen</div>
         </div>
-        <div class="stat-card" style="border-left:4px solid var(--warning)">
+        <div class="stat-card hover-card cursor-pointer" onclick="openKSection('ob')" style="border-left:4px solid var(--warning)">
           <div class="stat-label">⚠️ Ohne Buchung</div><div class="stat-value" id="tile-ohnebuchung-sum">€ 0,00</div><div id="tile-ohnebuchung-count" style="font-size:11px;color:#666">0 Rechnungen</div>
+          <div class="hover-hint">→ anzeigen</div>
         </div>
-        <div class="stat-card" style="border-left:4px solid var(--danger)">
+        <div class="stat-card hover-card cursor-pointer" onclick="openKSection('or')" style="border-left:4px solid var(--danger)">
           <div class="stat-label">❌ Ohne Rechnung</div><div class="stat-value" id="tile-ohnerech-sum">€ 0,00</div><div id="tile-ohnerech-count" style="font-size:11px;color:#666">0 Ausgaben</div>
+          <div class="hover-hint">→ anzeigen</div>
         </div>
+
         <label class="stat-card hover-card cursor-pointer" style="border-left:4px solid var(--navy); display:flex; flex-direction:column; justify-content:center; margin:0; background:var(--gray-100);">
           <input type="file" accept=".csv" onchange="handleBankCSV(this)" style="display:none;">
           <div class="stat-label" style="color:var(--navy);">📥 Aktion</div>
@@ -539,10 +528,14 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
         <div style="text-align:right; margin-bottom:15px;">
           <button class="btn btn-gold" onclick="startGeminiAbgleich(false)">✨ KI Abgleich manuell starten</button>
         </div>
-
-        <h4 style="color:var(--success); margin-bottom:10px; font-size:14px;">✅ Gedeckte Rechnungen</h4>
+                </div>
+             <h4 onclick="toggleKSection('ged')" style="color:var(--success); margin-bottom:10px; font-size:14px; cursor:pointer; user-select:none;">
+          <span id="karr-ged">▶</span> ✅ Gedeckte Rechnungen
+        </h4>
+        <div id="ksec-ged" style="display:none;">
         <input type="text" id="search-ged" class="filter-input-full" placeholder="Suche in Lieferant, Rechnr, Buchungstext..." oninput="updateKassapruefungUI()">
         <div class="table-wrap" style="margin-bottom:35px;">
+
           <table>
             <thead>
               <tr>
@@ -559,11 +552,16 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
             <tbody id="abg-gedeckt-tbody"></tbody>
           </table>
         </div>
-
-        <h4 style="color:var(--warning); margin-bottom:10px; font-size:14px;">⚠️ Rechnungen ohne Bankbuchung</h4>
+        </div>
+  
+        <h4 onclick="toggleKSection('ob')" style="color:var(--warning); margin-bottom:10px; font-size:14px; cursor:pointer; user-select:none;">
+          <span id="karr-ob">▶</span> ⚠️ Rechnungen ohne Bankbuchung
+        </h4>
+        <div id="ksec-ob" style="display:none;">
         <div style="font-size:11px; color:var(--gray-500); margin-bottom:10px;">Noch nicht bezahlt oder Buchung fehlt im Auszug. (Gilt nur für Banküberweisungen)</div>
         <input type="text" id="search-ob" class="filter-input-full" placeholder="Suche in Lieferant, Rechnr, Notiz..." oninput="updateKassapruefungUI()">
         <div class="table-wrap" style="margin-bottom:35px;">
+
           <table>
             <thead>
               <tr>
@@ -579,11 +577,15 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
             <tbody id="abg-ohnebuch-tbody"></tbody>
           </table>
         </div>
-
-        <h4 style="color:var(--danger); margin-bottom:10px; font-size:14px;">❌ Bankausgaben ohne Rechnung</h4>
+        </div>
+        <h4 onclick="toggleKSection('or')" style="color:var(--danger); margin-bottom:10px; font-size:14px; cursor:pointer; user-select:none;">
+          <span id="karr-or">▶</span> ❌ Bankausgaben ohne Rechnung
+        </h4>
+        <div id="ksec-or" style="display:none;">
         <div style="font-size:11px; color:var(--gray-500); margin-bottom:10px;">Ausgaben ohne Rechnung – kritisch für die Kassaprüfung!</div>
         <input type="text" id="search-or" class="filter-input-full" placeholder="Suche in Buchungstext, Empfänger..." oninput="updateKassapruefungUI()">
         <div class="table-wrap">
+
           <table>
             <thead>
               <tr>
@@ -598,6 +600,11 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
           </table>
         </div>
       </div>
+      
+      </div>
+
+      <div id="ksub-1"
+
 
       <div id="ksub-1" style="display:none;">
         <div class="filter-bar" style="margin-top:0;">
@@ -1877,6 +1884,29 @@ async function deleteBankbuchungen() {
   }
   hideLoader();
 }
+  function toggleKSection(id) {
+  const sec = document.getElementById('ksec-' + id);
+  const arr = document.getElementById('karr-' + id);
+  const isOpen = sec.style.display !== 'none';
+  sec.style.display = isOpen ? 'none' : 'block';
+  arr.textContent = isOpen ? '▶' : '▼';
+}
+
+function openKSection(id) {
+  // Switch to KI Abgleich tab first
+  switchKassaTab(0);
+  // Open the section
+  const sec = document.getElementById('ksec-' + id);
+  const arr = document.getElementById('karr-' + id);
+  sec.style.display = 'block';
+  arr.textContent = '▼';
+  // Navigate to kassapruefung tab and scroll
+  showTab('kassapruefung');
+  setTimeout(() => {
+    document.getElementById('ksec-' + id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 300);
+}
+
 </script>
 </body>
 </html>
