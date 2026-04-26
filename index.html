@@ -141,7 +141,12 @@ nav::-webkit-scrollbar { display: none; }
 
   /* Show mobile elements */
   .mobile-settings-btn { display: flex; align-items: center; justify-content: center; }
-  .bottom-nav { display: flex !important; justify-content: space-around; align-items: center; }
+  .bottom-nav { 
+    display: flex !important; 
+    flex-direction: row !important;
+    justify-content: space-around !important; 
+    align-items: center !important;
+  }
 
   /* Content padding for bottom nav */
   body { padding-bottom: calc(var(--bottom-nav-height) + var(--safe-bottom) + 16px); }
@@ -150,6 +155,7 @@ nav::-webkit-scrollbar { display: none; }
   /* Toast above bottom nav */
   #toast { bottom: calc(var(--bottom-nav-height) + var(--safe-bottom) + 12px); right: 12px; left: 12px; text-align: center; }
 }
+
 
 main { max-width: 1100px; margin: 0 auto; padding: 20px 16px; }
 .page { display: none; animation: fadeIn 0.3s; }
