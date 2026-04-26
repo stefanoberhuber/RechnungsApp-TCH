@@ -498,6 +498,7 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
       <div style="font-size:12px; color:var(--gray-500); margin-bottom:20px;">Lade den CSV-Kontoauszug (Raiffeisen) hoch. Einzahlungen werden ignoriert, Datenschutz ist aktiv. KI Abgleich startet automatisch.</div>
 
       <div id="kassa-checksum"></div>
+      <div class="stats-row" style="margin-bottom:25px;">
         <div class="stat-card hover-card cursor-pointer" onclick="openKSection('ged')" style="border-left:4px solid var(--success)">
           <div class="stat-label">✅ Gedeckt</div><div class="stat-value" id="tile-gedeck-sum">€ 0,00</div><div id="tile-gedeck-count" style="font-size:11px;color:#666">0 Rechnungen</div>
           <div class="hover-hint">→ anzeigen</div>
@@ -510,7 +511,6 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
           <div class="stat-label">❌ Ohne Rechnung</div><div class="stat-value" id="tile-ohnerech-sum">€ 0,00</div><div id="tile-ohnerech-count" style="font-size:11px;color:#666">0 Ausgaben</div>
           <div class="hover-hint">→ anzeigen</div>
         </div>
-
         <label class="stat-card hover-card cursor-pointer" style="border-left:4px solid var(--navy); display:flex; flex-direction:column; justify-content:center; margin:0; background:var(--gray-100);">
           <input type="file" accept=".csv" onchange="handleBankCSV(this)" style="display:none;">
           <div class="stat-label" style="color:var(--navy);">📥 Aktion</div>
@@ -518,6 +518,7 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
           <div style="font-size:11px;color:#666; margin-top:4px;">Raiffeisen Kontoauszug</div>
         </label>
       </div>
+
 
       <div class="kassa-tabs">
         <div class="k-tab active" id="ktab-0" onclick="switchKassaTab(0)">1. KI Abgleich</div>
@@ -528,8 +529,7 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
         <div style="text-align:right; margin-bottom:15px;">
           <button class="btn btn-gold" onclick="startGeminiAbgleich(false)">✨ KI Abgleich manuell starten</button>
         </div>
-                </div>
-             <h4 onclick="toggleKSection('ged')" style="color:var(--success); margin-bottom:10px; font-size:14px; cursor:pointer; user-select:none;">
+        <h4 onclick="toggleKSection('ged')"
           <span id="karr-ged">▶</span> ✅ Gedeckte Rechnungen
         </h4>
         <div id="ksec-ged" style="display:none;">
@@ -600,13 +600,9 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
           </table>
         </div>
       </div>
-      
-      </div>
-
-      <div id="ksub-1"
-
 
       <div id="ksub-1" style="display:none;">
+>
         <div class="filter-bar" style="margin-top:0;">
           <input type="text" id="kz-text" placeholder="Suche in Text/Empfänger..." style="flex:1;" oninput="updateKassapruefungUI()">
           <select id="kz-filter" onchange="updateKassapruefungUI()">
