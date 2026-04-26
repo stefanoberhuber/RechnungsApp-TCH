@@ -79,7 +79,7 @@ header {
 .mobile-settings-btn svg { width: 22px; height: 22px; display: block; }
 
 /* Desktop nav (top) */
-nav {
+#desktop-nav {
   background: var(--navy);
   display: flex;
   gap: 2px;
@@ -88,7 +88,8 @@ nav {
   overflow-x: auto;
   scrollbar-width: none;
 }
-nav::-webkit-scrollbar { display: none; }
+#desktop-nav::-webkit-scrollbar { display: none; }
+
 .tab {
   padding: 12px 16px;
   color: var(--white);
@@ -135,7 +136,8 @@ nav::-webkit-scrollbar { display: none; }
 /* ── RESPONSIVE ── */
 @media (max-width: 700px) {
   /* Hide desktop nav & wappen */
-  #desktop-nav { display: none; }
+  #desktop-nav { display: none !important; }
+
   .main-logo { display: none; }
   .top-bar::after { display: none; }
 
