@@ -1052,14 +1052,9 @@ function renderDashboard() {
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const diesenMonat = rechnungen.filter(r => (r.datum || '').startsWith(currentMonth));
 
-  document.getElementById('d-offen-betrag').innerText = formatEur(offen.reduce((s, r) => s + r.betrag, 0));
+    document.getElementById('d-offen-betrag').innerText = formatEur(offen.reduce((s, r) => s + r.betrag, 0));
   document.getElementById('d-offen-anzahl').innerText = offen.length + ' Belege';
-  document.getElementById('d-bezahlt-betrag').innerText = formatEur(bezahlt.reduce((s, r) => s + r.betrag, 0));
-  document.getElementById('d-bezahlt-anzahl').innerText = bezahlt.length + ' Belege';
-  document.getElementById('d-monat-betrag').innerText = formatEur(diesenMonat.reduce((s, r) => s + r.betrag, 0));
-  document.getElementById('d-monat-anzahl').innerText = diesenMonat.length + ' Belege';
-  document.getElementById('d-pruef-betrag').innerText = formatEur(zurPruefung.reduce((s, r) => s + r.betrag, 0));
-  document.getElementById('d-pruef-anzahl').innerText = zurPruefung.length + ' Belege';
+
 
   const sortedOffen = [...offen].sort((a, b) => new Date(b.datum) - new Date(a.datum));
   const tbody = document.getElementById('dash-tbody');
