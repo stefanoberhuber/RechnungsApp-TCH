@@ -529,9 +529,10 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
         <div style="text-align:right; margin-bottom:15px;">
           <button class="btn btn-gold" onclick="startGeminiAbgleich(false)">✨ KI Abgleich manuell starten</button>
         </div>
-        <h4 onclick="toggleKSection('ged')"
+              <h4 onclick="toggleKSection('ged')" style="color:var(--success); margin-bottom:10px; font-size:14px; cursor:pointer; user-select:none;">
           <span id="karr-ged">▶</span> ✅ Gedeckte Rechnungen
         </h4>
+
         <div id="ksec-ged" style="display:none;">
         <input type="text" id="search-ged" class="filter-input-full" placeholder="Suche in Lieferant, Rechnr, Buchungstext..." oninput="updateKassapruefungUI()">
         <div class="table-wrap" style="margin-bottom:35px;">
@@ -601,9 +602,12 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
         </div>
       </div>
 
+         </div>
+      </div>
+
       <div id="ksub-1" style="display:none;">
->
         <div class="filter-bar" style="margin-top:0;">
+
           <input type="text" id="kz-text" placeholder="Suche in Text/Empfänger..." style="flex:1;" oninput="updateKassapruefungUI()">
           <select id="kz-filter" onchange="updateKassapruefungUI()">
             <option value="Alle">Alle Ausgaben</option>
