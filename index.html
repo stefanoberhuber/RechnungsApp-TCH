@@ -713,7 +713,19 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
 <script>
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').catch(() => {}); }
 
+// --- Festgelegte Konfiguration ---
+const FIXED_CONFIG = {
+  clientId: "759681792548-m4sb0tn2etqhlulftikncti1v355279k.apps.googleusercontent.com",
+  sheetId: "157wugS72dO9AScYIPewb8ye1fj-jrV_9CjmnIR7BJ1Y",
+  folderId: "1GIZTNjUts9jLASOn1AOlOAszxij7ORfL"
+};
+
+// Lädt bestehende Daten (wie den Usernamen), erzwingt aber die IDs
 let settings = JSON.parse(localStorage.getItem('tc_settings') || '{}');
+settings.clientId = FIXED_CONFIG.clientId;
+settings.sheetId = FIXED_CONFIG.sheetId;
+settings.folderId = FIXED_CONFIG.folderId;
+// settings.userName bleibt so, wie er lokal gespeichert wurde oder ist leer
 let tc_autoupload = localStorage.getItem('tc_autoupload') === 'true';
 
 let rechnungen = [];
@@ -891,16 +903,20 @@ function hideLoader() {
 }
 
 function saveSettings() {
-  settings = {
-    userName: document.getElementById('s-username').value.trim(),
-    clientId: document.getElementById('s-client').value.trim(),
-    sheetId: document.getElementById('s-sheet').value.trim(),
-    folderId: document.getElementById('s-folder').value.trim(),
-    geminiKey: document.getElementById('s-gemini').value.trim()
-  };
+  const nameInput = document.getElementById('s-username').value.trim();
+  
+  if (!nameInput) {
+    showToast('Name (Erfasser) ist ein Pflichtfeld!', 'error');
+    document.getElementById('s-username').style.borderColor = 'var(--danger)';
+    return;
+  }
+
+  settings.userName = nameInput;
   localStorage.setItem('tc_settings', JSON.stringify(settings));
-  showToast('Einstellungen gespeichert. Bitte Seite neu laden.');
-  location.reload();
+  
+  document.getElementById('s-username').style.borderColor = '';
+  showToast('Name gespeichert. Die App ist bereit.');
+  loadFromSheets(); // Lädt Daten neu mit dem neuen Namen
 }
 
 function toggleAutoUpload(cb) {
@@ -978,8 +994,33 @@ async function ensureBankbuchungenHeader() {
 
 async function loadFromSheets() {
   if (!accessToken || !settings.sheetId) return;
-  showLoader('Lade Datenbank...');
+  showLoader('Lade Datenbank & Setup...');
   try {
+    // --- Gemini Key aus verstecktem Reiter laden ---
+    try {
+      const resConfig = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Konfiguration!B1`, {
+        headers: { 'Authorization': `Bearer ${accessToken}` }
+      });
+      const dataConfig = await resConfig.json();
+      if (dataConfig.values && dataConfig.values[0]) {
+        const keyFromSheet = dataConfig.values[0][0];
+        if (keyFromSheet && keyFromSheet.trim().startsWith('AIza')) {
+          settings.geminiKey = keyFromSheet.trim();
+          localStorage.setItem('tc_settings', JSON.stringify(settings));
+          if(document.getElementById('s-gemini')) document.getElementById('s-gemini').value = "✔️ Automatisch geladen";
+        }
+      }
+    } catch (e) { console.warn("Konfigurations-Tab fehlt noch im Sheet."); }
+
+    // --- Prüfung auf Username ---
+    if (!settings.userName || settings.userName.trim() === "") {
+      hideLoader();
+      showTab('einstellungen');
+      showToast('Bitte gib zuerst deinen Namen im Setup ein!', 'error');
+      document.getElementById('s-username').style.borderColor = 'var(--danger)';
+      return; 
+    }
+
     await ensureBankbuchungenHeader();
     const resR = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/Rechnungen!A:L`, {
       headers: { 'Authorization': `Bearer ${accessToken}` }
