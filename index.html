@@ -659,40 +659,28 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
     </div>
   </div>
 
-  <div id="page-einstellungen" class="page">
-    <div class="card">
-      <div class="card-title">Cloud Setup (Einmalig)</div>
+<div id="page-einstellungen" class="page">
+  <div class="card">
+    <div class="card-title">Benutzer-Einstellungen</div>
 
-      <div class="form-group" style="margin-bottom:10px;">
-        <label>Dein Name (Erfasser)</label>
-        <input type="text" id="s-username" placeholder="Max Mustermann">
-      </div>
-      <div class="form-group" style="margin-bottom:10px;">
-        <label>OAuth Client ID</label>
-        <input type="text" id="s-client" placeholder="xxxxx.apps.googleusercontent.com">
-      </div>
-      <div class="form-group" style="margin-bottom:10px;">
-        <label>Google Sheet ID</label>
-        <input type="text" id="s-sheet" placeholder="Aus der Tabellen-URL">
-      </div>
-      <div class="form-group" style="margin-bottom:10px;">
-        <label>Drive Ordner ID</label>
-        <input type="text" id="s-folder" placeholder="Aus der Drive-URL">
-      </div>
-      <div class="form-group" style="margin-bottom:15px;">
-        <label>Gemini API Key</label>
-        <input type="password" id="s-gemini" placeholder="AIzaSy...">
-      </div>
+    <div class="form-group" style="margin-bottom:20px;">
+      <label>Dein Name (Erfasser) *</label>
+      <input type="text" id="s-username" placeholder="z.B. Stefan Oberhuber">
+      <p style="font-size:11px; color:var(--gray-500); margin-top:4px;">Dieser Name wird bei jeder neuen Rechnung als Erfasser hinterlegt.</p>
+    </div>
 
-      <button class="btn btn-outline" onclick="saveSettings()" style="width:100%; margin-bottom:15px;">💾 Einstellungen lokal speichern</button>
-      
-      <div style="border-top:1px solid var(--gray-200); padding-top:20px; margin-top:20px;">
-        <div class="card-title" style="color:var(--danger); font-size:15px;">Gefahrenzone</div>
-        <button class="btn btn-outline" style="color:var(--danger); border-color:var(--danger); width:100%;" onclick="deleteBankbuchungen()">🗑️ Alle Bankbuchungen (Sheet) löschen</button>
-        <div style="font-size:11px; color:var(--gray-500); margin-top:5px; text-align:center;">Löscht den Reiter "Bankbuchungen" ab Zeile 2.</div>
-      </div>
+    <button class="btn btn-primary" onclick="saveSettings()" style="width:100%; margin-bottom:15px;">💾 Namen speichern</button>
+    
+    <div style="background: var(--gray-100); padding: 12px; border-radius: 8px; font-size: 12px; color: var(--navy); border-left: 4px solid var(--gold);">
+      ℹ️ Cloud-IDs und KI-Schlüssel werden automatisch vom System verwaltet.
+    </div>
+
+    <div style="border-top:1px solid var(--gray-200); padding-top:20px; margin-top:20px;">
+      <div class="card-title" style="color:var(--danger); font-size:15px;">Gefahrenzone</div>
+      <button class="btn btn-outline" style="color:var(--danger); border-color:var(--danger); width:100%;" onclick="deleteBankbuchungen()">🗑️ Alle Bankbuchungen (Sheet) löschen</button>
     </div>
   </div>
+</div>
   </main>
 
   <div id="toast"></div>
@@ -713,15 +701,15 @@ td { padding: 12px 10px; border-bottom: 1px solid var(--gray-100); vertical-alig
 <script>
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').catch(() => {}); }
 
-// --- Festgelegte Konfiguration ---
+// --- FIXE KONFIGURATION (Wird nicht mehr im UI abgefragt) ---
 const FIXED_CONFIG = {
   clientId: "759681792548-m4sb0tn2etqhlulftikncti1v355279k.apps.googleusercontent.com",
   sheetId: "157wugS72dO9AScYIPewb8ye1fj-jrV_9CjmnIR7BJ1Y",
   folderId: "1GIZTNjUts9jLASOn1AOlOAszxij7ORfL"
 };
 
-// Lädt bestehende Daten (wie den Usernamen), erzwingt aber die IDs
 let settings = JSON.parse(localStorage.getItem('tc_settings') || '{}');
+// Wir erzwingen die Nutzung der fixen IDs bei jedem Start
 settings.clientId = FIXED_CONFIG.clientId;
 settings.sheetId = FIXED_CONFIG.sheetId;
 settings.folderId = FIXED_CONFIG.folderId;
@@ -835,10 +823,6 @@ async function showApp() {
 
 window.onload = () => {
   document.getElementById('s-username').value = settings.userName || '';
-  document.getElementById('s-client').value = settings.clientId || '';
-  document.getElementById('s-sheet').value = settings.sheetId || '';
-  document.getElementById('s-folder').value = settings.folderId || '';
-  document.getElementById('s-gemini').value = settings.geminiKey || '';
 
   if (tc_autoupload) {
     document.getElementById('f-autoupload').checked = true;
@@ -904,19 +888,17 @@ function hideLoader() {
 
 function saveSettings() {
   const nameInput = document.getElementById('s-username').value.trim();
-  
   if (!nameInput) {
-    showToast('Name (Erfasser) ist ein Pflichtfeld!', 'error');
+    showToast('Bitte gib einen Namen ein!', 'error');
     document.getElementById('s-username').style.borderColor = 'var(--danger)';
     return;
   }
-
   settings.userName = nameInput;
   localStorage.setItem('tc_settings', JSON.stringify(settings));
-  
   document.getElementById('s-username').style.borderColor = '';
-  showToast('Name gespeichert. Die App ist bereit.');
-  loadFromSheets(); // Lädt Daten neu mit dem neuen Namen
+  showToast('Name gespeichert!');
+  // Falls wir gerade erst den Namen eingegeben haben, laden wir die App-Daten
+  if (accessToken) loadFromSheets();
 }
 
 function toggleAutoUpload(cb) {
