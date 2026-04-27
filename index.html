@@ -1788,12 +1788,41 @@ async function startGeminiAbgleich(isAuto = false) {
 
   showLoader('Gemini analysiert Zuordnungen...');
   try {
-    const prompt = `Du bist Buchhaltungsassistent für einen österreichischen Tennisverein. Ordne jede Bankausgabe einer Rechnung zu.
-Regeln: Ähnliche Firmennamen matchen, Betragsabweichung bis 2% ok, Datum max 14 Tage Diff. "niedrig" Konfidenz wenn nur Betrag stimmt.
-Eine Rechnung darf nur einmal zugeordnet werden.
-Bankausgaben: ${JSON.stringify(ausgaben.map(a => ({fingerprint: a.fingerprint, datum: a.datum, betrag: Math.abs(a.betrag), text: a.buchungstext, empf: a.empfaenger})))}
-Rechnungen: ${JSON.stringify(offene.map(r => ({id: r.id, datum: r.datum, lieferant: r.lieferant, betrag: r.betrag, rechnr: r.rechnr})))}
-Antworte AUSSCHLIESSLICH mit JSON-Array:[{"bank_fingerprint":"...", "rechnung_id":"...", "konfidenz":"hoch|mittel|niedrig", "begruendung":"..."}]`;
+const prompt = `Du bist Buchhaltungsassistent für einen österreichischen Tennisverein.
+Deine Aufgabe: Ordne jede Bankausgabe genau einer Rechnung zu.
+
+MATCHING-PRIORITÄTEN (von höchster zu niedrigster Konfidenz):
+1. HOCH: Rechnungsnummer aus Buchungstext stimmt mit Rechnungsnr. der Rechnung überein
+   → Suche im Buchungstext nach Mustern wie: RE123456, 1108612752, 52086/2026, ARK-26-20428 etc.
+   → Vergleiche flexibel: Groß/Kleinschreibung ignorieren, führende Nullen ignorieren
+2. HOCH: Firmenname (ähnlich) UND Betrag (±2% Abweichung ok) UND Datum (max 30 Tage Diff)
+3. MITTEL: Firmenname ähnlich UND Betrag stimmt, aber Datum weicht stärker ab
+4. NIEDRIG: Nur Betrag stimmt exakt, kein anderes Kriterium erfüllt
+
+WEITERE REGELN:
+- Eine Rechnung darf nur einmal zugeordnet werden
+- Wenn keine plausible Zuordnung möglich: rechnung_id = null
+- Bei Firmennamen: Abkürzungen, GmbH/AG weglassen, Umlaute ignorieren (z.B. "Hagleitner" matcht "Hagleitner Hygiene Oesterreich GmbH")
+- Barzahlungen sind bereits ausgeschlossen
+
+Bankausgaben: ${JSON.stringify(ausgaben.map(a => ({
+  fingerprint: a.fingerprint,
+  datum: a.datum,
+  betrag: Math.abs(a.betrag),
+  buchungstext: a.buchungstext,
+  empfaenger: a.empfaenger
+})))}
+
+Rechnungen (offen): ${JSON.stringify(offene.map(r => ({
+  id: r.id,
+  datum: r.datum,
+  lieferant: r.lieferant,
+  betrag: r.betrag,
+  rechnr: r.rechnr
+})))}
+
+Antworte AUSSCHLIESSLICH mit JSON-Array:
+[{"bank_fingerprint":"...", "rechnung_id":"...", "konfidenz":"hoch|mittel|niedrig", "begruendung":"..."}]`;
 
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${settings.geminiKey}`, {
       method: 'POST',
