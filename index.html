@@ -1396,8 +1396,16 @@ Verwende exakt diese Keys und keine anderen:
         await saveRechnung();
     }
   } catch (e) {
-    showToast('KI Fehler beim Auslesen. Bitte manuell ergänzen.', 'error');
-    console.error(e);
+    // --- NEU: Detaillierte Fehlermeldung für Auslastung ---
+    let errorMsg = 'KI Fehler beim Auslesen. Bitte manuell ergänzen.';
+    
+    if (e.message.includes('high demand') || e.message.includes('503') || e.message.includes('overloaded')) {
+      errorMsg = '⚠️ KI-Server aktuell überlastet (High Demand). Bitte in 1-2 Minuten erneut versuchen.';
+    } else {
+      console.error("Detaillierter Fehler:", e);
+    }
+    
+    showToast(errorMsg, 'error');
   }
   hideLoader();
 }
@@ -1795,9 +1803,11 @@ MATCHING-PRIORITÄTEN (von höchster zu niedrigster Konfidenz):
 1. HOCH: Rechnungsnummer aus Buchungstext stimmt mit Rechnungsnr. der Rechnung überein
    → Suche im Buchungstext nach Mustern wie: RE123456, 1108612752, 52086/2026, ARK-26-20428 etc.
    → Vergleiche flexibel: Groß/Kleinschreibung ignorieren, führende Nullen ignorieren
+   → Beispiel für MATCH: Verwendungszweck 413916/RE2613000903 stimmt mit Rechnungsnr. RE2613000903 überein
 2. HOCH: Firmenname (ähnlich) UND Betrag (±2% Abweichung ok) UND Datum (max 30 Tage Diff)
-3. MITTEL: Firmenname ähnlich UND Betrag stimmt, aber Datum weicht stärker ab
-4. NIEDRIG: Nur Betrag stimmt exakt, kein anderes Kriterium erfüllt
+3. HOCH: Rechnungsnummer ist ähnlich UND Betrag (±2% Abweichung ok) UND Datum (max 30 Tage Diff)
+4. MITTEL: Firmenname ähnlich UND Betrag stimmt, aber Datum weicht stärker ab
+5. NIEDRIG: Nur Betrag stimmt exakt, kein anderes Kriterium erfüllt
 
 WEITERE REGELN:
 - Eine Rechnung darf nur einmal zugeordnet werden
@@ -1862,7 +1872,15 @@ Antworte AUSSCHLIESSLICH mit JSON-Array:
     showToast(`Abgleich fertig. ${updates} Zuordnungen gefunden!`);
     await loadFromSheets();
   } catch (e) {
-    showToast('KI Fehler: ' + e.message, 'error');
+    // --- NEU: Detaillierte Fehlermeldung für Auslastung ---
+    let errorMsg = 'KI Fehler: ' + e.message;
+    
+    if (e.message.includes('high demand') || e.message.includes('503') || e.message.includes('overloaded')) {
+      errorMsg = '⚠️ KI-Server aktuell überlastet (High Demand). Abgleich fehlgeschlagen. Bitte gleich nochmal versuchen.';
+    }
+    
+    showToast(errorMsg, 'error');
+    console.error(e);
   }
   hideLoader();
 }
