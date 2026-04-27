@@ -1507,8 +1507,13 @@ const anonymisiereIBAN = t => String(t || '').replace(/[A-Z]{2}\d{2}[\d\s]{10,30
 });
 const entferneBIC = t => String(t || '').replace(/BIC\s+Empfänger:\s*[A-Z0-9]+/gi, '').trim();
 const extrahiereEmpfaenger = t => {
-  const m = String(t || '').match(/Zahlungsempfänger:\s*(.+?)(?=Verwendungszweck|IBAN|BIC|$)/i);
-  return m ? m[1].trim().substring(0, 50) : '';
+  // Format 1: "Zahlungsempfänger: NAME Verwendungszweck/IBAN..."
+  let m = String(t || '').match(/Zahlungsempfänger:\s*(.+?)(?:\s+Verwendungszweck|\s+IBAN|\s+BIC|$)/i);
+  if (m) return m[1].trim().substring(0, 50);
+  // Format 2: "ONLINE BANKING... Empfänger: NAME Verwendungszweck/IBAN..."
+  m = String(t || '').match(/(?<!\w)Empfänger:\s*(.+?)(?:\s+Verwendungszweck|\s+Zahlungsreferenz|\s+IBAN|\s+BIC|$)/i);
+  if (m) return m[1].trim().substring(0, 50);
+  return '';
 };
 async function processBankCSV(text) {
   showLoader('Verarbeite CSV...');
