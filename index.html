@@ -1365,7 +1365,7 @@ Verwende exakt diese Keys und keine anderen:
     const parts = [{ text: prompt }];
     currentFilesBase64.forEach(f => parts.push({ inline_data: { mime_type: f.type, data: f.data } }));
 
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${settings.geminiKey}`, {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${settings.geminiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents: [{ parts }], generationConfig: { temperature: 0.1, responseMimeType: 'application/json' } })
@@ -1857,7 +1857,7 @@ Rechnungen (offen): ${JSON.stringify(offene.map(r => ({
 Antworte AUSSCHLIESSLICH mit JSON-Array:
 [{"bank_fingerprint":"...", "rechnung_id":"...", "konfidenz":"hoch|mittel|niedrig", "begruendung":"..."}]`;
 
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${settings.geminiKey}`, {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${settings.geminiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.1, responseMimeType: 'application/json' } })
