@@ -19,8 +19,9 @@ Dieses Google Apps Script ist fuer das Postfach `rechnungen.tennishopfgarten@gma
 - Erfolgreich verarbeitete Threads erhalten automatisch das Gmail-Label `TCH-Verarbeitet`.
 - Fehlerhafte Threads erhalten automatisch das Gmail-Label `TCH-Fehler`.
 - Pro PDF wird eine Rechnung angelegt.
-- Die Rechnungs-ID beginnt mit `MAIL-` und wird aus Message-ID, Dateiname, Dateigroesse und PDF-Hash gebildet.
-- Bereits vorhandene IDs in Spalte A werden uebersprungen, damit ein erneuter Scriptlauf keine Duplikate erzeugt.
+- Die Rechnungs-ID und der PDF-Dateiname verwenden dasselbe Schema wie die Web-App: `YYYY-MM-DD_Lieferant_Notiz.pdf`.
+- Der Lieferant wird aus dem sichtbaren PDF-Inhalt gelesen; E-Mail-Absender, Signatur, Weiterleitungstext und Dateiname werden im Prompt ausdrücklich ignoriert.
+- Exakt gleiche PDF-Dateien werden zusätzlich per PDF-Hash in den Script Properties wiedererkannt.
 
 ## Geschriebene Sheet-Spalten
 
@@ -28,7 +29,7 @@ Das Script schreibt in `Rechnungen!A:L`:
 
 | Spalte | Wert |
 | --- | --- |
-| A | Rechnungs-ID / Fingerprint |
+| A | Rechnungs-ID im Web-App-Schema |
 | B | Rechnungsdatum |
 | C | Lieferant |
 | D | Betrag |
@@ -45,7 +46,7 @@ Das Script schreibt in `Rechnungen!A:L`:
 
 1. Sende eine echte Testmail mit einer PDF-Rechnung an `rechnungen.tennishopfgarten@gmail.com`.
 2. Starte `processInvoiceInbox` manuell.
-3. Pruefe, ob die PDF im Drive-Ordner liegt.
+3. Pruefe, ob die PDF im Drive-Ordner mit dem Schema `YYYY-MM-DD_Lieferant_Notiz.pdf` liegt.
 4. Pruefe, ob eine neue Zeile in `Rechnungen` steht.
 5. Oeffne die bestehende Web-App und pruefe, ob die Rechnung sichtbar ist.
 6. Starte das Script erneut. Es darf keine zweite Zeile fuer dieselbe PDF entstehen.
