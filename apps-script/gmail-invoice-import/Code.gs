@@ -9,19 +9,19 @@ const CONFIG = {
 };
 
 const CATEGORIES = [
-  'Getraenke (Brauunion, Kaffee)',
+  'Getränke (Brauunion, Kaffee)',
   'Kantine',
   'Mitglieder',
   'Instandhaltung',
   'Betriebskosten',
   'Versicherungen',
-  'Material (Tennisbaelle etc.)',
-  'Gebuehren (Lizenzen)',
+  'Material (Tennisbälle etc.)',
+  'Gebühren (Lizenzen)',
   'Tennislehrer',
   'Reinigung',
-  'Oeffentlichkeitsarbeit',
+  'Öffentlichkeitsarbeit',
   'Miete',
-  'Bankgebuehren, Bankzinsen und Geldspesen',
+  'Bankgebühren, Bankzinsen und Geldspesen',
   'Sonstiges'
 ];
 
@@ -125,8 +125,8 @@ function uploadPdfToDrive_(attachment, fingerprint) {
 }
 
 function extractInvoiceData_(pdfBlob, geminiKey) {
-  const prompt = 'Analysiere diese PDF-Rechnung fuer einen oesterreichischen Tennisverein. ' +
-    'Gib exakt ein JSON-Objekt zurueck, kein Array und keinen Markdown-Text. ' +
+  const prompt = 'Analysiere diese PDF-Rechnung für einen österreichischen Tennisverein. ' +
+    'Gib exakt ein JSON-Objekt zurück, kein Array und keinen Markdown-Text. ' +
     'Keys: lieferant (String), datum (YYYY-MM-DD), betrag (Zahl mit Punkt), rechnr (String), ' +
     'notiz (sehr kurz), kategorie (exakt eine dieser Kategorien: ' + CATEGORIES.join(', ') + '; sonst Sonstiges).';
 
@@ -168,7 +168,7 @@ function extractInvoiceData_(pdfBlob, geminiKey) {
   const text = data.candidates && data.candidates[0] && data.candidates[0].content &&
     data.candidates[0].content.parts && data.candidates[0].content.parts[0] &&
     data.candidates[0].content.parts[0].text;
-  if (!text) throw new Error('Gemini Antwort enthaelt keinen auslesbaren Text.');
+  if (!text) throw new Error('Gemini Antwort enthält keinen auslesbaren Text.');
 
   const parsed = extractJson_(text);
   return normalizeInvoiceData_(parsed);
@@ -187,20 +187,19 @@ function appendInvoiceRow_(sheet, id, invoice, fileUrl) {
     invoice.notiz,
     'Mailimport',
     fileUrl,
-    'Bankueberweisung'
+    'Banküberweisung'
   ]);
 }
 
 function normalizeInvoiceData_(data) {
   const normalized = data || {};
-  const category = normalizeCategory_(normalized.kategorie);
   return {
     lieferant: String(normalized.lieferant || '').trim() || 'Unbekannt',
     datum: normalizeDate_(normalized.datum),
     betrag: normalizeAmount_(normalized.betrag),
     rechnr: String(normalized.rechnr || '').trim() || 'ohne Rechnungsnr.',
     notiz: String(normalized.notiz || '').trim().substring(0, 120),
-    kategorie: category
+    kategorie: normalizeCategory_(normalized.kategorie)
   };
 }
 
@@ -223,7 +222,9 @@ function normalizeDate_(value) {
 }
 
 function normalizeAmount_(value) {
-  const amount = parseFloat(String(value || '0').replace(/\./g, '').replace(',', '.'));
+  const raw = String(value || '0').trim();
+  const normalized = raw.includes(',') ? raw.replace(/\./g, '').replace(',', '.') : raw;
+  const amount = parseFloat(normalized);
   return isNaN(amount) ? 0 : amount;
 }
 
