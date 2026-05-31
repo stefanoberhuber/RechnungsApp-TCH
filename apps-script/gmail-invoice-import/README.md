@@ -39,9 +39,7 @@ Das Script schreibt in `Rechnungen!A:L`:
 | I | Notiz |
 | J | `Mailimport` |
 | K | Drive-Link zur PDF |
-| L | `Bankueberweisung` |
-
-Hinweis: Im Code wird fuer Spalte L der App-kompatible Wert `Banküberweisung` geschrieben.
+| L | `Banküberweisung` |
 
 ## Erster Test
 
