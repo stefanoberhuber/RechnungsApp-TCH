@@ -60,16 +60,20 @@ function processThread_(thread, invoiceSheet, existingIds, geminiKey) {
     attachments.forEach(attachment => {
       if (!isPdfAttachment_(attachment)) return;
 
-      const fingerprint = createAttachmentFingerprint_(message, attachment);
-      if (existingIds.has(fingerprint)) {
+      const importKey = createAttachmentImportKey_(attachment);
+      if (isAlreadyImported_(importKey)) {
         duplicates++;
         return;
       }
 
-      const file = uploadPdfToDrive_(attachment, fingerprint);
       const extracted = extractInvoiceData_(attachment, geminiKey);
-      appendInvoiceRow_(invoiceSheet, fingerprint, extracted, file.getUrl());
-      existingIds.add(fingerprint);
+      const baseId = buildRechnungFingerprint_(extracted.datum, extracted.lieferant, extracted.notiz);
+      const invoiceId = ensureUniqueInvoiceId_(baseId, existingIds);
+      const file = uploadPdfToDrive_(attachment, invoiceId);
+
+      appendInvoiceRow_(invoiceSheet, invoiceId, extracted, file.getUrl());
+      markImported_(importKey, invoiceId);
+      existingIds.add(invoiceId);
       imported++;
     });
   });
@@ -104,31 +108,32 @@ function isPdfAttachment_(attachment) {
   return contentType === 'application/pdf' || name.endsWith('.pdf');
 }
 
-function createAttachmentFingerprint_(message, attachment) {
+function createAttachmentImportKey_(attachment) {
   const bytes = attachment.getBytes();
-  const contentHash = toHex_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, bytes));
-  const raw = [
-    message.getId(),
-    attachment.getName(),
-    bytes.length,
-    contentHash
-  ].join('|');
-  const idHash = toHex_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, raw));
-  return 'MAIL-' + idHash.substring(0, 24).toUpperCase();
+  const hash = toHex_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, bytes));
+  return 'pdf:' + hash;
 }
 
-function uploadPdfToDrive_(attachment, fingerprint) {
+function isAlreadyImported_(importKey) {
+  return !!PropertiesService.getScriptProperties().getProperty(importKey);
+}
+
+function markImported_(importKey, invoiceId) {
+  PropertiesService.getScriptProperties().setProperty(importKey, invoiceId);
+}
+
+function uploadPdfToDrive_(attachment, invoiceId) {
   const folder = DriveApp.getFolderById(CONFIG.driveFolderId);
-  const originalName = sanitizeFileName_(attachment.getName() || 'rechnung.pdf');
-  const targetName = fingerprint + '_' + originalName;
-  return folder.createFile(attachment.copyBlob()).setName(targetName);
+  return folder.createFile(attachment.copyBlob()).setName(invoiceId + '.pdf');
 }
 
 function extractInvoiceData_(pdfBlob, geminiKey) {
-  const prompt = 'Analysiere diese PDF-Rechnung für einen österreichischen Tennisverein. ' +
+  const prompt = 'Analysiere ausschließlich den sichtbaren Inhalt dieser PDF-Rechnung für einen österreichischen Tennisverein. ' +
+    'Ignoriere E-Mail-Absender, E-Mail-Signaturen, Dateinamen, Weiterleitungstexte und alle Informationen außerhalb der PDF. ' +
+    'Der Wert "lieferant" muss der Rechnungssteller/Lieferant sein, der in der PDF selbst als Aussteller, Verkäufer oder Leistungserbringer steht. ' +
     'Gib exakt ein JSON-Objekt zurück, kein Array und keinen Markdown-Text. ' +
     'Keys: lieferant (String), datum (YYYY-MM-DD), betrag (Zahl mit Punkt), rechnr (String), ' +
-    'notiz (sehr kurz), kategorie (exakt eine dieser Kategorien: ' + CATEGORIES.join(', ') + '; sonst Sonstiges).';
+    'notiz (sehr kurz: Leistung/Zweck aus der PDF, keine Kontaktdaten), kategorie (exakt eine dieser Kategorien: ' + CATEGORIES.join(', ') + '; sonst Sonstiges).';
 
   const payload = {
     contents: [{
@@ -228,6 +233,34 @@ function normalizeAmount_(value) {
   return isNaN(amount) ? 0 : amount;
 }
 
+function buildRechnungFingerprint_(datum, lieferant, notiz) {
+  const d = (datum || Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd')).slice(0, 10);
+  const lieferantTeil = sanitizeFingerprintPart_(lieferant, 'Ohne-Lieferant');
+  const notizTeil = sanitizeFingerprintPart_(notiz, 'Ohne-Notiz');
+  return d + '_' + lieferantTeil + '_' + notizTeil;
+}
+
+function sanitizeFingerprintPart_(value, fallback) {
+  const cleaned = String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9äöüÄÖÜß\-\s]/g, ' ')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^[-_]+|[-_]+$/g, '')
+    .substring(0, 60);
+  return cleaned || fallback;
+}
+
+function ensureUniqueInvoiceId_(baseId, existingIds) {
+  if (!baseId) return 'Unbekannt';
+  let candidate = baseId;
+  let counter = 2;
+  while (existingIds.has(candidate)) {
+    candidate = baseId + '_' + counter;
+    counter++;
+  }
+  return candidate;
+}
+
 function formatAmountForSheet_(amount) {
   return Number(amount || 0).toFixed(2).replace('.', ',');
 }
@@ -240,10 +273,6 @@ function extractJson_(text) {
     throw new Error('Kein JSON-Objekt in Gemini Antwort gefunden: ' + cleaned.substring(0, 300));
   }
   return JSON.parse(cleaned.substring(start, end + 1));
-}
-
-function sanitizeFileName_(name) {
-  return String(name || 'rechnung.pdf').replace(/[\\/:*?"<>|]/g, '_').substring(0, 120);
 }
 
 function toHex_(bytes) {
