@@ -26,28 +26,37 @@ const CATEGORIES = [
 ];
 
 function processInvoiceInbox() {
-  const spreadsheet = SpreadsheetApp.openById(CONFIG.spreadsheetId);
-  const invoiceSheet = spreadsheet.getSheetByName('Rechnungen');
-  if (!invoiceSheet) throw new Error('Sheet "Rechnungen" wurde nicht gefunden.');
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(30000)) {
+    return;
+  }
 
-  const geminiKey = getGeminiApiKey_(spreadsheet);
-  const processedLabel = getOrCreateLabel_(CONFIG.processedLabelName);
-  const errorLabel = getOrCreateLabel_(CONFIG.errorLabelName);
-  const existingIds = loadExistingInvoiceIds_(invoiceSheet);
-  const threads = GmailApp.search(CONFIG.searchQuery, 0, CONFIG.maxThreadsPerRun);
+  try {
+    const spreadsheet = SpreadsheetApp.openById(CONFIG.spreadsheetId);
+    const invoiceSheet = spreadsheet.getSheetByName('Rechnungen');
+    if (!invoiceSheet) throw new Error('Sheet "Rechnungen" wurde nicht gefunden.');
 
-  threads.forEach(thread => {
-    try {
-      const result = processThread_(thread, invoiceSheet, existingIds, geminiKey);
-      if (result.imported > 0 || result.duplicates > 0) {
-        thread.addLabel(processedLabel);
-        thread.removeLabel(errorLabel);
+    const geminiKey = getGeminiApiKey_(spreadsheet);
+    const processedLabel = getOrCreateLabel_(CONFIG.processedLabelName);
+    const errorLabel = getOrCreateLabel_(CONFIG.errorLabelName);
+    const existingIds = loadExistingInvoiceIds_(invoiceSheet);
+    const threads = GmailApp.search(CONFIG.searchQuery, 0, CONFIG.maxThreadsPerRun);
+
+    threads.forEach(thread => {
+      try {
+        const result = processThread_(thread, invoiceSheet, existingIds, geminiKey);
+        if (result.imported > 0 || result.duplicates > 0) {
+          thread.addLabel(processedLabel);
+          thread.removeLabel(errorLabel);
+        }
+      } catch (error) {
+        thread.addLabel(errorLabel);
+        logImportError_(spreadsheet, thread, error);
       }
-    } catch (error) {
-      thread.addLabel(errorLabel);
-      logImportError_(spreadsheet, thread, error);
-    }
-  });
+    });
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function processThread_(thread, invoiceSheet, existingIds, geminiKey) {
